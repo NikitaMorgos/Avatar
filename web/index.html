@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Avatar — Личная операционная система</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #fafafa;
+      --sidebar-bg: #f5f5f4;
+      --card-bg: #ffffff;
+      --text: #37352f;
+      --text-muted: #6b6b6b;
+      --accent: #2383e2;
+      --accent-hover: #0d6ecd;
+      --border: #e8e8e6;
+      --locked: #9b9b97;
+      --locked-bg: #f0f0ee;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'DM Sans', -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    .app {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 260px;
+      min-width: 260px;
+      background: var(--sidebar-bg);
+      border-right: 1px solid var(--border);
+      padding: 24px 12px;
+    }
+    .sidebar-logo {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 24px;
+      padding-left: 12px;
+    }
+    .sidebar-nav {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      color: var(--text);
+      text-decoration: none;
+      font-size: 0.9375rem;
+      transition: background 0.15s;
+    }
+    .nav-item:hover {
+      background: var(--border);
+    }
+    .nav-item.active {
+      background: var(--card-bg);
+      box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+    }
+    .nav-item.locked {
+      color: var(--locked);
+    }
+    .nav-item .lock {
+      opacity: 0.7;
+      width: 14px;
+      height: 14px;
+      flex-shrink: 0;
+    }
+
+    /* Main */
+    .main {
+      flex: 1;
+      padding: 48px 64px 80px;
+      max-width: 900px;
+    }
+    .page-title {
+      font-size: 2.5rem;
+      font-weight: 600;
+      margin: 0 0 8px;
+      letter-spacing: -0.02em;
+    }
+    .page-meta {
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      margin-bottom: 32px;
+    }
+
+    /* Blocks */
+    .block {
+      margin-bottom: 16px;
+    }
+    .block h2 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin: 24px 0 12px;
+    }
+    .block h2:first-child { margin-top: 0; }
+    .block p {
+      margin: 0 0 12px;
+      color: var(--text);
+    }
+    .block ul {
+      margin: 0 0 16px;
+      padding-left: 24px;
+    }
+    .block li {
+      margin-bottom: 6px;
+    }
+
+    /* Callouts / Cards */
+    .callout {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin: 12px 0;
+    }
+    .callout.locked {
+      background: var(--locked-bg);
+      border-color: #e5e5e3;
+      position: relative;
+    }
+    .callout.locked::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.6) 0%, transparent 50%);
+      border-radius: 8px;
+      pointer-events: none;
+    }
+    .callout-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+      font-weight: 500;
+    }
+    .callout-header .lock {
+      width: 16px;
+      height: 16px;
+      opacity: 0.6;
+    }
+    .callout-desc {
+      font-size: 0.9375rem;
+      color: var(--text-muted);
+      margin: 0;
+    }
+
+    /* Links */
+    .link-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .link-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      text-decoration: none;
+      color: var(--text);
+      font-size: 0.9375rem;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .link-item:hover {
+      border-color: var(--accent);
+      box-shadow: 0 2px 8px rgba(35,131,226,0.1);
+    }
+    .link-item svg {
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+      opacity: 0.7;
+    }
+    .link-item .label {
+      flex: 1;
+    }
+    .link-item .arrow {
+      opacity: 0.4;
+      font-size: 0.75rem;
+    }
+    .link-item.external::after {
+      content: '↗';
+      opacity: 0.5;
+      font-size: 0.75rem;
+    }
+
+    /* Locked section overlay */
+    .locked-content {
+      filter: blur(4px);
+      user-select: none;
+      pointer-events: none;
+      opacity: 0.7;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .app { flex-direction: column; }
+      .sidebar {
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+        padding: 16px;
+      }
+      .sidebar-nav { flex-direction: row; flex-wrap: wrap; }
+      .main { padding: 24px 20px 48px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="sidebar-logo">Avatar</div>
+      <nav class="sidebar-nav" id="sidebar-nav"></nav>
+    </aside>
+    <main class="main" id="main-content"></main>
+  </div>
+
+  <script>
+    const LOCK_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>';
+    const TG_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.161c-.18 1.897-.962 6.502-1.359 8.627-.168.9-.5 1.201-.82 1.23-.697.064-1.226-.461-1.901-.903-1.056-.693-1.653-1.124-2.678-1.8-1.185-.781-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.139-5.062 3.345-.479.329-.913.489-1.302.481-.428-.009-1.252-.242-1.865-.44-.752-.244-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.831-2.529 6.998-3.015 3.333-1.386 4.025-1.627 4.476-1.635.099-.002.321.023.465.141.121.1.155.234.171.331.015.098.034.321.019.495z"/></svg>';
+
+    const sections = [
+      {
+        id: 'overview',
+        name: 'Обзор',
+        locked: false,
+        content: `
+          <h2>Avatar — Личная операционная система</h2>
+          <p>Второй мозг и ERP для жизни: цели, спринты, задачи, лог, рефлексия. Всё в едином контексте.</p>
+          <div class="callout">
+            <div class="callout-header">Флоу управления</div>
+            <p class="callout-desc">Цель → Спринт → Задачи → Лог → Рефлексия</p>
+          </div>
+          <h2>Области жизни</h2>
+          <p>Домены, которые Avatar помогает отслеживать и развивать:</p>
+          <ul>
+            <li>Business, Family, Education, Работа</li>
+            <li>Ironman, WCS, Sport, Music, English</li>
+            <li>Finance, GTD, AI-projects, Саморазвитие</li>
+            <li>Collect, Эстетика и другие</li>
+          </ul>
+        `
+      },
+      {
+        id: 'collect',
+        name: 'Collect',
+        locked: false,
+        content: `
+          <h2>Collect — срез дня</h2>
+          <p>Ежедневные фотки окружающего мира + комментарий. Сохраняется в БД и публикуется в TG-канал.</p>
+          <div class="link-list">
+            <a href="https://t.me/CollectMyDay_bot" class="link-item" target="_blank" rel="noopener">
+              <span class="tg">${TG_SVG}</span>
+              <span class="label">@CollectMyDay_bot — бот для отправки фото</span>
+              <span class="arrow">↗</span>
+            </a>
+            <a href="#" class="link-item" target="_blank" rel="noopener" data-channel>
+              <span class="tg">${TG_SVG}</span>
+              <span class="label">TG-канал Collect (подставь ссылку)</span>
+              <span class="arrow">↗</span>
+            </a>
+          </div>
+        `
+      },
+      {
+        id: 'business',
+        name: 'Business',
+        locked: true,
+        content: `
+          <h2>Business</h2>
+          <p>Проекты, клиенты, сделки. Этот раздел под замком.</p>
+        `
+      },
+      {
+        id: 'family',
+        name: 'Family',
+        locked: true,
+        content: `
+          <h2>Family</h2>
+          <p>Семья, близкие, важные даты.</p>
+        `
+      },
+      {
+        id: 'education',
+        name: 'Education',
+        locked: true,
+        content: `
+          <h2>Education</h2>
+          <p>Курсы, книги, обучение.</p>
+        `
+      },
+      {
+        id: 'links',
+        name: 'Ссылки',
+        locked: false,
+        content: `
+          <h2>Внешние источники</h2>
+          <p>Важные каналы и ресурсы.</p>
+          <div class="link-list">
+            <a href="https://t.me/CollectMyDay_bot" class="link-item" target="_blank" rel="noopener">
+              <span>${TG_SVG}</span>
+              <span class="label">Collect Bot</span>
+              <span class="arrow">↗</span>
+            </a>
+            <a href="https://t.me" class="link-item" target="_blank" rel="noopener">
+              <span>${TG_SVG}</span>
+              <span class="label">Telegram</span>
+              <span class="arrow">↗</span>
+            </a>
+            <a href="https://notion.so" class="link-item" target="_blank" rel="noopener">
+              <span>📄</span>
+              <span class="label">Notion</span>
+              <span class="arrow">↗</span>
+            </a>
+          </div>
+        `
+      }
+    ];
+
+    function renderSidebar() {
+      const nav = document.getElementById('sidebar-nav');
+      nav.innerHTML = sections.map(s => `
+        <a class="nav-item ${s.locked ? 'locked' : ''} ${s.id === 'overview' ? 'active' : ''}" 
+           href="#" data-section="${s.id}">
+          ${s.locked ? `<span class="lock">${LOCK_SVG}</span>` : ''}
+          ${s.name}
+        </a>
+      `).join('');
+
+      nav.querySelectorAll('.nav-item').forEach(el => {
+        el.addEventListener('click', (e) => {
+          e.preventDefault();
+          const id = el.dataset.section;
+          selectSection(id);
+        });
+      });
+    }
+
+    function selectSection(id) {
+      const section = sections.find(s => s.id === id);
+      if (!section) return;
+
+      document.querySelectorAll('.nav-item').forEach(n => {
+        n.classList.toggle('active', n.dataset.section === id);
+      });
+
+      const main = document.getElementById('main-content');
+      const lockedClass = section.locked ? 'locked-content' : '';
+      main.innerHTML = `
+        <h1 class="page-title">${section.name}</h1>
+        <p class="page-meta">${section.locked ? '🔒 Раздел под замком' : 'Открыт'}</p>
+        <div class="block ${lockedClass}">
+          ${section.content}
+        </div>
+      `;
+    }
+
+    renderSidebar();
+    selectSection('overview');
+  </script>
+</body>
+</html>
