@@ -203,6 +203,20 @@
       opacity: 0.5;
       font-size: 0.75rem;
     }
+    .item-card {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 0.9375rem;
+      margin-bottom: 8px;
+    }
+    .item-card .label { flex: 1; }
+    .item-card .desc { font-size: 0.8125rem; color: var(--text-muted); margin-top: 2px; }
 
     /* Locked section overlay */
     .locked-content {
@@ -245,105 +259,66 @@
         name: 'Обзор',
         locked: false,
         content: `
-          <h2>Avatar — Личная операционная система</h2>
-          <p>Второй мозг и ERP для жизни: цели, спринты, задачи, лог, рефлексия. Всё в едином контексте.</p>
-          <div class="callout">
-            <div class="callout-header">Флоу управления</div>
-            <p class="callout-desc">Цель → Спринт → Задачи → Лог → Рефлексия</p>
-          </div>
-          <h2>Области жизни</h2>
-          <p>Домены, которые Avatar помогает отслеживать и развивать:</p>
-          <ul>
-            <li>Business, Family, Education, Работа</li>
-            <li>Ironman, WCS, Sport, Music, English</li>
-            <li>Finance, GTD, AI-projects, Саморазвитие</li>
-            <li>Collect, Эстетика и другие</li>
-          </ul>
+          <p>Второй мозг и ERP для жизни. Проекты, трекинг, GTD.</p>
         `
       },
       {
-        id: 'glava',
-        name: 'Glava',
+        id: 'projects',
+        name: 'Проекты',
         locked: false,
         content: `
-          <h2>Glava</h2>
-          <p>Проект в разработке.</p>
-        `
-      },
-      {
-        id: 'collect',
-        name: 'Collect',
-        locked: false,
-        content: `
-          <h2>Collect — срез дня</h2>
-          <p>Ежедневные фотки окружающего мира + комментарий. Сохраняется в БД и публикуется в TG-канал.</p>
           <div class="link-list">
-            <a href="https://t.me/+hF5RnN5ozz1hZWUy" class="link-item" target="_blank" rel="noopener">
-              <span class="tg">${TG_SVG}</span>
-              <span class="label">Collect my day — канал</span>
-              <span class="arrow">↗</span>
-            </a>
-          </div>
-        `
-      },
-      {
-        id: 'business',
-        name: 'Business',
-        locked: true,
-        content: `
-          <h2>Business</h2>
-          <p>Проекты, клиенты, сделки. Этот раздел под замком.</p>
-        `
-      },
-      {
-        id: 'family',
-        name: 'Family',
-        locked: true,
-        content: `
-          <h2>Family</h2>
-          <p>Семья, близкие, важные даты.</p>
-        `
-      },
-      {
-        id: 'education',
-        name: 'Education',
-        locked: true,
-        content: `
-          <h2>Education</h2>
-          <p>Курсы, книги, обучение.</p>
-        `
-      },
-      {
-        id: 'links',
-        name: 'Ссылки',
-        locked: false,
-        content: `
-          <h2>Внешние источники</h2>
-          <p>Важные каналы и ресурсы.</p>
-          <div class="link-list">
+            <div class="item-card">
+              <span>📖</span>
+              <div><strong>Glava.family</strong><div class="desc">Истории близких, собранные в одну книгу</div></div>
+            </div>
             <a href="https://nikitamorgos.github.io/wsdc-dashboard/" class="link-item" target="_blank" rel="noopener">
               <span>📊</span>
-              <span class="label">WSDC Points — дашборды</span>
+              <span class="label">WSDC points — интерактивные отчёты по пойнтам WSDC</span>
               <span class="arrow">↗</span>
             </a>
-            <a href="https://t.me/CollectMyDay_bot" class="link-item" target="_blank" rel="noopener">
-              <span>${TG_SVG}</span>
-              <span class="label">Collect Bot</span>
-              <span class="arrow">↗</span>
-            </a>
-            <a href="https://t.me" class="link-item" target="_blank" rel="noopener">
-              <span>${TG_SVG}</span>
-              <span class="label">Telegram</span>
-              <span class="arrow">↗</span>
-            </a>
-            <a href="https://notion.so" class="link-item" target="_blank" rel="noopener">
-              <span>📄</span>
-              <span class="label">Notion</span>
-              <span class="arrow">↗</span>
-            </a>
+            <div class="item-card">
+              <span>🖼</span>
+              <div><strong>Collect</strong><div class="desc">Фото-доска</div></div>
+            </div>
+            <div class="item-card">
+              <span>💃</span>
+              <div><strong>Dancelot</strong><div class="desc">Танцуйте хорошо, плохо не танцуйте</div></div>
+            </div>
           </div>
         `
-      }
+      },
+      {
+        id: 'media',
+        name: 'Медиа',
+        locked: false,
+        content: `
+          <div class="link-list">
+            <a href="https://t.me/+hF5RnN5ozz1hZWUy" class="link-item" target="_blank" rel="noopener">
+              <span>${TG_SVG}</span>
+              <span class="label">Collect my day — ежедневные фотки окружающего мира</span>
+              <span class="arrow">↗</span>
+            </a>
+            <a href="https://t.me/+4o59MZz8ARk0YTVi" class="link-item" target="_blank" rel="noopener">
+              <span>${TG_SVG}</span>
+              <span class="label">Powered by AI — как взрослый гуманитарий становится инженером, история записанная AI со слов человека</span>
+              <span class="arrow">↗</span>
+            </a>
+            <div class="item-card">
+              <span>${TG_SVG}</span>
+              <div><strong>Born to be Novice</strong></div>
+            </div>
+            <div class="item-card">
+              <span>${TG_SVG}</span>
+              <div><strong>Lev Bayonet</strong></div>
+            </div>
+          </div>
+        `
+      },
+      { id: 'health', name: 'Здоровье', locked: true, content: `<p>Раздел под замком.</p>` },
+      { id: 'finance', name: 'Финансы', locked: true, content: `<p>Раздел под замком.</p>` },
+      { id: 'family', name: 'Семья', locked: true, content: `<p>Раздел под замком.</p>` },
+      { id: 'pm-ru', name: 'PM-RU', locked: true, content: `<p>Раздел под замком.</p>` }
     ];
 
     function renderSidebar() {

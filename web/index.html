@@ -115,52 +115,6 @@
       margin: 0 0 12px;
       color: var(--text);
     }
-    .block ul {
-      margin: 0 0 16px;
-      padding-left: 24px;
-    }
-    .block li {
-      margin-bottom: 6px;
-    }
-
-    /* Callouts / Cards */
-    .callout {
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 16px 20px;
-      margin: 12px 0;
-    }
-    .callout.locked {
-      background: var(--locked-bg);
-      border-color: #e5e5e3;
-      position: relative;
-    }
-    .callout.locked::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(135deg, rgba(255,255,255,0.6) 0%, transparent 50%);
-      border-radius: 8px;
-      pointer-events: none;
-    }
-    .callout-header {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 12px;
-      font-weight: 500;
-    }
-    .callout-header .lock {
-      width: 16px;
-      height: 16px;
-      opacity: 0.6;
-    }
-    .callout-desc {
-      font-size: 0.9375rem;
-      color: var(--text-muted);
-      margin: 0;
-    }
 
     /* Links */
     .link-list {
@@ -198,13 +152,19 @@
       opacity: 0.4;
       font-size: 0.75rem;
     }
-    .link-item.external::after {
-      content: '↗';
-      opacity: 0.5;
-      font-size: 0.75rem;
+    .item-card {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 0.9375rem;
     }
+    .item-card .desc { font-size: 0.8125rem; color: var(--text-muted); margin-top: 2px; }
 
-    /* Locked section overlay */
     .locked-content {
       filter: blur(4px);
       user-select: none;
@@ -212,7 +172,6 @@
       opacity: 0.7;
     }
 
-    /* Responsive */
     @media (max-width: 768px) {
       .app { flex-direction: column; }
       .sidebar {
@@ -240,147 +199,88 @@
     const TG_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.161c-.18 1.897-.962 6.502-1.359 8.627-.168.9-.5 1.201-.82 1.23-.697.064-1.226-.461-1.901-.903-1.056-.693-1.653-1.124-2.678-1.8-1.185-.781-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.139-5.062 3.345-.479.329-.913.489-1.302.481-.428-.009-1.252-.242-1.865-.44-.752-.244-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.831-2.529 6.998-3.015 3.333-1.386 4.025-1.627 4.476-1.635.099-.002.321.023.465.141.121.1.155.234.171.331.015.098.034.321.019.495z"/></svg>';
 
     const sections = [
+      { id: 'overview', name: 'Обзор', locked: false, content: `<p>Второй мозг и ERP для жизни. Проекты, трекинг, GTD.</p>` },
       {
-        id: 'overview',
-        name: 'Обзор',
+        id: 'projects',
+        name: 'Проекты',
         locked: false,
         content: `
-          <h2>Avatar — Личная операционная система</h2>
-          <p>Второй мозг и ERP для жизни: цели, спринты, задачи, лог, рефлексия. Всё в едином контексте.</p>
-          <div class="callout">
-            <div class="callout-header">Флоу управления</div>
-            <p class="callout-desc">Цель → Спринт → Задачи → Лог → Рефлексия</p>
-          </div>
-          <h2>Области жизни</h2>
-          <p>Домены, которые Avatar помогает отслеживать и развивать:</p>
-          <ul>
-            <li>Business, Family, Education, Работа</li>
-            <li>Ironman, WCS, Sport, Music, English</li>
-            <li>Finance, GTD, AI-projects, Саморазвитие</li>
-            <li>Collect, Эстетика и другие</li>
-          </ul>
-        `
-      },
-      {
-        id: 'glava',
-        name: 'Glava',
-        locked: false,
-        content: `
-          <h2>Glava</h2>
-          <p>Проект в разработке.</p>
-        `
-      },
-      {
-        id: 'collect',
-        name: 'Collect',
-        locked: false,
-        content: `
-          <h2>Collect — срез дня</h2>
-          <p>Ежедневные фотки окружающего мира + комментарий. Сохраняется в БД и публикуется в TG-канал.</p>
           <div class="link-list">
-            <a href="https://t.me/+hF5RnN5ozz1hZWUy" class="link-item" target="_blank" rel="noopener">
-              <span class="tg">${TG_SVG}</span>
-              <span class="label">Collect my day — канал</span>
-              <span class="arrow">↗</span>
-            </a>
-          </div>
-        `
-      },
-      {
-        id: 'business',
-        name: 'Business',
-        locked: true,
-        content: `
-          <h2>Business</h2>
-          <p>Проекты, клиенты, сделки. Этот раздел под замком.</p>
-        `
-      },
-      {
-        id: 'family',
-        name: 'Family',
-        locked: true,
-        content: `
-          <h2>Family</h2>
-          <p>Семья, близкие, важные даты.</p>
-        `
-      },
-      {
-        id: 'education',
-        name: 'Education',
-        locked: true,
-        content: `
-          <h2>Education</h2>
-          <p>Курсы, книги, обучение.</p>
-        `
-      },
-      {
-        id: 'links',
-        name: 'Ссылки',
-        locked: false,
-        content: `
-          <h2>Внешние источники</h2>
-          <p>Важные каналы и ресурсы.</p>
-          <div class="link-list">
+            <div class="item-card">
+              <span>📖</span>
+              <div><strong>Glava.family</strong><div class="desc">Истории близких, собранные в одну книгу</div></div>
+            </div>
             <a href="https://nikitamorgos.github.io/wsdc-dashboard/" class="link-item" target="_blank" rel="noopener">
               <span>📊</span>
-              <span class="label">WSDC Points — дашборды</span>
+              <span class="label">WSDC points — интерактивные отчёты по пойнтам WSDC</span>
               <span class="arrow">↗</span>
             </a>
-            <a href="https://t.me/CollectMyDay_bot" class="link-item" target="_blank" rel="noopener">
-              <span>${TG_SVG}</span>
-              <span class="label">Collect Bot</span>
-              <span class="arrow">↗</span>
-            </a>
-            <a href="https://t.me" class="link-item" target="_blank" rel="noopener">
-              <span>${TG_SVG}</span>
-              <span class="label">Telegram</span>
-              <span class="arrow">↗</span>
-            </a>
-            <a href="https://notion.so" class="link-item" target="_blank" rel="noopener">
-              <span>📄</span>
-              <span class="label">Notion</span>
-              <span class="arrow">↗</span>
-            </a>
+            <div class="item-card">
+              <span>🖼</span>
+              <div><strong>Collect</strong><div class="desc">Фото-доска</div></div>
+            </div>
+            <div class="item-card">
+              <span>💃</span>
+              <div><strong>Dancelot</strong><div class="desc">Танцуйте хорошо, плохо не танцуйте</div></div>
+            </div>
           </div>
         `
-      }
+      },
+      {
+        id: 'media',
+        name: 'Медиа',
+        locked: false,
+        content: `
+          <div class="link-list">
+            <a href="https://t.me/+hF5RnN5ozz1hZWUy" class="link-item" target="_blank" rel="noopener">
+              <span>${TG_SVG}</span>
+              <span class="label">Collect my day — ежедневные фотки окружающего мира</span>
+              <span class="arrow">↗</span>
+            </a>
+            <a href="https://t.me/+4o59MZz8ARk0YTVi" class="link-item" target="_blank" rel="noopener">
+              <span>${TG_SVG}</span>
+              <span class="label">Powered by AI — как взрослый гуманитарий становится инженером, история записанная AI со слов человека</span>
+              <span class="arrow">↗</span>
+            </a>
+            <div class="item-card">
+              <span>${TG_SVG}</span>
+              <div><strong>Born to be Novice</strong></div>
+            </div>
+            <div class="item-card">
+              <span>${TG_SVG}</span>
+              <div><strong>Lev Bayonet</strong></div>
+            </div>
+          </div>
+        `
+      },
+      { id: 'health', name: 'Здоровье', locked: true, content: `<p>Раздел под замком.</p>` },
+      { id: 'finance', name: 'Финансы', locked: true, content: `<p>Раздел под замком.</p>` },
+      { id: 'family', name: 'Семья', locked: true, content: `<p>Раздел под замком.</p>` },
+      { id: 'pm-ru', name: 'PM-RU', locked: true, content: `<p>Раздел под замком.</p>` }
     ];
 
     function renderSidebar() {
       const nav = document.getElementById('sidebar-nav');
       nav.innerHTML = sections.map(s => `
-        <a class="nav-item ${s.locked ? 'locked' : ''} ${s.id === 'overview' ? 'active' : ''}" 
-           href="#" data-section="${s.id}">
+        <a class="nav-item ${s.locked ? 'locked' : ''} ${s.id === 'overview' ? 'active' : ''}" href="#" data-section="${s.id}">
           ${s.locked ? `<span class="lock">${LOCK_SVG}</span>` : ''}
           ${s.name}
         </a>
       `).join('');
-
       nav.querySelectorAll('.nav-item').forEach(el => {
-        el.addEventListener('click', (e) => {
-          e.preventDefault();
-          const id = el.dataset.section;
-          selectSection(id);
-        });
+        el.addEventListener('click', (e) => { e.preventDefault(); selectSection(el.dataset.section); });
       });
     }
 
     function selectSection(id) {
       const section = sections.find(s => s.id === id);
       if (!section) return;
-
-      document.querySelectorAll('.nav-item').forEach(n => {
-        n.classList.toggle('active', n.dataset.section === id);
-      });
-
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.toggle('active', n.dataset.section === id));
       const main = document.getElementById('main-content');
-      const lockedClass = section.locked ? 'locked-content' : '';
       main.innerHTML = `
         <h1 class="page-title">${section.name}</h1>
         <p class="page-meta">${section.locked ? '🔒 Раздел под замком' : 'Открыт'}</p>
-        <div class="block ${lockedClass}">
-          ${section.content}
-        </div>
+        <div class="block ${section.locked ? 'locked-content' : ''}">${section.content}</div>
       `;
     }
 
