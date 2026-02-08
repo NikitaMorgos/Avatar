@@ -36,7 +36,7 @@ avatar-system/
 5. Укажи `BOT_TOKEN` — токен бота от [@BotFather](https://t.me/BotFather).
 6. При необходимости задай `DB_PATH` (по умолчанию: `db/collect.db`).
 7. **Автопост в канал:** задай `CHANNEL_ID` в `.env` (@username или -100xxxxxxxxxx), добавь бота админом в канал с правом публиковать сообщения.
-8. **Синяя кнопка «Open»:** задеплой `web/index.html` на GitHub Pages или Netlify, укажи `MENU_BUTTON_URL=https://твой-сайт/` в `.env`.
+8. **Синяя кнопка «Open»:** сайт Avatar — `index.html` и `collect.html` в корне репо. GitHub Pages: Settings → Pages → Source: branch main, folder **/ (root)**. Сайт: `https://USERNAME.github.io/Avatar/`. Укажи `MENU_BUTTON_URL` в `.env` для кнопки бота.
 
 ## Запуск бота Collect
 
@@ -49,10 +49,15 @@ python -m bot.collect_bot
 python bot/collect_bot.py
 ```
 
+## Деплой на VPS (24/7)
+
+См. **`docs/vps-deploy.md`** — пошаговая инструкция по запуску на Linux VPS с systemd. В папке `deploy/` — unit-файл и скрипт настройки.
+
 ## Документация
 
 - `docs/avatar-project.md` — общий концепт Avatar, области жизни, карта модулей
 - `docs/collect-spec.md` — ТЗ модуля Collect
+- `docs/vps-deploy.md` — деплой на VPS 24/7
 - `docs/project-flow.md` — как Perplexity и Cursor работают вместе
 
 ---

@@ -1,0 +1,16 @@
+[Unit]
+Description=Avatar Collect Bot
+After=network.target
+
+[Service]
+Type=simple
+User=avatar
+Group=avatar
+WorkingDirectory=/opt/avatar
+ExecStart=/opt/avatar/venv/bin/python /opt/avatar/bot/collect_bot.py
+Restart=always
+RestartSec=10
+Environment=PATH=/opt/avatar/venv/bin
+
+[Install]
+WantedBy=multi-user.target
