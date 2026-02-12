@@ -369,7 +369,7 @@
     const COLLECT_API_URL = '';
 
     // Доступ к MarComTeam (email + пароль). Задай свои данные:
-    const MARCOM_CREDENTIALS = { email: 'n.morgos@gmail.com', password: 'SET_YOUR_PASSWORD' };
+    const MARCOM_CREDENTIALS = { email: 'n.morgos@gmail.com', password: 'Nthvbyfk2020' };
 
     const LOCK_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>';
     const TG_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.161c-.18 1.897-.962 6.502-1.359 8.627-.168.9-.5 1.201-.82 1.23-.697.064-1.226-.461-1.901-.903-1.056-.693-1.653-1.124-2.678-1.8-1.185-.781-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.139-5.062 3.345-.479.329-.913.489-1.302.481-.428-.009-1.252-.242-1.865-.44-.752-.244-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.831-2.529 6.998-3.015 3.333-1.386 4.025-1.627 4.476-1.635.099-.002.321.023.465.141.121.1.155.234.171.331.015.098.034.321.019.495z"/></svg>';
@@ -547,6 +547,9 @@
       `;
       if (id === 'media') loadPhotoBoard();
       bindLockedLinks();
+      if (id === 'pm-ru' && sessionStorage.getItem('marcom_unlocked') === '1') {
+        setTimeout(revealMarComLink, 0);
+      }
     }
 
     let _pendingLockedUrl = null;
@@ -558,6 +561,7 @@
           const url = el.dataset.url;
           if (!url) return;
           if (sessionStorage.getItem('marcom_unlocked') === '1') {
+            revealMarComLink();
             window.open(url, '_blank');
             return;
           }
@@ -571,13 +575,17 @@
     }
 
     document.getElementById('auth-submit').onclick = function() {
-      const email = document.getElementById('auth-email').value.trim();
-      const password = document.getElementById('auth-password').value;
+      const email = document.getElementById('auth-email').value.trim().toLowerCase();
+      const password = document.getElementById('auth-password').value.trim();
       const errEl = document.getElementById('auth-error');
-      if (email === MARCOM_CREDENTIALS.email && password === MARCOM_CREDENTIALS.password) {
+      const expectedEmail = MARCOM_CREDENTIALS.email.trim().toLowerCase();
+      const expectedPass = MARCOM_CREDENTIALS.password;
+      if (email === expectedEmail && password === expectedPass) {
         sessionStorage.setItem('marcom_unlocked', '1');
         document.getElementById('auth-modal').style.display = 'none';
         if (_pendingLockedUrl) {
+          // Показываем ссылку в PM-RU и открываем
+          revealMarComLink();
           window.open(_pendingLockedUrl, '_blank');
           _pendingLockedUrl = null;
         }
@@ -586,6 +594,21 @@
         errEl.style.display = 'block';
       }
     };
+
+    function revealMarComLink() {
+      const locked = document.querySelector('.locked-link[data-url*="MarComTeam"]');
+      if (locked && locked.dataset.url) {
+        const url = locked.dataset.url;
+        const label = locked.dataset.label || 'MarComTeam';
+        const wrap = document.createElement('a');
+        wrap.href = url;
+        wrap.target = '_blank';
+        wrap.rel = 'noopener';
+        wrap.className = 'link-item';
+        wrap.innerHTML = `<span class="label">${label}</span><span class="arrow">↗</span>`;
+        locked.parentNode.replaceChild(wrap, locked);
+      }
+    }
 
     document.getElementById('auth-modal').onclick = function(e) {
       if (e.target === this) {
