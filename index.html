@@ -464,16 +464,6 @@
               <div><strong>Lev Bayonet</strong></div>
             </div>
           </div>
-          <div class="photo-board">
-            <h3>Photo diary</h3>
-            <a href="https://t.me/+hF5RnN5ozz1hZWUy" class="link-item" target="_blank" rel="noopener" style="margin-bottom: 16px;">
-              <span>${TG_SVG}</span>
-              <span class="label">Смотреть все фото в канале Collect my day</span>
-              <span class="arrow">↗</span>
-            </a>
-            <p class="photo-board-hint">Или встрой фото на эту страницу — укажи URL API (бот на VPS, <code>python -m api.collect_api</code>):</p>
-            <div id="photo-board-container"></div>
-          </div>
         `
       },
       { id: 'health', name: 'Здоровье', locked: true, content: `<p>Раздел под замком.</p>` },
@@ -604,7 +594,6 @@
           ${section.content}
         </div>
       `;
-      if (id === 'media') loadPhotoBoard();
       bindLockedLinks();
       if (id === 'pm-ru' && sessionStorage.getItem('marcom_unlocked') === '1') {
         setTimeout(revealMarComLink, 0);
