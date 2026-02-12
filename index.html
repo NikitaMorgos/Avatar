@@ -466,7 +466,12 @@
           </div>
           <div class="photo-board">
             <h3>Photo diary</h3>
-            <p class="photo-board-hint">Фотки из канала Collect my day в хронологическом порядке.</p>
+            <a href="https://t.me/+hF5RnN5ozz1hZWUy" class="link-item" target="_blank" rel="noopener" style="margin-bottom: 16px;">
+              <span>${TG_SVG}</span>
+              <span class="label">Смотреть все фото в канале Collect my day</span>
+              <span class="arrow">↗</span>
+            </a>
+            <p class="photo-board-hint">Или встрой фото на эту страницу — укажи URL API (бот на VPS, <code>python -m api.collect_api</code>):</p>
             <div id="photo-board-container"></div>
           </div>
         `
@@ -521,7 +526,6 @@
       let apiUrl = getCollectApiUrl();
       if (!apiUrl) {
         container.innerHTML = `
-          <p class="photo-board-hint">Чтобы видеть фото, нужен URL API (бот Collect на VPS). Запусти на сервере: <code>python -m api.collect_api</code></p>
           <div class="photo-board-url-form">
             <input type="url" id="photo-api-url-input" placeholder="https://твой-vps:8080" value="">
             <button type="button" id="photo-api-url-save">Сохранить и загрузить</button>
