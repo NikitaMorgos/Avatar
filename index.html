@@ -282,6 +282,31 @@
       color: var(--text-muted);
       margin-top: 12px;
     }
+    .photo-board-url-form {
+      margin-top: 12px;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .photo-board-url-form input {
+      flex: 1;
+      min-width: 200px;
+      padding: 8px 12px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 0.875rem;
+    }
+    .photo-board-url-form button {
+      padding: 8px 16px;
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 0.875rem;
+      cursor: pointer;
+    }
+    .photo-board-url-form button:hover { background: var(--accent-hover); }
 
     .link-item.locked-link { cursor: pointer; }
     .link-item.locked-link .lock { opacity: 0.8; }
@@ -484,24 +509,45 @@
       });
     }
 
+    function getCollectApiUrl() {
+      const fromCode = (typeof COLLECT_API_URL === 'string' && COLLECT_API_URL.trim()) ? COLLECT_API_URL.trim() : '';
+      return fromCode || (localStorage.getItem('avatar_collect_api_url') || '').trim() || '';
+    }
+
     async function loadPhotoBoard() {
       const container = document.getElementById('photo-board-container');
-      if (!container || !COLLECT_API_URL) {
-        if (container) {
-          container.innerHTML = '<p class="photo-board-hint">Чтобы видеть Photo diary, укажи COLLECT_API_URL в index.html и запусти API на VPS: <code>python -m api.collect_api</code></p>';
-        }
+      if (!container) return;
+
+      let apiUrl = getCollectApiUrl();
+      if (!apiUrl) {
+        container.innerHTML = `
+          <p class="photo-board-hint">Чтобы видеть фото, нужен URL API (бот Collect на VPS). Запусти на сервере: <code>python -m api.collect_api</code></p>
+          <div class="photo-board-url-form">
+            <input type="url" id="photo-api-url-input" placeholder="https://твой-vps:8080" value="">
+            <button type="button" id="photo-api-url-save">Сохранить и загрузить</button>
+          </div>
+        `;
+        document.getElementById('photo-api-url-save').onclick = function() {
+          const val = (document.getElementById('photo-api-url-input').value || '').trim();
+          if (val) {
+            localStorage.setItem('avatar_collect_api_url', val.replace(/\/+$/, ''));
+            loadPhotoBoard();
+          }
+        };
         return;
       }
+
       container.innerHTML = '<p class="photo-board-loading">Загрузка…</p>';
       try {
-        const r = await fetch(COLLECT_API_URL + '/api/collect/entries');
+        const base = apiUrl.replace(/\/+$/, '');
+        const r = await fetch(base + '/api/collect/entries');
         if (!r.ok) throw new Error('Ошибка загрузки');
         const entries = await r.json();
         if (entries.length === 0) {
-          container.innerHTML = '<p class="photo-board-empty">Пока нет опубликованных фото. Отправь фото боту @CollectMyDay_bot.</p>';
+          container.innerHTML = '<p class="photo-board-empty">Пока нет опубликованных фото. Отправь фото боту @CollectMyDay_bot.</p><p class="photo-board-hint"><a href="#" id="photo-change-url">Изменить URL API</a></p>';
+          document.getElementById('photo-change-url').onclick = function(e) { e.preventDefault(); localStorage.removeItem('avatar_collect_api_url'); loadPhotoBoard(); };
           return;
         }
-        const base = COLLECT_API_URL.replace(/\/$/, '');
         container.innerHTML = `
           <div class="photo-grid">
             ${entries.map(e => {
@@ -516,9 +562,18 @@
               `;
             }).join('')}
           </div>
+          <p class="photo-board-hint"><a href="#" id="photo-change-url">Изменить URL API</a></p>
         `;
+        document.getElementById('photo-change-url').onclick = function(e) { e.preventDefault(); localStorage.removeItem('avatar_collect_api_url'); loadPhotoBoard(); };
       } catch (err) {
-        container.innerHTML = '<p class="photo-board-error">Не удалось загрузить фото. Проверь, что API запущен и COLLECT_API_URL указан верно.</p>';
+        container.innerHTML = '<p class="photo-board-error">Не удалось загрузить фото. Проверь, что API запущен и URL верный.</p><div class="photo-board-url-form"><input type="url" id="photo-api-url-input" placeholder="https://твой-vps:8080" value="${escapeHtml(apiUrl)}"><button type="button" id="photo-api-url-save">Изменить URL</button></div>';
+        document.getElementById('photo-api-url-save').onclick = function() {
+          const val = (document.getElementById('photo-api-url-input').value || '').trim();
+          if (val) {
+            localStorage.setItem('avatar_collect_api_url', val.replace(/\/+$/, ''));
+            loadPhotoBoard();
+          }
+        };
       }
     }
 
