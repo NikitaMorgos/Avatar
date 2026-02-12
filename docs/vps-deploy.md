@@ -156,12 +156,37 @@ sudo systemctl status collect-bot
 
 ---
 
+## API фото-доски (опционально)
+
+Чтобы раздел «Photo diary» на сайте Avatar показывал фотки из канала:
+
+1. Установи зависимости (flask, flask-cors, requests уже в requirements.txt).
+2. Настрой systemd для API:
+   ```bash
+   sudo cp deploy/collect-api.service /etc/systemd/system/
+   sudo systemctl daemon-reload
+   sudo systemctl enable collect-api
+   sudo systemctl start collect-api
+   ```
+3. Открой порт 8080 (если есть firewall):
+   ```bash
+   sudo ufw allow 8080/tcp
+   sudo ufw reload
+   ```
+4. В `index.html` укажи `COLLECT_API_URL`: `https://ТВОЙ_IP:8080` или домен с HTTPS.
+
+Для HTTPS настрой nginx + Let's Encrypt — иначе браузер может блокировать запросы с GitHub Pages (mixed content).
+
+---
+
 ## Полезные команды
 
 | Действие | Команда |
 |----------|---------|
 | Посмотреть логи в реальном времени | `sudo journalctl -u collect-bot -f` |
 | Перезапустить бота | `sudo systemctl restart collect-bot` |
+| Запустить API фото-доски | `sudo systemctl start collect-api` |
+| Логи API | `sudo journalctl -u collect-api -f` |
 | Остановить | `sudo systemctl stop collect-bot` |
 | Отключить автозапуск | `sudo systemctl disable collect-bot` |
 
