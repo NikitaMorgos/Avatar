@@ -26,3 +26,25 @@ CREATE TABLE IF NOT EXISTS fallback_photos (
     used_at TEXT
 );
 CREATE INDEX IF NOT EXISTS idx_fallback_used ON fallback_photos(used_at);
+
+-- Raw Inbox: сырьё из Plaud/Email/TG для Avatar (RAPA)
+CREATE TABLE IF NOT EXISTS raw (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    chat_id INTEGER NOT NULL,
+    title TEXT,
+    content TEXT NOT NULL,
+    source TEXT DEFAULT 'Telegram',
+    created_at TEXT NOT NULL,
+    rapa_stage TEXT DEFAULT 'Raw',
+    para_type TEXT,
+    project_id INTEGER,
+    area_id INTEGER,
+    gtd_type TEXT,
+    next_action TEXT,
+    ai_summary TEXT,
+    metadata TEXT,
+    tags TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_raw_user_created ON raw(user_id, created_at);
+CREATE INDEX IF NOT EXISTS idx_raw_rapa_stage ON raw(rapa_stage);

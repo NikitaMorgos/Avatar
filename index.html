@@ -324,6 +324,16 @@
     .modal button:hover { background: var(--accent-hover); }
     .modal .error { color: #c53030; font-size: 0.8125rem; margin-top: 8px; }
 
+    .gtd-overview { font-size: 0.9375rem; color: var(--text-muted); margin-bottom: 24px; }
+    .gtd-table-wrap { overflow-x: auto; margin: 16px 0; }
+    .gtd-table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+    .gtd-table th, .gtd-table td { padding: 8px 12px; text-align: left; border-bottom: 1px solid var(--border); }
+    .gtd-table th { font-weight: 600; color: var(--text-muted); background: var(--locked-bg); }
+    .gtd-table tr:hover td { background: #fafafa; }
+    .gtd-table .empty { color: var(--text-muted); font-style: italic; }
+    .gtd-login-btn { display: inline-block; margin-top: 16px; padding: 10px 20px; background: var(--accent); color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.9375rem; }
+    .gtd-login-btn:hover { background: var(--accent-hover); }
+
     /* Locked section overlay */
     .locked-content {
       filter: blur(4px);
@@ -376,12 +386,12 @@
           <li><strong>Lev Bayonet</strong></li>
         </ul>
         <h2>Разделы под замком</h2>
-        <p>Здоровье, Финансы, Семья</p>
+        <p>Здоровье, Финансы, Семья, GTD</p>
       </article>
     </main>
     <div id="auth-modal" class="modal-overlay" style="display: none;">
       <div class="modal">
-        <h4>Доступ к MarComTeam</h4>
+        <h4 id="auth-modal-title">Вход</h4>
         <input type="email" id="auth-email" placeholder="Email" autocomplete="email">
         <input type="password" id="auth-password" placeholder="Пароль" autocomplete="current-password">
         <button type="button" id="auth-submit">Войти</button>
@@ -394,8 +404,8 @@
     // URL API для Photo diary (Collect). Оставь пустым или укажи свой VPS, например: https://your-vps.com:8080
     const COLLECT_API_URL = '';
 
-    // Доступ к MarComTeam (email + пароль). Задай свои данные:
-    const MARCOM_CREDENTIALS = { email: 'n.morgos@gmail.com', password: 'Nthvbyfk2020' };
+    // Доступ к MarComTeam и GTD (email + пароль):
+    const AUTH_CREDENTIALS = { email: 'n.morgos@gmail.com', password: 'Nthvbyfk2020' };
 
     const LOCK_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>';
     const TG_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.161c-.18 1.897-.962 6.502-1.359 8.627-.168.9-.5 1.201-.82 1.23-.697.064-1.226-.461-1.901-.903-1.056-.693-1.653-1.124-2.678-1.8-1.185-.781-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.139-5.062 3.345-.479.329-.913.489-1.302.481-.428-.009-1.252-.242-1.865-.44-.752-.244-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.831-2.529 6.998-3.015 3.333-1.386 4.025-1.627 4.476-1.635.099-.002.321.023.465.141.121.1.155.234.171.331.015.098.034.321.019.495z"/></svg>';
@@ -476,6 +486,13 @@
       { id: 'health', name: 'Здоровье', locked: true, content: `<p>Раздел под замком.</p>` },
       { id: 'finance', name: 'Финансы', locked: true, content: `<p>Раздел под замком.</p>` },
       { id: 'family', name: 'Семья', locked: true, content: `<p>Раздел под замком.</p>` },
+      {
+        id: 'gtd',
+        name: 'GTD',
+        locked: true,
+        authFor: 'gtd',
+        content: null
+      },
       {
         id: 'pm-ru',
         name: 'PM-RU',
@@ -584,7 +601,7 @@
       return div.innerHTML;
     }
 
-    function selectSection(id) {
+    async function selectSection(id) {
       const section = sections.find(s => s.id === id);
       if (!section) return;
 
@@ -593,12 +610,46 @@
       });
 
       const main = document.getElementById('main-content');
+
+      if (id === 'gtd') {
+        const gtdUnlocked = sessionStorage.getItem('gtd_unlocked') === '1';
+        if (!gtdUnlocked) {
+          main.innerHTML = `
+            <h1 class="page-title">${section.name}</h1>
+            <p class="page-meta">🔒 Раздел под замком</p>
+            <div class="block locked-content">
+              <p>RAPA: Projects, Areas, Resources, Raw, Daily Log. Войди для доступа к таблицам.</p>
+              <button type="button" class="gtd-login-btn" id="gtd-login-btn">Войти</button>
+            </div>
+          `;
+          document.getElementById('gtd-login-btn').onclick = function() {
+            _authFor = 'gtd';
+            _pendingLockedUrl = null;
+            document.getElementById('auth-modal-title').textContent = 'Доступ к GTD';
+            document.getElementById('auth-modal').style.display = 'flex';
+            document.getElementById('auth-email').value = '';
+            document.getElementById('auth-password').value = '';
+            document.getElementById('auth-error').style.display = 'none';
+          };
+        } else {
+          main.innerHTML = '<h1 class="page-title">GTD</h1><p class="page-meta">Загрузка…</p><div class="block"></div>';
+          const html = await loadGtdContent();
+          main.innerHTML = `
+            <h1 class="page-title">GTD</h1>
+            <p class="page-meta">RAPA — Projects, Areas, Resources, Raw, Daily Log</p>
+            <div class="block">${html}</div>
+          `;
+        }
+        return;
+      }
+
+      const content = section.content || '<p>Пусто</p>';
       const lockedClass = section.locked ? 'locked-content' : '';
       main.innerHTML = `
         <h1 class="page-title">${section.name}</h1>
         <p class="page-meta">${section.locked ? '🔒 Раздел под замком' : 'Открыт'}</p>
         <div class="block ${lockedClass}">
-          ${section.content}
+          ${content}
         </div>
       `;
       bindLockedLinks();
@@ -607,7 +658,59 @@
       }
     }
 
+    async function loadGtdContent() {
+      const apiUrl = getCollectApiUrl();
+      let projects = [], areas = [], goals = [];
+
+      if (apiUrl) {
+        try {
+          const base = apiUrl.replace(/\/+$/, '');
+          const [pRes, aRes, gRes] = await Promise.all([
+            fetch(base + '/api/rapa/projects').then(r => r.ok ? r.json() : { projects: [] }),
+            fetch(base + '/api/rapa/areas').then(r => r.ok ? r.json() : { areas: [] }),
+            fetch(base + '/api/rapa/goals?year=2026').then(r => r.ok ? r.json() : { goals: [] })
+          ]);
+          projects = pRes.projects || [];
+          areas = aRes.areas || [];
+          goals = gRes.goals || [];
+        } catch (e) { console.warn('GTD API load failed:', e); }
+      }
+
+      const areasRows = areas.length ? areas.map(a => `<tr><td>${escapeHtml(a.name)}</td><td>${escapeHtml(a.type || '-')}</td><td>${escapeHtml(a.goal || '-')}</td></tr>`).join('') : '<tr><td colspan="3" class="empty">Нет данных. Укажи URL API в Collect.</td></tr>';
+      const projectsRows = projects.length ? projects.map(p => `<tr><td>${escapeHtml(p.name)}</td><td>${escapeHtml(p.area_name || '-')}</td><td>${escapeHtml(p.status || '-')}</td><td>${escapeHtml(p.horizon || '-')}</td><td>${escapeHtml(p.impact || '-')}</td><td>${escapeHtml(p.deadline || '-')}</td></tr>`).join('') : '<tr><td colspan="6" class="empty">Нет данных. Укажи URL API в Collect.</td></tr>';
+      const goalsRows = goals.length ? goals.map(g => `<tr><td>${escapeHtml(g.name)}</td><td>${escapeHtml(g.area_name || '-')}</td><td>${escapeHtml(g.description || '-')}</td><td>${escapeHtml(g.status || '-')}</td></tr>`).join('') : '<tr><td colspan="4" class="empty">Нет целей на 2026. Добавь через API.</td></tr>';
+
+      return `
+        <p class="gtd-overview">5 баз: Projects, Areas, Resources, Raw (Inbox), Daily Log. Archive — статус внутри баз.</p>
+
+        <h2>Areas</h2>
+        <div class="gtd-table-wrap">
+          <table class="gtd-table">
+            <thead><tr><th>Name</th><th>Type</th><th>Goal</th></tr></thead>
+            <tbody>${areasRows}</tbody>
+          </table>
+        </div>
+
+        <h2>Projects</h2>
+        <div class="gtd-table-wrap">
+          <table class="gtd-table">
+            <thead><tr><th>Name</th><th>Area</th><th>Status</th><th>Horizon</th><th>Impact</th><th>Due</th></tr></thead>
+            <tbody>${projectsRows}</tbody>
+          </table>
+        </div>
+
+        <h2>Goals 2026</h2>
+        <div class="gtd-table-wrap">
+          <table class="gtd-table">
+            <thead><tr><th>Name</th><th>Area</th><th>Description</th><th>Status</th></tr></thead>
+            <tbody>${goalsRows}</tbody>
+          </table>
+        </div>
+      `;
+    }
+
     let _pendingLockedUrl = null;
+    let _authFor = null;
 
     function bindLockedLinks() {
       document.querySelectorAll('.locked-link').forEach(el => {
@@ -620,7 +723,9 @@
             window.open(url, '_blank');
             return;
           }
+          _authFor = null;
           _pendingLockedUrl = url;
+          document.getElementById('auth-modal-title').textContent = 'Доступ к MarComTeam';
           document.getElementById('auth-modal').style.display = 'flex';
           document.getElementById('auth-email').value = '';
           document.getElementById('auth-password').value = '';
@@ -633,11 +738,17 @@
       const email = document.getElementById('auth-email').value.trim().toLowerCase();
       const password = document.getElementById('auth-password').value.trim();
       const errEl = document.getElementById('auth-error');
-      const expectedEmail = MARCOM_CREDENTIALS.email.trim().toLowerCase();
-      const expectedPass = MARCOM_CREDENTIALS.password;
+      const expectedEmail = AUTH_CREDENTIALS.email.trim().toLowerCase();
+      const expectedPass = AUTH_CREDENTIALS.password;
       if (email === expectedEmail && password === expectedPass) {
         sessionStorage.setItem('marcom_unlocked', '1');
+        if (_authFor === 'gtd') sessionStorage.setItem('gtd_unlocked', '1');
         document.getElementById('auth-modal').style.display = 'none';
+        if (_authFor === 'gtd') {
+          _authFor = null;
+          selectSection('gtd');
+          return;
+        }
         if (_pendingLockedUrl) {
           // Показываем ссылку в PM-RU и открываем
           revealMarComLink();

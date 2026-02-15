@@ -84,6 +84,18 @@ su - avatar
 
 ## Шаг 4. Установка Python и клонирование проекта
 
+**Вариант A — скрипт deploy.sh (как в GLAVA):**
+
+```bash
+# Скачай или склонируй проект, затем:
+chmod +x deploy/deploy.sh
+./deploy/deploy.sh
+```
+
+Скрипт установит пакеты, создаст пользователя avatar, склонирует репо, создаст venv, настроит .env и systemd. Дальше — шаг 5 (редактирование .env) и `sudo systemctl start collect-bot`.
+
+**Вариант B — ручная установка:**
+
 ```bash
 # Установить Python и git
 sudo apt install -y python3 python3-venv python3-pip git
@@ -93,7 +105,7 @@ sudo mkdir -p /opt/avatar
 sudo chown avatar:avatar /opt/avatar
 cd /opt/avatar
 
-# Клонировать репозиторий (подставь свой GitHub)
+# Клонировать репозиторий
 git clone https://github.com/NikitaMorgos/Avatar.git .
 
 # Виртуальное окружение и зависимости
@@ -102,7 +114,7 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-**Вариант в одну команду:** после `git clone` можешь запустить `chmod +x deploy/setup.sh && ./deploy/setup.sh` — скрипт сам создаст venv и настроит systemd. Дальше — шаги 5 и 6.
+После `git clone` можешь запустить `chmod +x deploy/setup.sh && ./deploy/setup.sh` — скрипт создаст venv и настроит systemd. Дальше — шаги 5 и 6.
 
 ---
 
@@ -153,6 +165,17 @@ sudo systemctl status collect-bot
 3. Отправь фото с подписью — должно сохраниться
 
 Готово. Бот работает 24/7, перезапустится при падении и после перезагрузки сервера.
+
+### Если ошибка Conflict (terminated by other getUpdates)
+
+Бот раньше работал через webhook или запущен в другом месте. Сбрось webhook:
+
+```bash
+cd /opt/avatar
+./venv/bin/python deploy/fix_webhook.py
+# Подожди 5–10 сек
+sudo systemctl start collect-bot
+```
 
 ---
 

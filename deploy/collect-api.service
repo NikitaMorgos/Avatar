@@ -1,0 +1,17 @@
+[Unit]
+Description=Avatar Collect API (фото-доска)
+After=network.target
+
+[Service]
+Type=simple
+User=avatar
+Group=avatar
+WorkingDirectory=/opt/avatar
+ExecStart=/opt/avatar/venv/bin/python -m api.collect_api
+Restart=always
+RestartSec=10
+Environment=PATH=/opt/avatar/venv/bin
+Environment=COLLECT_API_PORT=8080
+
+[Install]
+WantedBy=multi-user.target

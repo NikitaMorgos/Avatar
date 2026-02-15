@@ -2,9 +2,12 @@
 Collect bot — MVP.
 Принимает фото с подписью, сохраняет в SQLite, отвечает подтверждением.
 Поддерживает отложенный постинг по расписанию.
+RAPA: Raw → Assign → Project → Archive.
 """
 
+import json
 import logging
+import re
 import sqlite3
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -12,6 +15,9 @@ from pathlib import Path
 from aiogram import Bot, Dispatcher, F
 from aiogram.filters import Command
 from aiogram.types import BotCommand
+from aiogram.types import CallbackQuery
+from aiogram.types import InlineKeyboardButton
+from aiogram.types import InlineKeyboardMarkup
 from aiogram.types import Message
 from aiogram.types import MenuButtonCommands
 from aiogram.types import MenuButtonWebApp
@@ -23,6 +29,9 @@ import os
 
 # Загрузка .env: корень проекта (по пути к этому файлу)
 BASE = Path(__file__).resolve().parent.parent
+import sys
+if str(BASE) not in sys.path:
+    sys.path.insert(0, str(BASE))
 for _p in [BASE / ".env", Path.cwd() / ".env", BASE / "config" / ".env"]:
     if _p.exists():
         load_dotenv(dotenv_path=_p, override=True)
@@ -46,11 +55,20 @@ FALLBACK_TIME = (os.getenv("FALLBACK_TIME") or "").strip() or "23:00"
 # URL для синей кнопки «Open» (Web App). HTTPS или t.me/... Пусто = меню с командами.
 MENU_BUTTON_URL = (os.getenv("MENU_BUTTON_URL") or "").strip() or None
 
+# RAPA: ежедневный обзор в TG (HH:MM), например 09:00. Пусто = не слать.
+REVIEW_DAILY_TIME = (os.getenv("REVIEW_DAILY_TIME") or "").strip() or None
+RAW_OWNER_USER_ID = int(os.getenv("RAW_OWNER_USER_ID", "0")) or None
+
 # Глобальный планировщик (для /postat и заготовок)
 _scheduler: AsyncIOScheduler | None = None
 
 # Режим «добавляю заготовки»: user_id в этом set — фото идут в fallback_photos
 _adding_stock: set[int] = set()
+# Режим «добавляю в Raw»: user_id в этом set — фото идут в raw
+_adding_raw: set[int] = set()
+
+# Теги для Raw — выбор из списка кнопками
+RAW_TAGS = ["diary", "работа", "идея"]
 
 logging.basicConfig(
     level=logging.INFO,
@@ -67,6 +85,12 @@ def init_db() -> None:
     init_sql = (BASE / "db" / "init.sql").read_text(encoding="utf-8")
     with sqlite3.connect(DB_PATH) as conn:
         conn.executescript(init_sql)
+        # RAPA schema
+        try:
+            from bot.rapa import init_rapa_schema
+            init_rapa_schema(conn)
+        except Exception as e:
+            logger.warning("RAPA schema init: %s", e)
         # Миграция: добавить published_to_channel для существующих БД
         try:
             conn.execute("ALTER TABLE collect_entries ADD COLUMN published_to_channel INTEGER DEFAULT 0")
@@ -86,6 +110,29 @@ def init_db() -> None:
             );
             CREATE INDEX IF NOT EXISTS idx_fallback_used ON fallback_photos(used_at);
         """)
+        conn.executescript("""
+            CREATE TABLE IF NOT EXISTS raw (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                chat_id INTEGER NOT NULL,
+                title TEXT,
+                content TEXT NOT NULL,
+                source TEXT DEFAULT 'Telegram',
+                created_at TEXT NOT NULL,
+                rapa_stage TEXT DEFAULT 'Raw',
+                gtd_type TEXT,
+                ai_summary TEXT,
+                metadata TEXT,
+                tags TEXT
+            );
+            CREATE INDEX IF NOT EXISTS idx_raw_user_created ON raw(user_id, created_at);
+        """)
+        # Миграция: tags для raw (если таблица уже существовала без колонки)
+        try:
+            conn.execute("ALTER TABLE raw ADD COLUMN tags TEXT")
+            logger.info("Added tags column to raw")
+        except sqlite3.OperationalError:
+            pass  # колонка уже есть
     logger.info("DB initialized: %s", DB_PATH)
 
 
@@ -136,6 +183,84 @@ def get_unpublished_for_user(user_id: int) -> list[tuple[int, str | None]]:
             (user_id,),
         ).fetchall()
     return [(r["id"], (r["comment"] or "").strip() or None) for r in rows]
+
+
+def extract_raw_tags(content: str) -> tuple[str, list[str]]:
+    """Извлекает теги из текста (#diary, #работа и т.п.). Возвращает (очищенный текст, список тегов).
+    #raw — служебный маркер, не сохраняется как тег."""
+    text = content or ""
+    tags: list[str] = []
+    # Паттерн: # + слово (латиница, кириллица, цифры, _)
+    for m in re.finditer(r"#([A-Za-zА-Яа-яЁё0-9_]+)", text):
+        tag = m.group(1)
+        if tag.lower() != "raw":
+            tags.append(tag)
+    # Убираем все #теги из текста
+    cleaned = re.sub(r"#([A-Za-zА-Яа-яЁё0-9_]+)\s*", "", text).strip()
+    return cleaned, tags
+
+
+def save_raw(
+    user_id: int,
+    chat_id: int,
+    content: str,
+    source: str = "Telegram",
+    metadata: dict | None = None,
+    tags: list[str] | None = None,
+) -> int:
+    """Сохраняет сырьё в Raw (Inbox). Возвращает id. metadata — доп. данные (напр. photo_file_id)."""
+    content = (content or "").strip() or "📷 Фото"
+    title = content[:80] + "..." if len(content) > 80 else content
+    created_at = datetime.utcnow().isoformat()
+    meta_json = json.dumps(metadata) if metadata else None
+    tags_str = ",".join(tags) if tags else None
+    with sqlite3.connect(DB_PATH) as conn:
+        cur = conn.execute(
+            """
+            INSERT INTO raw (user_id, chat_id, title, content, source, created_at, rapa_stage, metadata, tags)
+            VALUES (?, ?, ?, ?, ?, ?, 'Raw', ?, ?)
+            """,
+            (user_id, chat_id, title, content, source, created_at, meta_json, tags_str),
+        )
+        rowid = cur.lastrowid
+    logger.info("Saved raw: id=%s user=%s source=%s tags=%s", rowid, user_id, source, tags_str)
+    # RAPA: предварительная классификация Assign
+    try:
+        from bot.rapa import propose_assign
+        propose_assign(rowid, user_id, content)
+    except Exception as e:
+        logger.debug("RAPA propose_assign: %s", e)
+    return rowid
+
+
+def add_tag_to_raw(raw_id: int, user_id: int, tag: str) -> bool:
+    """Добавляет тег к записи Raw. Возвращает True если обновлено."""
+    with sqlite3.connect(DB_PATH) as conn:
+        conn.row_factory = sqlite3.Row
+        row = conn.execute("SELECT tags FROM raw WHERE id = ? AND user_id = ?", (raw_id, user_id)).fetchone()
+        if not row:
+            return False
+        current = (row["tags"] or "").strip()
+        tags_list = [t.strip() for t in current.split(",") if t.strip()]
+        if tag in tags_list:
+            return True
+        tags_list.append(tag)
+        new_tags = ",".join(tags_list)
+        conn.execute("UPDATE raw SET tags = ? WHERE id = ? AND user_id = ?", (new_tags, raw_id, user_id))
+    return True
+
+
+def build_raw_tag_keyboard(raw_id: int, exclude_tags: list[str] | None = None) -> InlineKeyboardMarkup:
+    """Кнопки выбора тега для записи Raw."""
+    exclude = set((exclude_tags or []))
+    buttons = [
+        InlineKeyboardButton(text=t, callback_data=f"raw_tag:{raw_id}:{t}")
+        for t in RAW_TAGS
+        if t not in exclude
+    ]
+    if not buttons:
+        return InlineKeyboardMarkup(inline_keyboard=[])
+    return InlineKeyboardMarkup(inline_keyboard=[buttons])
 
 
 def cancel_entry(entry_id: int, user_id: int) -> bool:
@@ -235,6 +360,22 @@ async def on_photo(message: Message, bot: Bot) -> None:
         await message.reply(f"Добавил в заготовки ✓ Осталось заготовок: {n}. Ещё фото или /done — закончить.")
         return
 
+    # Режим «добавляю в Raw» или подпись #raw
+    is_raw = user_id in _adding_raw or (comment and re.search(r"#raw\b", comment, re.I))
+    if is_raw:
+        content = re.sub(r"#raw\b", "", comment, flags=re.I).strip() if comment else ""
+        cleaned, tags = extract_raw_tags(content)
+        raw_id = save_raw(
+            user_id, chat_id, cleaned or "📷 Фото", source="Telegram",
+            metadata={"photo_file_id": photo_file_id}, tags=tags or None
+        )
+        tags_hint = f" #{','.join(tags)}" if tags else ""
+        suffix = " Ещё фото или /done — закончить." if user_id in _adding_raw else ""
+        text = f"✓ В Raw #%s%s%s" % (raw_id, tags_hint, suffix)
+        kb = build_raw_tag_keyboard(raw_id, exclude_tags=tags) if not tags else None
+        await message.reply(text, reply_markup=kb)
+        return
+
     try:
         rowid = save_entry(user_id, chat_id, message_id, photo_file_id, comment)
         # Публикуем в канал, если задан CHANNEL_ID
@@ -271,6 +412,91 @@ async def on_photo(message: Message, bot: Bot) -> None:
         await message.reply("Не удалось сохранить. Попробуй позже.")
 
 
+async def cmd_diary(message: Message) -> None:
+    """/diary <текст> — сохранить в Raw с тегом diary. Шорткат для /raw + #diary."""
+    user_id = message.from_user.id if message.from_user else 0
+    chat_id = message.chat.id
+    text = (message.text or "").strip()
+    parts = text.split(maxsplit=1)
+    content = parts[1].strip() if len(parts) > 1 else ""
+    if message.reply_to_message and not content:
+        rep = message.reply_to_message
+        content = (rep.text or rep.caption or "").strip()
+    if not content:
+        await message.reply("Напиши текст после /diary — сохраню в Raw с тегом diary.")
+        return
+    raw_id = save_raw(user_id, chat_id, content, source="Telegram", tags=["diary"])
+    if raw_id:
+        await message.reply(f"✓ В Raw #%s #diary" % raw_id)
+
+
+async def cmd_rawphoto(message: Message) -> None:
+    """Режим: следующие фото идут в Raw. /done — выйти."""
+    global _adding_raw
+    user_id = message.from_user.id if message.from_user else 0
+    _adding_raw.add(user_id)
+    await message.reply("Режим Raw: следующие фото — в Inbox. /done — закончить.")
+
+
+async def cmd_raw(message: Message) -> None:
+    """Команда /raw — сохранить текст в Raw (Inbox) для Avatar."""
+    user_id = message.from_user.id if message.from_user else 0
+    chat_id = message.chat.id
+
+    content = ""
+    # Текст после команды: /raw или /raw@botname
+    text = (message.text or "").strip()
+    parts = text.split(maxsplit=1)
+    if len(parts) > 1:
+        content = parts[1].strip()
+    # Или ответ на сообщение
+    if not content and message.reply_to_message:
+        rep = message.reply_to_message
+        content = (rep.text or rep.caption or "").strip()
+        if not content and rep.entities:
+            # Ссылки и пр.
+            content = (rep.text or "").strip()
+
+    if not content:
+        logger.info("cmd_raw: empty content, reply_to=%s", bool(message.reply_to_message))
+        await message.reply(
+            "Отправь сырьё в Raw (Inbox):\n\n"
+            "• /raw <текст> — сохранить текст\n"
+            "• /diary <текст> — сразу с тегом diary\n"
+            "• Или нажми кнопку тега после сохранения"
+        )
+        return
+
+    cleaned, tags = extract_raw_tags(content)
+    raw_id = save_raw(user_id, chat_id, cleaned or "…", source="Telegram", tags=tags or None)
+    if raw_id:
+        tags_hint = f" #{','.join(tags)}" if tags else ""
+        text = f"✓ Сохранено в Raw #%s%s\n\n«%s»" % (raw_id, tags_hint, ((cleaned or content)[:100] + "…" if len(cleaned or content) > 100 else (cleaned or content)))
+        kb = build_raw_tag_keyboard(raw_id, exclude_tags=tags) if not tags else None
+        await message.reply(text, reply_markup=kb)
+    else:
+        await message.reply("Не удалось сохранить (пустой текст?).")
+
+
+async def cmd_review(message: Message) -> None:
+    """/review [daily|weekly|monthly] — обзор RAPA."""
+    user_id = message.from_user.id if message.from_user else 0
+    text = (message.text or "").strip().lower().split()
+    period = text[1] if len(text) > 1 else "daily"
+    try:
+        from bot.rapa import build_daily_review, build_weekly_review, build_monthly_review
+        if period in ("week", "weekly", "неделя"):
+            out = build_weekly_review(user_id)
+        elif period in ("month", "monthly", "месяц"):
+            out = build_monthly_review(user_id)
+        else:
+            out = build_daily_review(user_id)
+        await message.reply(out[:4000])
+    except Exception as e:
+        logger.exception("Review failed: %s", e)
+        await message.reply(f"Ошибка: {e}")
+
+
 async def cmd_start(message: Message) -> None:
     """Команда /start."""
     schedule_hint = f"\nПосты в канал: отложенно в {POST_SCHEDULE_TIME}." if POST_SCHEDULE_TIME else ""
@@ -278,6 +504,9 @@ async def cmd_start(message: Message) -> None:
         "Привет. Отправь фото с подписью — я сохраню его как срез дня.\n\n"
         "Один день — одна (или несколько) фоток. Буду использовать их для канала, досок и обзоров."
         f"{schedule_hint}\n\n"
+        "Фото → Collect (канал). Фото с #raw или /rawphoto → Raw (Inbox).\n"
+        "Теги: /diary или кнопки после сохранения в Raw.\n"
+        "RAPA: Raw раскладывается по слоям (Assign). /review daily|weekly|monthly — обзоры.\n\n"
         "/postnow — опубликовать сейчас\n"
         "/postat 18:30 — опубликовать в указанное время\n"
         "/mylist — список отложенных\n"
@@ -300,11 +529,19 @@ async def cmd_addstock(message: Message) -> None:
 
 
 async def cmd_done(message: Message) -> None:
-    """Выйти из режима заготовок."""
+    """Выйти из режима заготовок или Raw."""
     user_id = message.from_user.id if message.from_user else 0
+    was_stock = user_id in _adding_stock
+    was_raw = user_id in _adding_raw
     _adding_stock.discard(user_id)
-    n = get_fallback_unused_count_for_user(user_id)
-    await message.reply(f"Готово. Заготовок осталось: {n}.")
+    _adding_raw.discard(user_id)
+    if was_raw:
+        await message.reply("Готово. Режим Raw выключен.")
+    elif was_stock:
+        n = get_fallback_unused_count_for_user(user_id)
+        await message.reply(f"Готово. Заготовок осталось: {n}.")
+    else:
+        await message.reply("Не был в режиме заготовок или Raw.")
 
 
 async def cmd_stock(message: Message) -> None:
@@ -312,6 +549,20 @@ async def cmd_stock(message: Message) -> None:
     user_id = message.from_user.id if message.from_user else 0
     n = get_fallback_unused_count_for_user(user_id)
     await message.reply(f"Заготовок: {n}. Пополнить — /addstock.")
+
+
+async def run_daily_review(bot: Bot) -> None:
+    """Отправляет ежедневный RAPA-обзор владельцу."""
+    uid = RAW_OWNER_USER_ID or get_owner_user_id()
+    if not uid:
+        return
+    try:
+        from bot.rapa import build_daily_review
+        text = build_daily_review(uid)
+        await bot.send_message(chat_id=uid, text=text[:4000])
+        logger.info("Daily review sent to %s", uid)
+    except Exception as e:
+        logger.exception("Daily review failed: %s", e)
 
 
 async def run_fallback_check(bot: Bot) -> None:
@@ -482,6 +733,46 @@ async def cmd_testchannel(message: Message, bot: Bot) -> None:
         await message.reply(f"Ошибка при посте в канал:\n{type(e).__name__}: {e}")
 
 
+async def on_text_to_raw(message: Message) -> None:
+    """Текст или ссылка без команды — сохранить в Raw. Теги: #diary, #работа и т.п."""
+    if not message.text or message.text.strip().startswith("/"):
+        return
+    user_id = message.from_user.id if message.from_user else 0
+    chat_id = message.chat.id
+    content = message.text.strip()
+    cleaned, tags = extract_raw_tags(content)
+    raw_id = save_raw(user_id, chat_id, cleaned or "…", source="Telegram", tags=tags or None)
+    if raw_id:
+        tags_hint = f" #{','.join(tags)}" if tags else ""
+        text = f"✓ В Raw #%s%s" % (raw_id, tags_hint)
+        kb = build_raw_tag_keyboard(raw_id, exclude_tags=tags) if not tags else None
+        await message.reply(text, reply_markup=kb)
+
+
+async def on_raw_tag_callback(callback: CallbackQuery) -> None:
+    """Клик по кнопке тега: добавляем тег к записи Raw."""
+    data = callback.data or ""
+    if not data.startswith("raw_tag:"):
+        return
+    try:
+        _, raw_id_s, tag = data.split(":", 2)
+        raw_id = int(raw_id_s)
+    except (ValueError, TypeError):
+        await callback.answer("Ошибка")
+        return
+    user_id = callback.from_user.id if callback.from_user else 0
+    if add_tag_to_raw(raw_id, user_id, tag):
+        await callback.answer(f"✓ Тег «{tag}» добавлен")
+        # Убираем кнопки и обновляем текст
+        try:
+            new_text = (callback.message.text or "") + f" #{tag}"
+            await callback.message.edit_text(new_text, reply_markup=None)
+        except Exception:
+            pass
+    else:
+        await callback.answer("Не удалось добавить тег")
+
+
 async def on_forwarded_from_channel(message: Message) -> None:
     """Если переслано сообщение из канала — возвращаем ID канала."""
     origin = message.forward_origin
@@ -514,6 +805,10 @@ async def setup_bot_ui(bot: Bot) -> None:
         BotCommand(command="addstock", description="Добавить заготовки"),
         BotCommand(command="stock", description="Сколько заготовок"),
         BotCommand(command="channelid", description="ID канала для .env"),
+        BotCommand(command="raw", description="В Raw (Inbox)"),
+        BotCommand(command="diary", description="В Raw с тегом diary"),
+        BotCommand(command="rawphoto", description="Фото → Raw"),
+        BotCommand(command="review", description="Обзор daily/weekly/monthly"),
     ]
     try:
         await bot.set_my_commands(commands=commands)
@@ -547,6 +842,11 @@ def main() -> None:
     dp.message.register(cmd_done, Command("done"))
     dp.message.register(cmd_stock, Command("stock"))
     dp.message.register(cmd_channelid, Command("channelid"))
+    dp.message.register(cmd_raw, Command("raw"))
+    dp.message.register(cmd_diary, Command("diary"))
+    dp.message.register(cmd_rawphoto, Command("rawphoto"))
+    dp.message.register(cmd_review, Command("review"))
+    dp.callback_query.register(on_raw_tag_callback, F.data.startswith("raw_tag:"))
     dp.message.register(cmd_cancel, Command("cancel"))
     dp.message.register(cmd_mylist, Command("mylist"))
     dp.message.register(cmd_postat, Command("postat"))
@@ -554,25 +854,34 @@ def main() -> None:
     dp.message.register(cmd_testchannel, Command("testchannel"))
     dp.message.register(on_forwarded_from_channel, F.forward_origin)  # до on_photo!
     dp.message.register(on_photo, F.photo)
+    dp.message.register(on_text_to_raw, F.text)  # текст/ссылки → Raw
 
-    # Планировщик: отложенный постинг + проверка заготовок в 23:00
-    if CHANNEL_ID:
+    # Планировщик: постинг, fallback, ежедневный RAPA-обзор
+    if CHANNEL_ID or REVIEW_DAILY_TIME:
         async def start_scheduler(*_):
             global _scheduler
             _scheduler = AsyncIOScheduler()
-            try:
-                if POST_SCHEDULE_TIME:
-                    h, m = map(int, POST_SCHEDULE_TIME.strip().split(":"))
-                    _scheduler.add_job(run_scheduled_post, "cron", hour=h, minute=m, args=[bot])
-                    logger.info("Scheduled post: daily at %s", POST_SCHEDULE_TIME)
-            except (ValueError, IndexError) as e:
-                logger.warning("Invalid POST_SCHEDULE_TIME: %s", e)
-            try:
-                h, m = map(int, (FALLBACK_TIME or "23:00").strip().split(":"))
-                _scheduler.add_job(run_fallback_check, "cron", hour=h, minute=m, args=[bot])
-                logger.info("Fallback check: daily at %s", FALLBACK_TIME)
-            except (ValueError, IndexError) as e:
-                logger.warning("Invalid FALLBACK_TIME, using 23:00: %s", e)
+            if CHANNEL_ID:
+                try:
+                    if POST_SCHEDULE_TIME:
+                        h, m = map(int, POST_SCHEDULE_TIME.strip().split(":"))
+                        _scheduler.add_job(run_scheduled_post, "cron", hour=h, minute=m, args=[bot])
+                        logger.info("Scheduled post: daily at %s", POST_SCHEDULE_TIME)
+                except (ValueError, IndexError) as e:
+                    logger.warning("Invalid POST_SCHEDULE_TIME: %s", e)
+                try:
+                    h, m = map(int, (FALLBACK_TIME or "23:00").strip().split(":"))
+                    _scheduler.add_job(run_fallback_check, "cron", hour=h, minute=m, args=[bot])
+                    logger.info("Fallback check: daily at %s", FALLBACK_TIME)
+                except (ValueError, IndexError) as e:
+                    logger.warning("Invalid FALLBACK_TIME, using 23:00: %s", e)
+            if REVIEW_DAILY_TIME:
+                try:
+                    h, m = map(int, REVIEW_DAILY_TIME.strip().split(":"))
+                    _scheduler.add_job(run_daily_review, "cron", hour=h, minute=m, args=[bot])
+                    logger.info("Daily review: at %s", REVIEW_DAILY_TIME)
+                except (ValueError, IndexError) as e:
+                    logger.warning("Invalid REVIEW_DAILY_TIME: %s", e)
             _scheduler.start()
         dp.startup.register(start_scheduler)
 
