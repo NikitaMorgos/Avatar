@@ -692,6 +692,19 @@
         { name: 'English', sub: '' }
       ];
 
+      const defaultProjects = [
+        { name: 'Glava', area_name: '', status: '', horizon: '', impact: '', deadline: '' },
+        { name: 'Avatar', area_name: '', status: '', horizon: '', impact: '', deadline: '' },
+        { name: 'FrameDance', area_name: '', status: '', horizon: '', impact: '', deadline: '' },
+        { name: 'Collect', area_name: '', status: '', horizon: '', impact: '', deadline: '' },
+        { name: 'PM-RU_OMK', area_name: '', status: '', horizon: '', impact: '', deadline: '' },
+        { name: 'Sandbox', area_name: '', status: '', horizon: '', impact: '', deadline: '' },
+        { name: 'AI-Doc', area_name: '', status: '', horizon: '', impact: '', deadline: '' },
+        { name: 'AI-Trainer', area_name: '', status: '', horizon: '', impact: '', deadline: '' },
+        { name: 'tg_powered by AI', area_name: '', status: '', horizon: '', impact: '', deadline: '' },
+        { name: 'tg_born to be Novice', area_name: '', status: '', horizon: '', impact: '', deadline: '' }
+      ];
+
       if (apiUrl) {
         try {
           const base = apiUrl.replace(/\/+$/, '');
@@ -700,16 +713,17 @@
             fetch(base + '/api/rapa/areas').then(r => r.ok ? r.json() : { areas: [] }),
             fetch(base + '/api/rapa/goals?year=2026').then(r => r.ok ? r.json() : { goals: [] })
           ]);
-          projects = pRes.projects || [];
+          projects = (pRes.projects && pRes.projects.length) ? pRes.projects : defaultProjects;
           areas = (aRes.areas && aRes.areas.length) ? aRes.areas : defaultAreas.map(a => ({ name: a.name, type: '', goal: a.sub }));
           goals = gRes.goals || [];
-        } catch (e) { console.warn('GTD API load failed:', e); areas = defaultAreas.map(a => ({ name: a.name, type: '', goal: a.sub })); }
+        } catch (e) { console.warn('GTD API load failed:', e); projects = defaultProjects; areas = defaultAreas.map(a => ({ name: a.name, type: '', goal: a.sub })); }
       } else {
+        projects = defaultProjects;
         areas = defaultAreas.map(a => ({ name: a.name, type: '', goal: a.sub }));
       }
 
       const areasRows = areas.map(a => `<tr><td>${escapeHtml(a.name)}</td><td>${escapeHtml((a.goal || a.sub || '').trim() || '-')}</td></tr>`).join('');
-      const projectsRows = projects.length ? projects.map(p => `<tr><td>${escapeHtml(p.name)}</td><td>${escapeHtml(p.area_name || '-')}</td><td>${escapeHtml(p.status || '-')}</td><td>${escapeHtml(p.horizon || '-')}</td><td>${escapeHtml(p.impact || '-')}</td><td>${escapeHtml(p.deadline || '-')}</td></tr>`).join('') : '<tr><td colspan="6" class="empty">Нет данных. Укажи URL API в Collect.</td></tr>';
+      const projectsRows = projects.map(p => `<tr><td>${escapeHtml(p.name)}</td><td>${escapeHtml(p.area_name || '-')}</td><td>${escapeHtml(p.status || '-')}</td><td>${escapeHtml(p.horizon || '-')}</td><td>${escapeHtml(p.impact || '-')}</td><td>${escapeHtml(p.deadline || '-')}</td></tr>`).join('');
       const goalsRows = goals.length ? goals.map(g => `<tr><td>${escapeHtml(g.name)}</td><td>${escapeHtml(g.area_name || '-')}</td><td>${escapeHtml(g.description || '-')}</td><td>${escapeHtml(g.status || '-')}</td></tr>`).join('') : '<tr><td colspan="4" class="empty">Нет целей на 2026. Добавь через API.</td></tr>';
 
       return `
