@@ -676,6 +676,22 @@
       const apiUrl = getCollectApiUrl();
       let projects = [], areas = [], goals = [];
 
+      const defaultAreas = [
+        { name: 'Ironman', sub: 'General, Run, Swim, Cycling, Ski, Yoga, GPP' },
+        { name: 'Dance', sub: 'WCS' },
+        { name: 'Family', sub: 'General, Katya, Darina, Miron' },
+        { name: 'Finance', sub: '' },
+        { name: 'Business', sub: 'General, Family Office, Family Business' },
+        { name: 'Profession', sub: 'General, CAIO, CMO' },
+        { name: 'Self', sub: '' },
+        { name: 'GTD', sub: '' },
+        { name: 'Education', sub: '' },
+        { name: 'Network', sub: '' },
+        { name: 'Aesthetics', sub: '' },
+        { name: 'Music', sub: '' },
+        { name: 'English', sub: '' }
+      ];
+
       if (apiUrl) {
         try {
           const base = apiUrl.replace(/\/+$/, '');
@@ -685,12 +701,14 @@
             fetch(base + '/api/rapa/goals?year=2026').then(r => r.ok ? r.json() : { goals: [] })
           ]);
           projects = pRes.projects || [];
-          areas = aRes.areas || [];
+          areas = (aRes.areas && aRes.areas.length) ? aRes.areas : defaultAreas.map(a => ({ name: a.name, type: '', goal: a.sub }));
           goals = gRes.goals || [];
-        } catch (e) { console.warn('GTD API load failed:', e); }
+        } catch (e) { console.warn('GTD API load failed:', e); areas = defaultAreas.map(a => ({ name: a.name, type: '', goal: a.sub })); }
+      } else {
+        areas = defaultAreas.map(a => ({ name: a.name, type: '', goal: a.sub }));
       }
 
-      const areasRows = areas.length ? areas.map(a => `<tr><td>${escapeHtml(a.name)}</td><td>${escapeHtml(a.type || '-')}</td><td>${escapeHtml(a.goal || '-')}</td></tr>`).join('') : '<tr><td colspan="3" class="empty">Нет данных. Укажи URL API в Collect.</td></tr>';
+      const areasRows = areas.map(a => `<tr><td>${escapeHtml(a.name)}</td><td>${escapeHtml((a.goal || a.sub || '').trim() || '-')}</td></tr>`).join('');
       const projectsRows = projects.length ? projects.map(p => `<tr><td>${escapeHtml(p.name)}</td><td>${escapeHtml(p.area_name || '-')}</td><td>${escapeHtml(p.status || '-')}</td><td>${escapeHtml(p.horizon || '-')}</td><td>${escapeHtml(p.impact || '-')}</td><td>${escapeHtml(p.deadline || '-')}</td></tr>`).join('') : '<tr><td colspan="6" class="empty">Нет данных. Укажи URL API в Collect.</td></tr>';
       const goalsRows = goals.length ? goals.map(g => `<tr><td>${escapeHtml(g.name)}</td><td>${escapeHtml(g.area_name || '-')}</td><td>${escapeHtml(g.description || '-')}</td><td>${escapeHtml(g.status || '-')}</td></tr>`).join('') : '<tr><td colspan="4" class="empty">Нет целей на 2026. Добавь через API.</td></tr>';
 
@@ -700,7 +718,7 @@
         <h2>Areas</h2>
         <div class="gtd-table-wrap">
           <table class="gtd-table">
-            <thead><tr><th>Name</th><th>Type</th><th>Goal</th></tr></thead>
+            <thead><tr><th>Area</th><th>Sub-areas</th></tr></thead>
             <tbody>${areasRows}</tbody>
           </table>
         </div>
