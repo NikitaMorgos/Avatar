@@ -333,6 +333,9 @@
     .gtd-table .empty { color: var(--text-muted); font-style: italic; }
     .gtd-login-btn { display: inline-block; margin-top: 16px; padding: 10px 20px; background: var(--accent); color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.9375rem; }
     .gtd-login-btn:hover { background: var(--accent-hover); }
+    .gtd-login-form { max-width: 320px; margin-top: 16px; }
+    .gtd-login-form input { width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 6px; margin-bottom: 12px; font-size: 0.9375rem; box-sizing: border-box; }
+    .gtd-login-form input:focus { outline: none; border-color: var(--accent); }
 
     /* Locked section overlay */
     .locked-content {
@@ -617,19 +620,30 @@
           main.innerHTML = `
             <h1 class="page-title">${section.name}</h1>
             <p class="page-meta">🔒 Раздел под замком</p>
-            <div class="block locked-content">
+            <div class="block">
               <p>RAPA: Projects, Areas, Resources, Raw, Daily Log. Войди для доступа к таблицам.</p>
-              <button type="button" class="gtd-login-btn" id="gtd-login-btn">Войти</button>
+              <form class="gtd-login-form" id="gtd-login-form">
+                <input type="email" id="gtd-email" placeholder="Email" autocomplete="email" required>
+                <input type="password" id="gtd-password" placeholder="Пароль" autocomplete="current-password" required>
+                <button type="submit" class="gtd-login-btn">Войти</button>
+                <div id="gtd-auth-error" class="error" style="display: none; margin-top: 8px;"></div>
+              </form>
             </div>
           `;
-          document.getElementById('gtd-login-btn').onclick = function() {
-            _authFor = 'gtd';
-            _pendingLockedUrl = null;
-            document.getElementById('auth-modal-title').textContent = 'Доступ к GTD';
-            document.getElementById('auth-modal').style.display = 'flex';
-            document.getElementById('auth-email').value = '';
-            document.getElementById('auth-password').value = '';
-            document.getElementById('auth-error').style.display = 'none';
+          document.getElementById('gtd-login-form').onsubmit = function(e) {
+            e.preventDefault();
+            const email = document.getElementById('gtd-email').value.trim().toLowerCase();
+            const password = document.getElementById('gtd-password').value.trim();
+            const errEl = document.getElementById('gtd-auth-error');
+            const expectedEmail = AUTH_CREDENTIALS.email.trim().toLowerCase();
+            const expectedPass = AUTH_CREDENTIALS.password;
+            if (email === expectedEmail && password === expectedPass) {
+              sessionStorage.setItem('gtd_unlocked', '1');
+              selectSection('gtd');
+            } else {
+              errEl.textContent = 'Неверный email или пароль';
+              errEl.style.display = 'block';
+            }
           };
         } else {
           main.innerHTML = '<h1 class="page-title">GTD</h1><p class="page-meta">Загрузка…</p><div class="block"></div>';
