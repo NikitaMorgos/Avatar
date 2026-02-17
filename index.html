@@ -663,7 +663,9 @@
             <div class="block">${html}</div>
           `;
           const pdfBtn = document.getElementById('gtd-pdf-btn');
-          if (pdfBtn) pdfBtn.onclick = exportGtdToPdf;
+          if (pdfBtn) pdfBtn.onclick = () => exportGtdToPdf('gtd-export-content', 'GTD-2026.pdf');
+          const pdfSprintsBtn = document.getElementById('gtd-pdf-sprints-btn');
+          if (pdfSprintsBtn) pdfSprintsBtn.onclick = () => exportGtdToPdf('gtd-export-sprints', 'GTD-Sprints-1Q2026.pdf');
           bindGtdTabs();
         }
         return;
@@ -820,7 +822,8 @@
         </div>
 
         <div id="gtd-panel-sprints" class="gtd-panel">
-          <p class="gtd-overview">Goals 1Q2026, формулировки спринта.</p>
+          <p class="gtd-overview">Goals 1Q2026, формулировки спринта. <button type="button" class="gtd-login-btn" id="gtd-pdf-sprints-btn">Выгрузить в PDF</button></p>
+          <div id="gtd-export-sprints">
           <h2>Goals 1Q2026 по AREA</h2>
           <div class="gtd-table-wrap">
             <table class="gtd-table">
@@ -834,6 +837,7 @@
               <thead><tr><th>Project</th><th>Sub</th><th>Формулировка 1Q</th><th>Priority</th><th>Progress %</th><th>Status</th><th>MVP done</th></tr></thead>
               <tbody>${sprintsByProjectRows}</tbody>
             </table>
+          </div>
           </div>
         </div>
 
@@ -867,10 +871,12 @@
       });
     }
 
-    function exportGtdToPdf() {
-      const el = document.getElementById('gtd-export-content');
+    function exportGtdToPdf(elId, filename) {
+      elId = elId || 'gtd-export-content';
+      filename = filename || 'GTD-2026.pdf';
+      const el = document.getElementById(elId);
       if (!el || typeof html2pdf === 'undefined') { alert('Не удалось создать PDF'); return; }
-      const opt = { margin: 10, filename: 'GTD-2026.pdf', image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } };
+      const opt = { margin: 10, filename, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } };
       html2pdf().set(opt).from(el).save();
     }
 
