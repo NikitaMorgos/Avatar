@@ -663,9 +663,7 @@
             <div class="block">${html}</div>
           `;
           const pdfBtn = document.getElementById('gtd-pdf-btn');
-          if (pdfBtn) pdfBtn.onclick = () => exportGtdToPdf('gtd-export-content', 'GTD-2026.pdf');
-          const pdfSprintsBtn = document.getElementById('gtd-pdf-sprints-btn');
-          if (pdfSprintsBtn) pdfSprintsBtn.onclick = () => exportGtdToPdf('gtd-export-sprints', 'GTD-Sprints-1Q2026.pdf');
+          if (pdfBtn) pdfBtn.onclick = exportGtdToPdfActiveTab;
           bindGtdTabs();
         }
         return;
@@ -785,10 +783,11 @@
           <button type="button" class="gtd-tab" data-tab="sprints">СПРИНТЫ</button>
           <button type="button" class="gtd-tab" data-tab="metrics">МЕТРИКИ</button>
           <button type="button" class="gtd-tab" data-tab="todo">ToDo</button>
+          <button type="button" class="gtd-login-btn gtd-pdf-btn" id="gtd-pdf-btn" style="margin-left:auto">Выгрузить в PDF</button>
         </div>
 
         <div id="gtd-panel-goals" class="gtd-panel active">
-          <p class="gtd-overview">Goals 2026, Areas, Projects. <button type="button" class="gtd-login-btn" id="gtd-pdf-btn">Выгрузить в PDF</button></p>
+          <p class="gtd-overview">Goals 2026, Areas, Projects.</p>
           <div id="gtd-export-content">
           <h2>Goals 2026 по AREA</h2>
           <div class="gtd-table-wrap">
@@ -822,7 +821,7 @@
         </div>
 
         <div id="gtd-panel-sprints" class="gtd-panel">
-          <p class="gtd-overview">Goals 1Q2026, формулировки спринта. <button type="button" class="gtd-login-btn" id="gtd-pdf-sprints-btn">Выгрузить в PDF</button></p>
+          <p class="gtd-overview">Goals 1Q2026, формулировки спринта.</p>
           <div id="gtd-export-sprints">
           <h2>Goals 1Q2026 по AREA</h2>
           <div class="gtd-table-wrap">
@@ -871,10 +870,16 @@
       });
     }
 
-    function exportGtdToPdf(elId, filename) {
-      elId = elId || 'gtd-export-content';
-      filename = filename || 'GTD-2026.pdf';
-      const el = document.getElementById(elId);
+    function exportGtdToPdfActiveTab() {
+      const sprints = document.getElementById('gtd-panel-sprints');
+      let el, filename;
+      if (sprints && sprints.classList.contains('active')) {
+        el = document.getElementById('gtd-export-sprints');
+        filename = 'GTD-Sprints-1Q2026.pdf';
+      } else {
+        el = document.getElementById('gtd-export-content');
+        filename = 'GTD-2026.pdf';
+      }
       if (!el || typeof html2pdf === 'undefined') { alert('Не удалось создать PDF'); return; }
       const opt = { margin: 10, filename, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } };
       html2pdf().set(opt).from(el).save();
