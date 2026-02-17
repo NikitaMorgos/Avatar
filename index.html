@@ -334,10 +334,6 @@
     .gtd-table .empty { color: var(--text-muted); font-style: italic; }
     .gtd-table .gtd-cell-text { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.3; word-break: break-word; }
     .gtd-table .gtd-cell-oneline, .gtd-table th { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
-    .gtd-sprint-section td { font-weight: 600; color: var(--text-muted); padding: 8px 12px; background: var(--locked-bg); }
-    .gtd-add-input { width: 100%; padding: 6px 10px; font-size: 0.875rem; border: 1px solid var(--border); border-radius: 4px; box-sizing: border-box; }
-    .gtd-add-btn, .gtd-del-btn { padding: 4px 10px; font-size: 1rem; cursor: pointer; border: 1px solid var(--border); border-radius: 4px; background: var(--locked-bg); }
-    .gtd-add-btn:hover, .gtd-del-btn:hover { background: var(--border); }
     .gtd-login-btn { display: inline-block; margin-top: 16px; padding: 10px 20px; background: var(--accent); color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.9375rem; }
     .gtd-login-btn:hover { background: var(--accent-hover); }
     .gtd-login-form { max-width: 320px; margin-top: 16px; }
@@ -669,7 +665,6 @@
           const pdfBtn = document.getElementById('gtd-pdf-btn');
           if (pdfBtn) pdfBtn.onclick = exportGtdToPdfActiveTab;
           bindGtdTabs();
-          bindGtd1QAndSprints();
         }
         return;
       }
@@ -688,24 +683,6 @@
         setTimeout(revealMarComLink, 0);
       }
     }
-
-    function goalKeyArea(g) { return (g.area||'') + '|' + (g.area1||'') + '|' + (g.desc||''); }
-    function goalKeyProject(g) { return (g.proj||'') + '|' + (g.proj1||'') + '|' + (g.desc||''); }
-    const GTD_STORAGE_KEY = 'gtd_1q_2026';
-    function loadGtd1QState() {
-      try {
-        const s = localStorage.getItem(GTD_STORAGE_KEY);
-        if (s) { const j = JSON.parse(s); return { areaKeys: new Set(j.areaKeys||[]), projectKeys: new Set(j.projectKeys||[]), manualLife: j.manualLife||[], manualDate: j.manualDate||[] }; }
-      } catch(e) {}
-      const areaKeys = new Set(), projectKeys = new Set();
-      defaultSprints1Q2026.byArea.forEach(g => areaKeys.add(goalKeyArea(g)));
-      defaultSprints1Q2026.byProject.forEach(g => projectKeys.add(goalKeyProject(g)));
-      return { areaKeys, projectKeys, manualLife: [], manualDate: [] };
-    }
-    function saveGtd1QState(st) {
-      try { localStorage.setItem(GTD_STORAGE_KEY, JSON.stringify({ areaKeys: [...st.areaKeys], projectKeys: [...st.projectKeys], manualLife: st.manualLife, manualDate: st.manualDate })); } catch(e) {}
-    }
-    let gtd1QState = loadGtd1QState();
 
     const defaultGoalsByArea = [{"area":"Ironman","area1":"General","desc":"сплю в основном без подкаста. 7-8 часов","prio":"must"},{"area":"Ironman","area1":"General","desc":"провести комплексный чекап организма. задел чтоб поставить на рельсы","prio":"nice"},{"area":"Ironman","area1":"General","desc":"минимизировать влияние вируса герпеса","prio":"must"},{"area":"Ironman","area1":"General","desc":"средний объем активности не меньше 7:30","prio":"must"},{"area":"Ironman","area1":"General","desc":"болею меньше 1.2 дней в месяц в среднем","prio":"nice"},{"area":"Ironman","area1":"Run","desc":"выбежал 5 км из 23 минут","prio":"nice"},{"area":"Ironman","area1":"Swim","desc":"поучаствовал в заплыве","prio":"nice"},{"area":"Ironman","area1":"Swim","desc":"возобновить тренировки в бассейне TI-Online","prio":"must"},{"area":"Ironman","area1":"Swim","desc":"проплыл 1 км из 19 минут","prio":"nice"},{"area":"Ironman","area1":"Cycling","desc":"сходил на несколько тренировок Велобит","prio":"must"},{"area":"Ironman","area1":"Ski","desc":"опробовал флетфристайл на трассах","prio":"nice"},{"area":"Ironman","area1":"Ski","desc":"забронили каталку на 2027 с новым опытом","prio":"must"},{"area":"Ironman","area1":"Ski","desc":"поучаствовал в лыжном забеге","prio":"nice"},{"area":"Ironman","area1":"Ski","desc":"несколько раз погонял в парке с утра","prio":"must"},{"area":"Ironman","area1":"Yoga","desc":"пересобрать с AI трек фейсфит, начать делать","prio":"nice"},{"area":"Ironman","area1":"Yoga","desc":"завести трек с подводящими упражнениями к стойке на руках в пространстве, сделать несколько подходов","prio":"nice"},{"area":"Ironman","area1":"Yoga","desc":"пройти курс Animal Flow в Fitstars","prio":"must"},{"area":"Ironman","area1":"GPP","desc":"несколько подготовительных тренировок по выходу силой","prio":"nice"},{"area":"Ironman","area1":"GPP","desc":"сделал подъем переворотом 2 раза подряд","prio":"nice"},{"area":"Dance","area1":"WCS","desc":"заработать больше 2пойнтов в новисах","prio":"nice"},{"area":"Dance","area1":"WCS","desc":"поучаствовать как минимум в 1 международном ивенте","prio":"nice"},{"area":"Dance","area1":"WCS","desc":"внедрить практику кирпичики","prio":"must"},{"area":"Dance","area1":"WCS","desc":"пересобрать методику сампо (AI)","prio":"nice"},{"area":"Dance","area1":"WCS","desc":"пересобрать работу с рекапами","prio":"nice"},{"area":"Dance","area1":"WCS","desc":"выйти на новый уровень в развитии","prio":"must"},{"area":"Dance","area1":"WCS","desc":"продвинуться в свич-треке","prio":"nice"},{"area":"Family","area1":"General","desc":"обновили жилище (комнаты по-новому)","prio":"nice"},{"area":"Family","area1":"Katya","desc":"вернулись к треку 23-24 (свидания, психолог, планы)","prio":"must"},{"area":"Family","area1":"Darina","desc":"интересная поездка","prio":"nice"},{"area":"Family","area1":"Darina","desc":"сделали несколько подходов к будущей профессии","prio":"nice"},{"area":"Family","area1":"Darina","desc":"внес осмысленный вклад в выздоровление","prio":"must"},{"area":"Family","area1":"Miron","desc":"продолжить (может и развить) вечерние истории","prio":"must"},{"area":"Family","area1":"Miron","desc":"сделан подход к совместной спорт-активности","prio":"nice"},{"area":"Finance","area1":"","desc":"суммарная ЗП покрывает расходы, кредит и нефинансовые инвестиции","prio":"must"},{"area":"Finance","area1":"","desc":"среднемесячный финрез больше 60тр","prio":"nice"},{"area":"Finance","area1":"","desc":"ДВД-финрез >-426тр","prio":"nice"},{"area":"Finance","area1":"","desc":"разница между номинальными и фактическими активами < 1.5млн","prio":"nice"},{"area":"Business","area1":"General","desc":"доходы от FO+FB занимают значимую долю","prio":"nice"},{"area":"Business","area1":"Family Office","desc":"результаты 26 лучше 25","prio":"nice"},{"area":"Business","area1":"Family Business","desc":"появились устойцивые треки по бизнесам ","prio":"must"},{"area":"Profession","area1":"General","desc":"заметная трансформация CMO=>CAIO","prio":"must"},{"area":"Profession","area1":"General","desc":"суммарная удовлетворенность от работ выше 65","prio":"nice"},{"area":"Profession","area1":"CAIO","desc":"прокачался в новом качестве CEO AI-бизнесов","prio":"nice"},{"area":"Profession","area1":"CMO","desc":"заметное улучшение качества CMO","prio":"nice"},{"area":"Self","area1":"General","desc":"меньше быстрого контента, быстрых углеводов, быстрых стимулов","prio":"must"},{"area":"Self","area1":"Diary","desc":"подготовил трек к старту нового тг-канала","prio":"nice"},{"area":"Self","area1":"Diary","desc":"фотки за год собираются в разные доски","prio":"nice"},{"area":"Self","area1":"Diary","desc":"обновленный подход к летописи","prio":"nice"},{"area":"GTD","area1":"","desc":"цели 50, выполнены > 67%","prio":"must"},{"area":"GTD","area1":"","desc":"цели 30, выполнены > 67%","prio":"nice"},{"area":"Education","area1":"","desc":"стартовать стрим, с обучением, где AI выступает и методологом и преподавателем","prio":"nice"},{"area":"Network","area1":"","desc":"начать заводить новый круг знакомств в новом амплуа","prio":"nice"},{"area":"Aesthetics","area1":"","desc":"поисследовать направление архитектуры конструктивизма (как дом наркомфина, только пошире)","prio":"nice"},{"area":"Aesthetics","area1":"","desc":"прочитать пару-тройку хорошей художественной лит-ры","prio":"nice"},{"area":"Music","area1":"","desc":"пересобрать трек с гитарой на Аватаре и продолжить","prio":"nice"},{"area":"Music","area1":"","desc":"поисследовать возможности для Льва Штыка","prio":"nice"},{"area":"English","area1":"","desc":"восстановить стрим на подходящем контенте (музыка, AI, wcs)","prio":"nice"}];
     const defaultSprints1Q2026 = { byArea: [{"area":"Ironman","area1":"General","desc":"средний объем активности не меньше 7:30","prio":"must","formul":"средний объем активности в феврале не меньше 7:30"},{"area":"Ironman","area1":"Ski","desc":"поучаствовал в лыжном забеге","prio":"nice","formul":"пробежал SkiGrom 28 февраля"},{"area":"Ironman","area1":"Ski","desc":"несколько раз погонял в парке с утра","prio":"must","formul":"2 раза сгонял на тренировку в парк"},{"area":"Ironman","area1":"Yoga","desc":"пройти курс Animal Flow в Fitstars","prio":"must","formul":"сделал 3 подхода (повторил старые) из курса"},{"area":"Dance","area1":"WCS","desc":"внедрить практику кирпичики","prio":"must","formul":"сделал 3 подхода с кирпичиками"},{"area":"Dance","area1":"WCS","desc":"пересобрать работу с рекапами","prio":"nice","formul":"залил несколько настоящих рекапов и отсортировал их в ЛК"},{"area":"Family","area1":"Katya","desc":"вернулись к треку 23-24 (свидания, психолог, планы)","prio":"must","formul":"2 подхода свидания"},{"area":"Family","area1":"Darina","desc":"внес осмысленный вклад в выздоровление","prio":"must","formul":"подумал, как лучше поучаствовать"},{"area":"Family","area1":"Miron","desc":"продолжить (может и развить) вечерние истории","prio":"must","formul":"продолжил ежедневные истории, внедрил небольшое разнообразие"},{"area":"Finance","area1":"","desc":"суммарная ЗП покрывает расходы, кредит и нефинансовые инвестиции","prio":"must","formul":"по итогам 1Q ЗП покрывает все расходы"},{"area":"Business","area1":"Family Business","desc":"появились устойцивые треки по бизнесам ","prio":"must","formul":"есть 1 трек по Главе, есть 2 подхода по FD и по TI-Online"},{"area":"GTD","area1":"","desc":"цели 30, выполнены > 67%","prio":"must","formul":"в среднем по 3м спринтам выполняется цели=30, выполнение >67%"}], byProject: [{"proj":"Glava","proj1":"","area":"Business","area1":"Family Business","desc":"сервис запустился в коммерческую эксплуатацию","prio":"must","formul":"довели до MVP в составе 3х фаундеров"},{"proj":"Avatar","proj1":"GTD","area":"GTD","area1":"","desc":"работает связка годовые цели-спринт","prio":"must","formul":"обкатка связки на 3х спринтах"},{"proj":"FrameDance","proj1":"startup","area":"Business","area1":"General","desc":"сделан подход как к стартапу (кофаундер, инвестор)","prio":"nice","formul":"есть лендинг, часть MVP сделал сам, постучался к 2-3 кофаундерам"},{"proj":"PM-RU_ОМК","proj1":"","area":"Profession","area1":"CMO","desc":"портал работает полноценно, тиражируем","prio":"must","formul":"есть разделы-константы, заработал mail/PA, сотрудники пользуются этим флоу"}] };
@@ -764,19 +741,15 @@
       const projectsRows = projects.map(p => `<tr><td>${escapeHtml(p.name)}</td><td>${escapeHtml(p.area_name || '-')}</td><td>${escapeHtml(p.status || '-')}</td><td>${escapeHtml(p.horizon || '-')}</td><td>${escapeHtml(p.impact || '-')}</td><td>${escapeHtml(p.deadline || '-')}</td></tr>`).join('');
       const statusLabels = { 'не начинал': 'не начинал', 'в процессе': 'в процессе', 'почти done': 'почти done', 'done': 'done' };
       const goalsByAreaRows = goalsByArea.map(g => {
-        const key = goalKeyArea(g);
-        const checked = gtd1QState.areaKeys.has(key) ? ' checked' : '';
         const prog = g.progress != null ? g.progress : '';
         const st = (g.status && statusLabels[g.status]) ? g.status : 'не начинал';
-        return `<tr data-type="area" data-key="${escapeHtml(key)}"><td><input type="checkbox" class="gtd-1q-cb" data-type="area" data-key="${escapeHtml(key)}"${checked}></td><td>${escapeHtml(g.area)}</td><td>${escapeHtml(g.area1 || '-')}</td><td title="${escapeHtml(g.desc || '')}"><span class="gtd-cell-text">${escapeHtml(g.desc || '-')}</span></td><td>${escapeHtml(g.prio || '-')}</td><td>${prog !== '' ? prog + '%' : '-'}</td><td class="gtd-cell-oneline" title="${escapeHtml(st)}">${escapeHtml(st)}</td></tr>`;
+        return `<tr><td>${escapeHtml(g.area)}</td><td>${escapeHtml(g.area1 || '-')}</td><td title="${escapeHtml(g.desc || '')}"><span class="gtd-cell-text">${escapeHtml(g.desc || '-')}</span></td><td>${escapeHtml(g.prio || '-')}</td><td>${prog !== '' ? prog + '%' : '-'}</td><td class="gtd-cell-oneline" title="${escapeHtml(st)}">${escapeHtml(st)}</td></tr>`;
       }).join('');
       const goalsByProjectRows = goalsByProject.map(g => {
-        const key = goalKeyProject(g);
-        const checked = gtd1QState.projectKeys.has(key) ? ' checked' : '';
         const prog = g.progress != null ? g.progress : '';
         const st = (g.status && statusLabels[g.status]) ? g.status : 'не начинал';
         const mvp = (g.mvp === 'Y' || g.mvp === 'y') ? 'Y' : 'N';
-        return `<tr data-type="project" data-key="${escapeHtml(key)}"><td><input type="checkbox" class="gtd-1q-cb" data-type="project" data-key="${escapeHtml(key)}"${checked}></td><td>${escapeHtml(g.proj)}</td><td>${escapeHtml(g.proj1 || '-')}</td><td>${escapeHtml(g.area + (g.area1 ? ' / ' + g.area1 : ''))}</td><td title="${escapeHtml(g.desc || '')}"><span class="gtd-cell-text">${escapeHtml(g.desc || '-')}</span></td><td>${escapeHtml(g.prio || '-')}</td><td>${prog !== '' ? prog + '%' : '-'}</td><td class="gtd-cell-oneline" title="${escapeHtml(st)}">${escapeHtml(st)}</td><td>${mvp}</td></tr>`;
+        return `<tr><td>${escapeHtml(g.proj)}</td><td>${escapeHtml(g.proj1 || '-')}</td><td>${escapeHtml(g.area + (g.area1 ? ' / ' + g.area1 : ''))}</td><td title="${escapeHtml(g.desc || '')}"><span class="gtd-cell-text">${escapeHtml(g.desc || '-')}</span></td><td>${escapeHtml(g.prio || '-')}</td><td>${prog !== '' ? prog + '%' : '-'}</td><td class="gtd-cell-oneline" title="${escapeHtml(st)}">${escapeHtml(st)}</td><td>${mvp}</td></tr>`;
       }).join('');
 
       let rawItems = [];
@@ -789,26 +762,20 @@
       }
       const rawRows = rawItems.length ? rawItems.map(r => `<tr><td>${escapeHtml((r.title || r.content || '').slice(0,60))}</td><td>${escapeHtml(r.source || '-')}</td><td>${escapeHtml(r.created_at ? new Date(r.created_at).toLocaleDateString('ru-RU') : '-')}</td><td>${escapeHtml(r.rapa_stage || r.gtd_type || '-')}</td></tr>`).join('') : '<tr><td colspan="4" class="empty">Нет Raw. Укажи URL API в Collect. Raw приходит из Plaud, Email, TG.</td></tr>';
 
-      const area1Q = goalsByArea.filter(g => gtd1QState.areaKeys.has(goalKeyArea(g)));
-      const proj1Q = goalsByProject.filter(g => gtd1QState.projectKeys.has(goalKeyProject(g)));
-      const sprintFormul = (g, src) => (src && src.formul) || g.formul || g.desc || '-';
-      const areaSprintRows = area1Q.map(g => {
-        const src = defaultSprints1Q2026.byArea.find(a => goalKeyArea(a) === goalKeyArea(g));
-        const formul = sprintFormul(g, src);
-        const prog = (src && src.progress != null) ? src.progress : (g.progress != null ? g.progress : '');
-        const st = (src && src.status && statusLabels[src.status]) ? src.status : ((g.status && statusLabels[g.status]) ? g.status : 'не начинал');
-        return `<tr><td class="gtd-cell-oneline">AREA</td><td>${escapeHtml(g.area + (g.area1 ? ' / ' + g.area1 : ''))}</td><td title="${escapeHtml(formul)}"><span class="gtd-cell-text">${escapeHtml(formul)}</span></td><td>${escapeHtml(g.prio || '-')}</td><td>${prog !== '' ? prog + '%' : '-'}</td><td class="gtd-cell-oneline" title="${escapeHtml(st)}">${escapeHtml(st)}</td><td>-</td><td></td></tr>`;
+      const sprints1Q = defaultSprints1Q2026;
+      const sprintsByAreaRows = sprints1Q.byArea.map(g => {
+        const prog = g.progress != null ? g.progress : '';
+        const st = (g.status && statusLabels[g.status]) ? g.status : 'не начинал';
+        const formul = g.formul || g.desc || '-';
+        return `<tr><td>${escapeHtml(g.area)}</td><td>${escapeHtml(g.area1 || '-')}</td><td title="${escapeHtml(formul)}"><span class="gtd-cell-text">${escapeHtml(formul)}</span></td><td>${escapeHtml(g.prio || '-')}</td><td>${prog !== '' ? prog + '%' : '-'}</td><td class="gtd-cell-oneline" title="${escapeHtml(st)}">${escapeHtml(st)}</td></tr>`;
       }).join('');
-      const projSprintRows = proj1Q.map(g => {
-        const src = defaultSprints1Q2026.byProject.find(a => goalKeyProject(a) === goalKeyProject(g));
-        const formul = sprintFormul(g, src);
-        const prog = (src && src.progress != null) ? src.progress : (g.progress != null ? g.progress : '');
-        const st = (src && src.status && statusLabels[src.status]) ? src.status : ((g.status && statusLabels[g.status]) ? g.status : 'не начинал');
+      const sprintsByProjectRows = sprints1Q.byProject.map(g => {
+        const prog = g.progress != null ? g.progress : '';
+        const st = (g.status && statusLabels[g.status]) ? g.status : 'не начинал';
         const mvp = (g.mvp === 'Y' || g.mvp === 'y') ? 'Y' : 'N';
-        return `<tr><td class="gtd-cell-oneline">PROJECT</td><td>${escapeHtml(g.proj + (g.proj1 ? ' / ' + g.proj1 : ''))}</td><td title="${escapeHtml(formul)}"><span class="gtd-cell-text">${escapeHtml(formul)}</span></td><td>${escapeHtml(g.prio || '-')}</td><td>${prog !== '' ? prog + '%' : '-'}</td><td class="gtd-cell-oneline" title="${escapeHtml(st)}">${escapeHtml(st)}</td><td>${mvp}</td><td></td></tr>`;
+        const formul = g.formul || g.desc || '-';
+        return `<tr><td>${escapeHtml(g.proj)}</td><td>${escapeHtml(g.proj1 || '-')}</td><td title="${escapeHtml(formul)}"><span class="gtd-cell-text">${escapeHtml(formul)}</span></td><td>${escapeHtml(g.prio || '-')}</td><td>${prog !== '' ? prog + '%' : '-'}</td><td class="gtd-cell-oneline" title="${escapeHtml(st)}">${escapeHtml(st)}</td><td>${mvp}</td></tr>`;
       }).join('');
-      const lifeManualRows = (gtd1QState.manualLife || []).map((m, i) => `<tr data-manual="life" data-i="${i}"><td class="gtd-cell-oneline">Life</td><td colspan="2" title="${escapeHtml(m.text||'')}"><span class="gtd-cell-text">${escapeHtml(m.text||'-')}</span></td><td>-</td><td>-</td><td>-</td><td>-</td><td><button type="button" class="gtd-del-btn" data-manual="life" data-i="${i}">×</button></td></tr>`).join('');
-      const dateManualRows = (gtd1QState.manualDate || []).map((m, i) => `<tr data-manual="date" data-i="${i}"><td class="gtd-cell-oneline">Date</td><td colspan="2" title="${escapeHtml(m.text||'')}"><span class="gtd-cell-text">${escapeHtml(m.text||'-')}</span></td><td>-</td><td>-</td><td>-</td><td>-</td><td><button type="button" class="gtd-del-btn" data-manual="date" data-i="${i}">×</button></td></tr>`).join('');
 
       return `
         <div class="gtd-tabs">
@@ -825,14 +792,14 @@
           <h2>Goals 2026 по AREA</h2>
           <div class="gtd-table-wrap">
             <table class="gtd-table">
-              <thead><tr><th>1Q</th><th>Area</th><th>Sub</th><th>Description</th><th>Priority</th><th>Progress %</th><th>Status</th></tr></thead>
+              <thead><tr><th>Area</th><th>Sub</th><th>Description</th><th>Priority</th><th>Progress %</th><th>Status</th></tr></thead>
               <tbody>${goalsByAreaRows}</tbody>
             </table>
           </div>
           <h2>Goals 2026 по Projects</h2>
           <div class="gtd-table-wrap">
             <table class="gtd-table">
-              <thead><tr><th>1Q</th><th>Project</th><th>Sub</th><th>Area</th><th>Description</th><th>Priority</th><th>Progress %</th><th>Status</th><th>MVP done</th></tr></thead>
+              <thead><tr><th>Project</th><th>Sub</th><th>Area</th><th>Description</th><th>Priority</th><th>Progress %</th><th>Status</th><th>MVP done</th></tr></thead>
               <tbody>${goalsByProjectRows}</tbody>
             </table>
           </div>
@@ -854,23 +821,20 @@
         </div>
 
         <div id="gtd-panel-sprints" class="gtd-panel">
-          <p class="gtd-overview">Goals 1Q2026 — цели из вкладки ЦЕЛИ (1Q) + ручные задачи Life/Date.</p>
+          <p class="gtd-overview">Goals 1Q2026, формулировки спринта.</p>
           <div id="gtd-export-sprints">
+          <h2>Goals 1Q2026 по AREA</h2>
           <div class="gtd-table-wrap">
-            <table class="gtd-table" id="gtd-sprints-table">
-              <thead><tr><th>Type</th><th>Area/Project</th><th>Формулировка</th><th>Priority</th><th>Progress %</th><th>Status</th><th>MVP</th><th></th></tr></thead>
-              <tbody>
-                <tr class="gtd-sprint-section"><td colspan="8"><strong>AREA</strong></td></tr>
-                ${areaSprintRows}
-                <tr class="gtd-sprint-section"><td colspan="8"><strong>PROJECT</strong></td></tr>
-                ${projSprintRows}
-                <tr class="gtd-sprint-section"><td colspan="8"><strong>Life</strong> — задачи вручную</td></tr>
-                ${lifeManualRows}
-                <tr class="gtd-add-row" data-add="life"><td colspan="7"><input type="text" class="gtd-add-input" placeholder="Добавить задачу Life..."></td><td><button type="button" class="gtd-add-btn" data-add="life">+</button></td></tr>
-                <tr class="gtd-sprint-section"><td colspan="8"><strong>Date</strong> — задачи вручную</td></tr>
-                ${dateManualRows}
-                <tr class="gtd-add-row" data-add="date"><td colspan="7"><input type="text" class="gtd-add-input" placeholder="Добавить задачу Date..."></td><td><button type="button" class="gtd-add-btn" data-add="date">+</button></td></tr>
-              </tbody>
+            <table class="gtd-table">
+              <thead><tr><th>Area</th><th>Sub</th><th>Формулировка 1Q</th><th>Priority</th><th>Progress %</th><th>Status</th></tr></thead>
+              <tbody>${sprintsByAreaRows}</tbody>
+            </table>
+          </div>
+          <h2>Goals 1Q2026 по Project</h2>
+          <div class="gtd-table-wrap">
+            <table class="gtd-table">
+              <thead><tr><th>Project</th><th>Sub</th><th>Формулировка 1Q</th><th>Priority</th><th>Progress %</th><th>Status</th><th>MVP done</th></tr></thead>
+              <tbody>${sprintsByProjectRows}</tbody>
             </table>
           </div>
           </div>
@@ -896,75 +860,6 @@
       `;
     }
 
-    function updateSprintsTable() {
-      const tbl = document.getElementById('gtd-sprints-table');
-      if (!tbl || !tbl.tBodies[0]) return;
-      const statusLabels = { 'не начинал': 'не начинал', 'в процессе': 'в процессе', 'почти done': 'почти done', 'done': 'done' };
-      const sprintFormul = (g, src) => (src && src.formul) || g.formul || g.desc || '-';
-      const goalsByArea = defaultGoalsByArea, goalsByProject = defaultGoalsByProject;
-      const area1Q = goalsByArea.filter(g => gtd1QState.areaKeys.has(goalKeyArea(g)));
-      const proj1Q = goalsByProject.filter(g => gtd1QState.projectKeys.has(goalKeyProject(g)));
-      const areaRows = area1Q.map(g => {
-        const src = defaultSprints1Q2026.byArea.find(a => goalKeyArea(a) === goalKeyArea(g));
-        const formul = sprintFormul(g, src);
-        const prog = (src && src.progress != null) ? src.progress : (g.progress != null ? g.progress : '');
-        const st = (src && src.status && statusLabels[src.status]) ? src.status : ((g.status && statusLabels[g.status]) ? g.status : 'не начинал');
-        return `<tr><td class="gtd-cell-oneline">AREA</td><td>${escapeHtml(g.area + (g.area1 ? ' / ' + g.area1 : ''))}</td><td title="${escapeHtml(formul)}"><span class="gtd-cell-text">${escapeHtml(formul)}</span></td><td>${escapeHtml(g.prio || '-')}</td><td>${prog !== '' ? prog + '%' : '-'}</td><td class="gtd-cell-oneline" title="${escapeHtml(st)}">${escapeHtml(st)}</td><td>-</td><td></td></tr>`;
-      }).join('');
-      const projRows = proj1Q.map(g => {
-        const src = defaultSprints1Q2026.byProject.find(a => goalKeyProject(a) === goalKeyProject(g));
-        const formul = sprintFormul(g, src);
-        const prog = (src && src.progress != null) ? src.progress : (g.progress != null ? g.progress : '');
-        const st = (src && src.status && statusLabels[src.status]) ? src.status : ((g.status && statusLabels[g.status]) ? g.status : 'не начинал');
-        const mvp = (g.mvp === 'Y' || g.mvp === 'y') ? 'Y' : 'N';
-        return `<tr><td class="gtd-cell-oneline">PROJECT</td><td>${escapeHtml(g.proj + (g.proj1 ? ' / ' + g.proj1 : ''))}</td><td title="${escapeHtml(formul)}"><span class="gtd-cell-text">${escapeHtml(formul)}</span></td><td>${escapeHtml(g.prio || '-')}</td><td>${prog !== '' ? prog + '%' : '-'}</td><td class="gtd-cell-oneline" title="${escapeHtml(st)}">${escapeHtml(st)}</td><td>${mvp}</td><td></td></tr>`;
-      }).join('');
-      const lifeRows = (gtd1QState.manualLife || []).map((m, i) => `<tr data-manual="life" data-i="${i}"><td class="gtd-cell-oneline">Life</td><td colspan="2" title="${escapeHtml(m.text||'')}"><span class="gtd-cell-text">${escapeHtml(m.text||'-')}</span></td><td>-</td><td>-</td><td>-</td><td>-</td><td><button type="button" class="gtd-del-btn" data-manual="life" data-i="${i}">×</button></td></tr>`).join('');
-      const dateRows = (gtd1QState.manualDate || []).map((m, i) => `<tr data-manual="date" data-i="${i}"><td class="gtd-cell-oneline">Date</td><td colspan="2" title="${escapeHtml(m.text||'')}"><span class="gtd-cell-text">${escapeHtml(m.text||'-')}</span></td><td>-</td><td>-</td><td>-</td><td>-</td><td><button type="button" class="gtd-del-btn" data-manual="date" data-i="${i}">×</button></td></tr>`).join('');
-      tbl.tBodies[0].innerHTML = `<tr class="gtd-sprint-section"><td colspan="8"><strong>AREA</strong></td></tr>${areaRows}<tr class="gtd-sprint-section"><td colspan="8"><strong>PROJECT</strong></td></tr>${projRows}<tr class="gtd-sprint-section"><td colspan="8"><strong>Life</strong> — задачи вручную</td></tr>${lifeRows}<tr class="gtd-add-row" data-add="life"><td colspan="7"><input type="text" class="gtd-add-input" placeholder="Добавить задачу Life..."></td><td><button type="button" class="gtd-add-btn" data-add="life">+</button></td></tr><tr class="gtd-sprint-section"><td colspan="8"><strong>Date</strong> — задачи вручную</td></tr>${dateRows}<tr class="gtd-add-row" data-add="date"><td colspan="7"><input type="text" class="gtd-add-input" placeholder="Добавить задачу Date..."></td><td><button type="button" class="gtd-add-btn" data-add="date">+</button></td></tr>`;
-      bindGtd1QAndSprints();
-    }
-    function bindGtd1QAndSprints() {
-      document.querySelectorAll('.gtd-1q-cb').forEach(cb => {
-        cb.onchange = function() {
-          const type = this.dataset.type, key = this.dataset.key;
-          if (type === 'area') { if (this.checked) gtd1QState.areaKeys.add(key); else gtd1QState.areaKeys.delete(key); }
-          else if (type === 'project') { if (this.checked) gtd1QState.projectKeys.add(key); else gtd1QState.projectKeys.delete(key); }
-          saveGtd1QState(gtd1QState);
-          updateSprintsTable();
-        };
-      });
-      const doAddManual = (add, inputEl) => {
-        const text = (inputEl && inputEl.value || '').trim();
-        if (!text) return;
-        if (add === 'life') { gtd1QState.manualLife = gtd1QState.manualLife || []; gtd1QState.manualLife.push({ text }); }
-        else if (add === 'date') { gtd1QState.manualDate = gtd1QState.manualDate || []; gtd1QState.manualDate.push({ text }); }
-        saveGtd1QState(gtd1QState);
-        if (inputEl) inputEl.value = '';
-        updateSprintsTable();
-      };
-      document.querySelectorAll('.gtd-add-btn').forEach(btn => {
-        btn.onclick = function() {
-          const row = this.closest('tr');
-          const input = row && row.querySelector('.gtd-add-input');
-          doAddManual(this.dataset.add, input);
-        };
-      });
-      document.querySelectorAll('.gtd-add-input').forEach(input => {
-        input.onkeydown = function(e) {
-          if (e.key === 'Enter') { e.preventDefault(); const row = this.closest('tr'); doAddManual(row && row.dataset.add, this); }
-        };
-      });
-      document.querySelectorAll('.gtd-del-btn').forEach(btn => {
-        btn.onclick = function() {
-          const man = this.dataset.manual, i = parseInt(this.dataset.i, 10);
-          if (man === 'life' && gtd1QState.manualLife) { gtd1QState.manualLife.splice(i, 1); }
-          else if (man === 'date' && gtd1QState.manualDate) { gtd1QState.manualDate.splice(i, 1); }
-          saveGtd1QState(gtd1QState);
-          updateSprintsTable();
-        };
-      });
-    }
     function bindGtdTabs() {
       document.querySelectorAll('.gtd-tab').forEach(tab => {
         tab.onclick = () => {
