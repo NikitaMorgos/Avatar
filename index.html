@@ -736,8 +736,18 @@
 
       const areasRows = areas.map(a => `<tr><td>${escapeHtml(a.name)}</td><td>${escapeHtml((a.goal || a.sub || '').trim() || '-')}</td></tr>`).join('');
       const projectsRows = projects.map(p => `<tr><td>${escapeHtml(p.name)}</td><td>${escapeHtml(p.area_name || '-')}</td><td>${escapeHtml(p.status || '-')}</td><td>${escapeHtml(p.horizon || '-')}</td><td>${escapeHtml(p.impact || '-')}</td><td>${escapeHtml(p.deadline || '-')}</td></tr>`).join('');
-      const goalsByAreaRows = goalsByArea.map(g => `<tr><td>${escapeHtml(g.area)}</td><td>${escapeHtml(g.area1 || '-')}</td><td>${escapeHtml(g.desc || '-')}</td><td>${escapeHtml(g.prio || '-')}</td></tr>`).join('');
-      const goalsByProjectRows = goalsByProject.map(g => `<tr><td>${escapeHtml(g.proj)}</td><td>${escapeHtml(g.proj1 || '-')}</td><td>${escapeHtml(g.area + (g.area1 ? ' / ' + g.area1 : ''))}</td><td>${escapeHtml(g.desc || '-')}</td><td>${escapeHtml(g.prio || '-')}</td></tr>`).join('');
+      const statusLabels = { 'не начинал': 'не начинал', 'в процессе': 'в процессе', 'почти done': 'почти done', 'done': 'done' };
+      const goalsByAreaRows = goalsByArea.map(g => {
+        const prog = g.progress != null ? g.progress : '';
+        const st = (g.status && statusLabels[g.status]) ? g.status : 'не начинал';
+        return `<tr><td>${escapeHtml(g.area)}</td><td>${escapeHtml(g.area1 || '-')}</td><td>${escapeHtml(g.desc || '-')}</td><td>${escapeHtml(g.prio || '-')}</td><td>${prog !== '' ? prog + '%' : '-'}</td><td>${escapeHtml(st)}</td></tr>`;
+      }).join('');
+      const goalsByProjectRows = goalsByProject.map(g => {
+        const prog = g.progress != null ? g.progress : '';
+        const st = (g.status && statusLabels[g.status]) ? g.status : 'не начинал';
+        const mvp = (g.mvp === 'Y' || g.mvp === 'y') ? 'Y' : 'N';
+        return `<tr><td>${escapeHtml(g.proj)}</td><td>${escapeHtml(g.proj1 || '-')}</td><td>${escapeHtml(g.area + (g.area1 ? ' / ' + g.area1 : ''))}</td><td>${escapeHtml(g.desc || '-')}</td><td>${escapeHtml(g.prio || '-')}</td><td>${prog !== '' ? prog + '%' : '-'}</td><td>${escapeHtml(st)}</td><td>${mvp}</td></tr>`;
+      }).join('');
 
       let rawItems = [];
       if (apiUrl) {
@@ -763,14 +773,14 @@
           <h2>Goals 2026 по AREA</h2>
           <div class="gtd-table-wrap">
             <table class="gtd-table">
-              <thead><tr><th>Area</th><th>Sub</th><th>Description</th><th>Priority</th></tr></thead>
+              <thead><tr><th>Area</th><th>Sub</th><th>Description</th><th>Priority</th><th>Progress %</th><th>Status</th></tr></thead>
               <tbody>${goalsByAreaRows}</tbody>
             </table>
           </div>
           <h2>Goals 2026 по Projects</h2>
           <div class="gtd-table-wrap">
             <table class="gtd-table">
-              <thead><tr><th>Project</th><th>Sub</th><th>Area</th><th>Description</th><th>Priority</th></tr></thead>
+              <thead><tr><th>Project</th><th>Sub</th><th>Area</th><th>Description</th><th>Priority</th><th>Progress %</th><th>Status</th><th>MVP done</th></tr></thead>
               <tbody>${goalsByProjectRows}</tbody>
             </table>
           </div>
