@@ -91,6 +91,7 @@
       padding: 48px 64px 80px;
       max-width: 900px;
     }
+    .main.gtd-wide { max-width: 1600px; }
     .page-title {
       font-size: 2.5rem;
       font-weight: 600;
@@ -327,6 +328,7 @@
 
     .gtd-overview { font-size: 0.9375rem; color: var(--text-muted); margin-bottom: 24px; }
     .gtd-table-wrap { overflow-x: auto; margin: 16px 0; }
+    .main.gtd-wide .gtd-table-wrap { overflow-x: visible; }
     .gtd-table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
     .gtd-table th, .gtd-table td { padding: 8px 12px; text-align: left; border-bottom: 1px solid var(--border); }
     .gtd-table th { font-weight: 600; color: var(--text-muted); background: var(--locked-bg); }
@@ -625,6 +627,7 @@
       });
 
       const main = document.getElementById('main-content');
+      main.classList.toggle('gtd-wide', id === 'gtd');
 
       if (id === 'gtd') {
         const gtdUnlocked = sessionStorage.getItem('gtd_unlocked') === '1';
@@ -779,7 +782,7 @@
         const st = (g.status && statusLabels[g.status]) ? g.status : 'не начинал';
         const mvp = (g.mvp === 'Y' || g.mvp === 'y') ? 'Y' : 'N';
         const name = goalName(key, 'project');
-        return `<tr><td><input type="checkbox" class="gtd-1q-cb" data-type="project" data-key="${escapeHtml(key)}"${checked}></td><td class="gtd-cell-oneline" title="${escapeHtml(name)}">${escapeHtml(name)}</td><td>${escapeHtml(g.proj)}</td><td>${escapeHtml(g.proj1 || '-')}</td><td>${escapeHtml(g.area + (g.area1 ? ' / ' + g.area1 : ''))}</td><td class="gtd-col-desc" title="${escapeHtml(g.desc || '')}"><span class="gtd-cell-text">${escapeHtml(g.desc || '-')}</span></td><td>${escapeHtml(g.prio || '-')}</td><td>${prog !== '' ? prog + '%' : '-'}</td><td class="gtd-cell-oneline" title="${escapeHtml(st)}">${escapeHtml(st)}</td><td>${mvp}</td></tr>`;
+        return `<tr><td><input type="checkbox" class="gtd-1q-cb" data-type="project" data-key="${escapeHtml(key)}"${checked}></td><td class="gtd-cell-oneline" title="${escapeHtml(name)}">${escapeHtml(name)}</td><td>${escapeHtml(g.proj)}</td><td>${escapeHtml(g.proj1 || '-')}</td><td class="gtd-col-desc" title="${escapeHtml(g.desc || '')}"><span class="gtd-cell-text">${escapeHtml(g.desc || '-')}</span></td><td>${escapeHtml(g.prio || '-')}</td><td>${prog !== '' ? prog + '%' : '-'}</td><td class="gtd-cell-oneline" title="${escapeHtml(st)}">${escapeHtml(st)}</td><td>${escapeHtml(g.area + (g.area1 ? ' / ' + g.area1 : ''))}</td><td>${mvp}</td></tr>`;
       }).join('');
 
       let rawItems = [];
@@ -835,7 +838,7 @@
           <h2>Goals 2026 по Projects</h2>
           <div class="gtd-table-wrap">
             <table class="gtd-table gtd-table-projects">
-              <thead><tr><th>1Q</th><th>Name</th><th>Project</th><th>Sub</th><th>Area</th><th>Description</th><th>Priority</th><th>Progress %</th><th>Status</th><th>MVP done</th></tr></thead>
+              <thead><tr><th>1Q</th><th>Name</th><th>Project</th><th>Sub</th><th>Description</th><th>Priority</th><th>Progress %</th><th>Status</th><th>Area</th><th>MVP done</th></tr></thead>
               <tbody>${goalsByProjectRows}</tbody>
             </table>
           </div>
