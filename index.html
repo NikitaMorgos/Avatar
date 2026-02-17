@@ -334,6 +334,8 @@
     .gtd-table .empty { color: var(--text-muted); font-style: italic; }
     .gtd-table .gtd-cell-text { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.3; word-break: break-word; }
     .gtd-table .gtd-cell-oneline, .gtd-table th { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+    .gtd-table .gtd-cell-editable { min-width: 120px; }
+    .gtd-table .gtd-cell-editable:focus { outline: 2px solid var(--accent); background: #fff; }
     .gtd-login-btn { display: inline-block; margin-top: 16px; padding: 10px 20px; background: var(--accent); color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.9375rem; }
     .gtd-login-btn:hover { background: var(--accent-hover); }
     .gtd-login-form { max-width: 320px; margin-top: 16px; }
@@ -691,14 +693,14 @@
     function loadGtd1QState(sprints1Q) {
       try {
         const s = localStorage.getItem(GTD_1Q_KEY);
-        if (s) { const j = JSON.parse(s); return { areaKeys: new Set(j.areaKeys||[]), projectKeys: new Set(j.projectKeys||[]), manualLife: j.manualLife||[], manualDate: j.manualDate||[] }; }
+        if (s) { const j = JSON.parse(s); return { areaKeys: new Set(j.areaKeys||[]), projectKeys: new Set(j.projectKeys||[]), customFormuls: j.customFormuls||{}, manualLife: j.manualLife||[], manualDate: j.manualDate||[] }; }
       } catch(e) {}
       const areaKeys = new Set(), projectKeys = new Set();
       if (sprints1Q) { sprints1Q.byArea.forEach(g => areaKeys.add(goalKeyArea(g))); sprints1Q.byProject.forEach(g => projectKeys.add(goalKeyProject(g))); }
-      return { areaKeys, projectKeys, manualLife: [], manualDate: [] };
+      return { areaKeys, projectKeys, customFormuls: {}, manualLife: [], manualDate: [] };
     }
     function saveGtd1QState(st) {
-      try { localStorage.setItem(GTD_1Q_KEY, JSON.stringify({ areaKeys: [...st.areaKeys], projectKeys: [...st.projectKeys], manualLife: st.manualLife||[], manualDate: st.manualDate||[] })); } catch(e) {}
+      try { localStorage.setItem(GTD_1Q_KEY, JSON.stringify({ areaKeys: [...st.areaKeys], projectKeys: [...st.projectKeys], customFormuls: st.customFormuls||{}, manualLife: st.manualLife||[], manualDate: st.manualDate||[] })); } catch(e) {}
     }
     let gtd1QState;
 
@@ -787,21 +789,23 @@
 
       const area1Q = goalsByArea.filter(g => gtd1QState.areaKeys.has(goalKeyArea(g)));
       const proj1Q = goalsByProject.filter(g => gtd1QState.projectKeys.has(goalKeyProject(g)));
-      const sprintFormul = (g, src) => (src && src.formul) || g.formul || g.desc || '-';
+      const sprintFormul = (g, src, key, type) => (gtd1QState.customFormuls && gtd1QState.customFormuls[type + '|' + key]) || (src && src.formul) || g.formul || g.desc || '-';
       const sprintsByAreaRows = area1Q.map(g => {
-        const src = defaultSprints1Q2026.byArea.find(a => goalKeyArea(a) === goalKeyArea(g));
-        const formul = sprintFormul(g, src);
+        const key = goalKeyArea(g);
+        const src = defaultSprints1Q2026.byArea.find(a => goalKeyArea(a) === key);
+        const formul = sprintFormul(g, src, key, 'area');
         const prog = (src && src.progress != null) ? src.progress : (g.progress != null ? g.progress : '');
         const st = (src && src.status && statusLabels[src.status]) ? src.status : ((g.status && statusLabels[g.status]) ? g.status : 'не начинал');
-        return `<tr><td>${escapeHtml(g.area)}</td><td>${escapeHtml(g.area1 || '-')}</td><td title="${escapeHtml(formul)}"><span class="gtd-cell-text">${escapeHtml(formul)}</span></td><td>${escapeHtml(g.prio || '-')}</td><td>${prog !== '' ? prog + '%' : '-'}</td><td class="gtd-cell-oneline" title="${escapeHtml(st)}">${escapeHtml(st)}</td></tr>`;
+        return `<tr><td>${escapeHtml(g.area)}</td><td>${escapeHtml(g.area1 || '-')}</td><td class="gtd-cell-editable gtd-cell-text" contenteditable="true" data-key="${escapeHtml(key)}" data-type="area" title="Редактируемая ячейка">${escapeHtml(formul)}</td><td>${escapeHtml(g.prio || '-')}</td><td>${prog !== '' ? prog + '%' : '-'}</td><td class="gtd-cell-oneline" title="${escapeHtml(st)}">${escapeHtml(st)}</td></tr>`;
       }).join('');
       const sprintsByProjectRows = proj1Q.map(g => {
-        const src = defaultSprints1Q2026.byProject.find(a => goalKeyProject(a) === goalKeyProject(g));
-        const formul = sprintFormul(g, src);
+        const key = goalKeyProject(g);
+        const src = defaultSprints1Q2026.byProject.find(a => goalKeyProject(a) === key);
+        const formul = sprintFormul(g, src, key, 'project');
         const prog = (src && src.progress != null) ? src.progress : (g.progress != null ? g.progress : '');
         const st = (src && src.status && statusLabels[src.status]) ? src.status : ((g.status && statusLabels[g.status]) ? g.status : 'не начинал');
         const mvp = (g.mvp === 'Y' || g.mvp === 'y') ? 'Y' : 'N';
-        return `<tr><td>${escapeHtml(g.proj)}</td><td>${escapeHtml(g.proj1 || '-')}</td><td title="${escapeHtml(formul)}"><span class="gtd-cell-text">${escapeHtml(formul)}</span></td><td>${escapeHtml(g.prio || '-')}</td><td>${prog !== '' ? prog + '%' : '-'}</td><td class="gtd-cell-oneline" title="${escapeHtml(st)}">${escapeHtml(st)}</td><td>${mvp}</td></tr>`;
+        return `<tr><td>${escapeHtml(g.proj)}</td><td>${escapeHtml(g.proj1 || '-')}</td><td class="gtd-cell-editable gtd-cell-text" contenteditable="true" data-key="${escapeHtml(key)}" data-type="project" title="Редактируемая ячейка">${escapeHtml(formul)}</td><td>${escapeHtml(g.prio || '-')}</td><td>${prog !== '' ? prog + '%' : '-'}</td><td class="gtd-cell-oneline" title="${escapeHtml(st)}">${escapeHtml(st)}</td><td>${mvp}</td></tr>`;
       }).join('');
 
       return `
@@ -814,7 +818,7 @@
         </div>
 
         <div id="gtd-panel-goals" class="gtd-panel active">
-          <p class="gtd-overview">Goals 2026, Areas, Projects.</p>
+          <p class="gtd-overview">Goals 2026, Areas, Projects. <button type="button" class="gtd-login-btn" id="gtd-refresh-btn">Обновить</button></p>
           <div id="gtd-export-content">
           <h2>Goals 2026 по AREA</h2>
           <div class="gtd-table-wrap">
@@ -889,39 +893,55 @@
 
     function updateSprintsTbodies() {
       const statusLabels = { 'не начинал': 'не начинал', 'в процессе': 'в процессе', 'почти done': 'почти done', 'done': 'done' };
-      const sprintFormul = (g, src) => (src && src.formul) || g.formul || g.desc || '-';
+      const sprintFormul = (g, src, key, type) => (gtd1QState.customFormuls && gtd1QState.customFormuls[type + '|' + key]) || (src && src.formul) || g.formul || g.desc || '-';
       const area1Q = defaultGoalsByArea.filter(g => gtd1QState.areaKeys.has(goalKeyArea(g)));
       const proj1Q = defaultGoalsByProject.filter(g => gtd1QState.projectKeys.has(goalKeyProject(g)));
       const areaRows = area1Q.map(g => {
-        const src = defaultSprints1Q2026.byArea.find(a => goalKeyArea(a) === goalKeyArea(g));
-        const formul = sprintFormul(g, src);
+        const key = goalKeyArea(g);
+        const src = defaultSprints1Q2026.byArea.find(a => goalKeyArea(a) === key);
+        const formul = sprintFormul(g, src, key, 'area');
         const prog = (src && src.progress != null) ? src.progress : (g.progress != null ? g.progress : '');
         const st = (src && src.status && statusLabels[src.status]) ? src.status : ((g.status && statusLabels[g.status]) ? g.status : 'не начинал');
-        return `<tr><td>${escapeHtml(g.area)}</td><td>${escapeHtml(g.area1 || '-')}</td><td title="${escapeHtml(formul)}"><span class="gtd-cell-text">${escapeHtml(formul)}</span></td><td>${escapeHtml(g.prio || '-')}</td><td>${prog !== '' ? prog + '%' : '-'}</td><td class="gtd-cell-oneline" title="${escapeHtml(st)}">${escapeHtml(st)}</td></tr>`;
+        return `<tr><td>${escapeHtml(g.area)}</td><td>${escapeHtml(g.area1 || '-')}</td><td class="gtd-cell-editable gtd-cell-text" contenteditable="true" data-key="${escapeHtml(key)}" data-type="area" title="Редактируемая ячейка">${escapeHtml(formul)}</td><td>${escapeHtml(g.prio || '-')}</td><td>${prog !== '' ? prog + '%' : '-'}</td><td class="gtd-cell-oneline" title="${escapeHtml(st)}">${escapeHtml(st)}</td></tr>`;
       }).join('');
       const projRows = proj1Q.map(g => {
-        const src = defaultSprints1Q2026.byProject.find(a => goalKeyProject(a) === goalKeyProject(g));
-        const formul = sprintFormul(g, src);
+        const key = goalKeyProject(g);
+        const src = defaultSprints1Q2026.byProject.find(a => goalKeyProject(a) === key);
+        const formul = sprintFormul(g, src, key, 'project');
         const prog = (src && src.progress != null) ? src.progress : (g.progress != null ? g.progress : '');
         const st = (src && src.status && statusLabels[src.status]) ? src.status : ((g.status && statusLabels[g.status]) ? g.status : 'не начинал');
         const mvp = (g.mvp === 'Y' || g.mvp === 'y') ? 'Y' : 'N';
-        return `<tr><td>${escapeHtml(g.proj)}</td><td>${escapeHtml(g.proj1 || '-')}</td><td title="${escapeHtml(formul)}"><span class="gtd-cell-text">${escapeHtml(formul)}</span></td><td>${escapeHtml(g.prio || '-')}</td><td>${prog !== '' ? prog + '%' : '-'}</td><td class="gtd-cell-oneline" title="${escapeHtml(st)}">${escapeHtml(st)}</td><td>${mvp}</td></tr>`;
+        return `<tr><td>${escapeHtml(g.proj)}</td><td>${escapeHtml(g.proj1 || '-')}</td><td class="gtd-cell-editable gtd-cell-text" contenteditable="true" data-key="${escapeHtml(key)}" data-type="project" title="Редактируемая ячейка">${escapeHtml(formul)}</td><td>${escapeHtml(g.prio || '-')}</td><td>${prog !== '' ? prog + '%' : '-'}</td><td class="gtd-cell-oneline" title="${escapeHtml(st)}">${escapeHtml(st)}</td><td>${mvp}</td></tr>`;
       }).join('');
       const areaTb = document.getElementById('gtd-sprints-area-tbody');
       const projTb = document.getElementById('gtd-sprints-project-tbody');
       if (areaTb) areaTb.innerHTML = areaRows;
       if (projTb) projTb.innerHTML = projRows;
+      bindGtdEditableFormuls();
     }
-    function bindGtd1Q() {
-      document.querySelectorAll('.gtd-1q-cb').forEach(cb => {
-        cb.onchange = function() {
+    function sync1QFromCheckboxes() {
+      gtd1QState.areaKeys.clear();
+      gtd1QState.projectKeys.clear();
+      document.querySelectorAll('.gtd-1q-cb[data-type="area"]').forEach(cb => { if (cb.checked) gtd1QState.areaKeys.add(cb.dataset.key); });
+      document.querySelectorAll('.gtd-1q-cb[data-type="project"]').forEach(cb => { if (cb.checked) gtd1QState.projectKeys.add(cb.dataset.key); });
+      saveGtd1QState(gtd1QState);
+      updateSprintsTbodies();
+    }
+    function bindGtdEditableFormuls() {
+      document.querySelectorAll('.gtd-cell-editable[contenteditable="true"]').forEach(cell => {
+        cell.onblur = function() {
           const type = this.dataset.type, key = this.dataset.key;
-          if (type === 'area') { if (this.checked) gtd1QState.areaKeys.add(key); else gtd1QState.areaKeys.delete(key); }
-          else if (type === 'project') { if (this.checked) gtd1QState.projectKeys.add(key); else gtd1QState.projectKeys.delete(key); }
+          const text = (this.textContent || '').trim();
+          gtd1QState.customFormuls = gtd1QState.customFormuls || {};
+          if (text) gtd1QState.customFormuls[type + '|' + key] = text;
+          else delete gtd1QState.customFormuls[type + '|' + key];
           saveGtd1QState(gtd1QState);
-          updateSprintsTbodies();
         };
       });
+    }
+    function bindGtd1Q() {
+      const refreshBtn = document.getElementById('gtd-refresh-btn');
+      if (refreshBtn) refreshBtn.onclick = sync1QFromCheckboxes;
     }
     function bindGtdTabs() {
       document.querySelectorAll('.gtd-tab').forEach(tab => {
