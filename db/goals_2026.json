@@ -358,7 +358,7 @@
       "area": "Profession",
       "area1": "CAIO",
       "desc": "заработал сбор и сортировка всей инфы в 3х каналах: tg, plaud, email",
-      "prio": ""
+      "prio": "must"
     },
     {
       "proj": "Avatar",
@@ -366,7 +366,7 @@
       "area": "Ironman",
       "area1": "General",
       "desc": "заработал медицинский дневник - полноценный сбор сырья",
-      "prio": ""
+      "prio": "must"
     },
     {
       "proj": "Avatar",
@@ -374,7 +374,7 @@
       "area": "Ironman",
       "area1": "General",
       "desc": "спортивный дневник перехехал на аватар",
-      "prio": ""
+      "prio": "must"
     },
     {
       "proj": "Avatar",
@@ -382,7 +382,7 @@
       "area": "GTD",
       "area1": "",
       "desc": "работает связка годовые цели-спринт",
-      "prio": ""
+      "prio": "must"
     },
     {
       "proj": "FrameDance",
@@ -398,7 +398,7 @@
       "area": "Business",
       "area1": "General",
       "desc": "сделан подход как к стартапу (кофаундер, инвестор)",
-      "prio": ""
+      "prio": "nice"
     },
     {
       "proj": "Collect",
@@ -406,7 +406,7 @@
       "area": "Profession",
       "area1": "General",
       "desc": "сервис развит и его могут использовать сторонние пользователи",
-      "prio": ""
+      "prio": "nice"
     },
     {
       "proj": "PM-RU_ОМК",
@@ -414,7 +414,7 @@
       "area": "Profession",
       "area1": "CMO",
       "desc": "портал работает полноценно, тиражируем",
-      "prio": ""
+      "prio": "must"
     },
     {
       "proj": "Sandbox",
@@ -422,7 +422,7 @@
       "area": "Profession",
       "area1": "CAIO",
       "desc": "описан с десяток кейсов как внутрь PM-RU, так и наружу",
-      "prio": ""
+      "prio": "nice"
     },
     {
       "proj": "AI-Doc",
@@ -430,7 +430,7 @@
       "area": "Ironman",
       "area1": "General",
       "desc": "AI собирает сырье из медицинского дневника, дает рекомендации и управляет мед треком",
-      "prio": ""
+      "prio": "nice"
     },
     {
       "proj": "AI-Trainer",
@@ -438,7 +438,7 @@
       "area": "Ironman",
       "area1": "General",
       "desc": "AI собирает спортивный дневник и управляет как полноценный тренер",
-      "prio": ""
+      "prio": "nice"
     },
     {
       "proj": "tg_powered by AI",
@@ -446,7 +446,7 @@
       "area": "Self",
       "area1": "Diary",
       "desc": "канал развился, постоянно ведется, нравится",
-      "prio": ""
+      "prio": "nice"
     },
     {
       "proj": "tg_born to be Novice",
@@ -454,7 +454,7 @@
       "area": "Dance",
       "area1": "WCS",
       "desc": "канал стартовал или подготовился к старту",
-      "prio": ""
+      "prio": "nice"
     }
   ]
 }
