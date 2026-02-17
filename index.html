@@ -337,6 +337,12 @@
     .gtd-login-form { max-width: 320px; margin-top: 16px; }
     .gtd-login-form input { width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 6px; margin-bottom: 12px; font-size: 0.9375rem; box-sizing: border-box; }
     .gtd-login-form input:focus { outline: none; border-color: var(--accent); }
+    .gtd-tabs { display: flex; gap: 4px; margin-bottom: 20px; border-bottom: 1px solid var(--border); }
+    .gtd-tab { padding: 10px 16px; font-size: 0.9375rem; background: none; border: none; border-bottom: 2px solid transparent; cursor: pointer; color: var(--text-muted); }
+    .gtd-tab:hover { color: var(--text); }
+    .gtd-tab.active { color: var(--accent); font-weight: 500; border-bottom-color: var(--accent); }
+    .gtd-panel { display: none; }
+    .gtd-panel.active { display: block; }
 
     /* Locked section overlay */
     .locked-content {
@@ -656,6 +662,7 @@
           `;
           const pdfBtn = document.getElementById('gtd-pdf-btn');
           if (pdfBtn) pdfBtn.onclick = exportGtdToPdf;
+          bindGtdTabs();
         }
         return;
       }
@@ -732,43 +739,96 @@
       const goalsByAreaRows = goalsByArea.map(g => `<tr><td>${escapeHtml(g.area)}</td><td>${escapeHtml(g.area1 || '-')}</td><td>${escapeHtml(g.desc || '-')}</td><td>${escapeHtml(g.prio || '-')}</td></tr>`).join('');
       const goalsByProjectRows = goalsByProject.map(g => `<tr><td>${escapeHtml(g.proj)}</td><td>${escapeHtml(g.proj1 || '-')}</td><td>${escapeHtml(g.area + (g.area1 ? ' / ' + g.area1 : ''))}</td><td>${escapeHtml(g.desc || '-')}</td><td>${escapeHtml(g.prio || '-')}</td></tr>`).join('');
 
+      let rawItems = [];
+      if (apiUrl) {
+        try {
+          const base = apiUrl.replace(/\/+$/, '');
+          const rRes = await fetch(base + '/api/rapa/raw?days=30').then(r => r.ok ? r.json() : { raw: [] });
+          rawItems = rRes.raw || [];
+        } catch (e) {}
+      }
+      const rawRows = rawItems.length ? rawItems.map(r => `<tr><td>${escapeHtml((r.title || r.content || '').slice(0,60))}</td><td>${escapeHtml(r.source || '-')}</td><td>${escapeHtml(r.created_at ? new Date(r.created_at).toLocaleDateString('ru-RU') : '-')}</td><td>${escapeHtml(r.rapa_stage || r.gtd_type || '-')}</td></tr>`).join('') : '<tr><td colspan="4" class="empty">Нет Raw. Укажи URL API в Collect. Raw приходит из Plaud, Email, TG.</td></tr>';
+
       return `
-        <p class="gtd-overview">5 баз: Projects, Areas, Resources, Raw (Inbox), Daily Log. Archive — статус внутри баз.</p>
-        <p><button type="button" class="gtd-login-btn" id="gtd-pdf-btn">Выгрузить в PDF</button></p>
-        <div id="gtd-export-content">
-        <h2>Goals 2026 по AREA</h2>
-        <div class="gtd-table-wrap">
-          <table class="gtd-table">
-            <thead><tr><th>Area</th><th>Sub</th><th>Description</th><th>Priority</th></tr></thead>
-            <tbody>${goalsByAreaRows}</tbody>
-          </table>
+        <div class="gtd-tabs">
+          <button type="button" class="gtd-tab active" data-tab="goals">ЦЕЛИ</button>
+          <button type="button" class="gtd-tab" data-tab="sprints">СПРИНТЫ</button>
+          <button type="button" class="gtd-tab" data-tab="metrics">МЕТРИКИ</button>
+          <button type="button" class="gtd-tab" data-tab="todo">ToDo</button>
         </div>
 
-        <h2>Goals 2026 по Projects</h2>
-        <div class="gtd-table-wrap">
-          <table class="gtd-table">
-            <thead><tr><th>Project</th><th>Sub</th><th>Area</th><th>Description</th><th>Priority</th></tr></thead>
-            <tbody>${goalsByProjectRows}</tbody>
-          </table>
+        <div id="gtd-panel-goals" class="gtd-panel active">
+          <p class="gtd-overview">Goals 2026, Areas, Projects. <button type="button" class="gtd-login-btn" id="gtd-pdf-btn">Выгрузить в PDF</button></p>
+          <div id="gtd-export-content">
+          <h2>Goals 2026 по AREA</h2>
+          <div class="gtd-table-wrap">
+            <table class="gtd-table">
+              <thead><tr><th>Area</th><th>Sub</th><th>Description</th><th>Priority</th></tr></thead>
+              <tbody>${goalsByAreaRows}</tbody>
+            </table>
+          </div>
+          <h2>Goals 2026 по Projects</h2>
+          <div class="gtd-table-wrap">
+            <table class="gtd-table">
+              <thead><tr><th>Project</th><th>Sub</th><th>Area</th><th>Description</th><th>Priority</th></tr></thead>
+              <tbody>${goalsByProjectRows}</tbody>
+            </table>
+          </div>
+          <h2>Areas</h2>
+          <div class="gtd-table-wrap">
+            <table class="gtd-table">
+              <thead><tr><th>Area</th><th>Sub-areas</th></tr></thead>
+              <tbody>${areasRows}</tbody>
+            </table>
+          </div>
+          <h2>Projects</h2>
+          <div class="gtd-table-wrap">
+            <table class="gtd-table">
+              <thead><tr><th>Name</th><th>Area</th><th>Status</th><th>Horizon</th><th>Impact</th><th>Due</th></tr></thead>
+              <tbody>${projectsRows}</tbody>
+            </table>
+          </div>
+          </div>
         </div>
 
-        <h2>Areas</h2>
-        <div class="gtd-table-wrap">
-          <table class="gtd-table">
-            <thead><tr><th>Area</th><th>Sub-areas</th></tr></thead>
-            <tbody>${areasRows}</tbody>
-          </table>
+        <div id="gtd-panel-sprints" class="gtd-panel">
+          <p class="gtd-overview">Работа с задачами по спринтам. Здесь будут спринты и задачи.</p>
+          <div class="gtd-table-wrap">
+            <table class="gtd-table">
+              <thead><tr><th>Спринт</th><th>Задачи</th><th>Статус</th></tr></thead>
+              <tbody><tr><td colspan="3" class="empty">Скоро появится</td></tr></tbody>
+            </table>
+          </div>
         </div>
 
-        <h2>Projects</h2>
-        <div class="gtd-table-wrap">
-          <table class="gtd-table">
-            <thead><tr><th>Name</th><th>Area</th><th>Status</th><th>Horizon</th><th>Impact</th><th>Due</th></tr></thead>
-            <tbody>${projectsRows}</tbody>
-          </table>
+        <div id="gtd-panel-metrics" class="gtd-panel">
+          <p class="gtd-overview">Метрики и дашборды.</p>
+          <h2>% выполнения годовых целей</h2>
+          <p class="empty">Скоро появится дашборд</p>
+          <h2>Выполнение задач по спринтам</h2>
+          <p class="empty">Скоро появится дашборд</p>
         </div>
+
+        <div id="gtd-panel-todo" class="gtd-panel">
+          <p class="gtd-overview">Raw из всех источников: Plaud, Email, TG. Сырьё для Assign.</p>
+          <div class="gtd-table-wrap">
+            <table class="gtd-table">
+              <thead><tr><th>Content</th><th>Source</th><th>Date</th><th>Stage</th></tr></thead>
+              <tbody>${rawRows}</tbody>
+            </table>
+          </div>
         </div>
       `;
+    }
+
+    function bindGtdTabs() {
+      document.querySelectorAll('.gtd-tab').forEach(tab => {
+        tab.onclick = () => {
+          const id = tab.dataset.tab;
+          document.querySelectorAll('.gtd-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === id));
+          document.querySelectorAll('.gtd-panel').forEach(p => p.classList.toggle('active', p.id === 'gtd-panel-' + id));
+        };
+      });
     }
 
     function exportGtdToPdf() {
