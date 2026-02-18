@@ -804,7 +804,8 @@
         const formul = sprintFormul(g, src, key, 'area');
         const prog = (src && src.progress != null) ? src.progress : (g.progress != null ? g.progress : '');
         const st = (src && src.status && statusLabels[src.status]) ? src.status : ((g.status && statusLabels[g.status]) ? g.status : 'не начинал');
-        return `<tr><td>${escapeHtml(g.area)}</td><td>${escapeHtml(g.area1 || '-')}</td><td class="gtd-cell-editable gtd-cell-text" contenteditable="true" data-key="${escapeHtml(key)}" data-type="area" title="Редактируемая ячейка">${escapeHtml(formul)}</td><td>${escapeHtml(g.prio || '-')}</td><td>${prog !== '' ? prog + '%' : '-'}</td><td class="gtd-cell-oneline" title="${escapeHtml(st)}">${escapeHtml(st)}</td></tr>`;
+        const name = goalName(key, 'area');
+        return `<tr><td class="gtd-cell-oneline" title="${escapeHtml(name)}">${escapeHtml(name)}</td><td>${escapeHtml(g.area)}</td><td>${escapeHtml(g.area1 || '-')}</td><td class="gtd-cell-editable gtd-cell-text" contenteditable="true" data-key="${escapeHtml(key)}" data-type="area" title="Редактируемая ячейка">${escapeHtml(formul)}</td><td>${escapeHtml(g.prio || '-')}</td><td>${prog !== '' ? prog + '%' : '-'}</td><td class="gtd-cell-oneline" title="${escapeHtml(st)}">${escapeHtml(st)}</td></tr>`;
       }).join('');
       const sprintsByProjectRows = proj1Q.map(g => {
         const key = goalKeyProject(g);
@@ -813,7 +814,8 @@
         const prog = (src && src.progress != null) ? src.progress : (g.progress != null ? g.progress : '');
         const st = (src && src.status && statusLabels[src.status]) ? src.status : ((g.status && statusLabels[g.status]) ? g.status : 'не начинал');
         const mvp = (g.mvp === 'Y' || g.mvp === 'y') ? 'Y' : 'N';
-        return `<tr><td>${escapeHtml(g.proj)}</td><td>${escapeHtml(g.proj1 || '-')}</td><td class="gtd-cell-editable gtd-cell-text" contenteditable="true" data-key="${escapeHtml(key)}" data-type="project" title="Редактируемая ячейка">${escapeHtml(formul)}</td><td>${escapeHtml(g.prio || '-')}</td><td>${prog !== '' ? prog + '%' : '-'}</td><td class="gtd-cell-oneline" title="${escapeHtml(st)}">${escapeHtml(st)}</td><td>${mvp}</td></tr>`;
+        const name = goalName(key, 'project');
+        return `<tr><td class="gtd-cell-oneline" title="${escapeHtml(name)}">${escapeHtml(name)}</td><td>${escapeHtml(g.proj)}</td><td>${escapeHtml(g.proj1 || '-')}</td><td class="gtd-cell-editable gtd-cell-text" contenteditable="true" data-key="${escapeHtml(key)}" data-type="project" title="Редактируемая ячейка">${escapeHtml(formul)}</td><td>${escapeHtml(g.prio || '-')}</td><td>${prog !== '' ? prog + '%' : '-'}</td><td class="gtd-cell-oneline" title="${escapeHtml(st)}">${escapeHtml(st)}</td><td>${mvp}</td></tr>`;
       }).join('');
 
       return `
@@ -865,14 +867,14 @@
           <h2>Goals 1Q2026 по AREA</h2>
           <div class="gtd-table-wrap">
             <table class="gtd-table">
-              <thead><tr><th>Area</th><th>Sub</th><th>Формулировка 1Q</th><th>Priority</th><th>Progress %</th><th>Status</th></tr></thead>
+              <thead><tr><th>Name</th><th>Area</th><th>Sub</th><th>Формулировка 1Q</th><th>Priority</th><th>Progress %</th><th>Status</th></tr></thead>
               <tbody id="gtd-sprints-area-tbody">${sprintsByAreaRows}</tbody>
             </table>
           </div>
           <h2>Goals 1Q2026 по Project</h2>
           <div class="gtd-table-wrap">
             <table class="gtd-table">
-              <thead><tr><th>Project</th><th>Sub</th><th>Формулировка 1Q</th><th>Priority</th><th>Progress %</th><th>Status</th><th>MVP done</th></tr></thead>
+              <thead><tr><th>Name</th><th>Project</th><th>Sub</th><th>Формулировка 1Q</th><th>Priority</th><th>Progress %</th><th>Status</th><th>MVP done</th></tr></thead>
               <tbody id="gtd-sprints-project-tbody">${sprintsByProjectRows}</tbody>
             </table>
           </div>
@@ -899,6 +901,7 @@
       `;
     }
 
+    function goalName(key, type) { return (goalNames[type] && goalNames[type][key]) || '-'; }
     function updateSprintsTbodies() {
       const statusLabels = { 'не начинал': 'не начинал', 'в процессе': 'в процессе', 'почти done': 'почти done', 'done': 'done' };
       const sprintFormul = (g, src, key, type) => (gtd1QState.customFormuls && gtd1QState.customFormuls[type + '|' + key]) || (src && src.formul) || g.formul || g.desc || '-';
@@ -910,7 +913,8 @@
         const formul = sprintFormul(g, src, key, 'area');
         const prog = (src && src.progress != null) ? src.progress : (g.progress != null ? g.progress : '');
         const st = (src && src.status && statusLabels[src.status]) ? src.status : ((g.status && statusLabels[g.status]) ? g.status : 'не начинал');
-        return `<tr><td>${escapeHtml(g.area)}</td><td>${escapeHtml(g.area1 || '-')}</td><td class="gtd-cell-editable gtd-cell-text" contenteditable="true" data-key="${escapeHtml(key)}" data-type="area" title="Редактируемая ячейка">${escapeHtml(formul)}</td><td>${escapeHtml(g.prio || '-')}</td><td>${prog !== '' ? prog + '%' : '-'}</td><td class="gtd-cell-oneline" title="${escapeHtml(st)}">${escapeHtml(st)}</td></tr>`;
+        const name = goalName(key, 'area');
+        return `<tr><td class="gtd-cell-oneline" title="${escapeHtml(name)}">${escapeHtml(name)}</td><td>${escapeHtml(g.area)}</td><td>${escapeHtml(g.area1 || '-')}</td><td class="gtd-cell-editable gtd-cell-text" contenteditable="true" data-key="${escapeHtml(key)}" data-type="area" title="Редактируемая ячейка">${escapeHtml(formul)}</td><td>${escapeHtml(g.prio || '-')}</td><td>${prog !== '' ? prog + '%' : '-'}</td><td class="gtd-cell-oneline" title="${escapeHtml(st)}">${escapeHtml(st)}</td></tr>`;
       }).join('');
       const projRows = proj1Q.map(g => {
         const key = goalKeyProject(g);
@@ -919,7 +923,8 @@
         const prog = (src && src.progress != null) ? src.progress : (g.progress != null ? g.progress : '');
         const st = (src && src.status && statusLabels[src.status]) ? src.status : ((g.status && statusLabels[g.status]) ? g.status : 'не начинал');
         const mvp = (g.mvp === 'Y' || g.mvp === 'y') ? 'Y' : 'N';
-        return `<tr><td>${escapeHtml(g.proj)}</td><td>${escapeHtml(g.proj1 || '-')}</td><td class="gtd-cell-editable gtd-cell-text" contenteditable="true" data-key="${escapeHtml(key)}" data-type="project" title="Редактируемая ячейка">${escapeHtml(formul)}</td><td>${escapeHtml(g.prio || '-')}</td><td>${prog !== '' ? prog + '%' : '-'}</td><td class="gtd-cell-oneline" title="${escapeHtml(st)}">${escapeHtml(st)}</td><td>${mvp}</td></tr>`;
+        const name = goalName(key, 'project');
+        return `<tr><td class="gtd-cell-oneline" title="${escapeHtml(name)}">${escapeHtml(name)}</td><td>${escapeHtml(g.proj)}</td><td>${escapeHtml(g.proj1 || '-')}</td><td class="gtd-cell-editable gtd-cell-text" contenteditable="true" data-key="${escapeHtml(key)}" data-type="project" title="Редактируемая ячейка">${escapeHtml(formul)}</td><td>${escapeHtml(g.prio || '-')}</td><td>${prog !== '' ? prog + '%' : '-'}</td><td class="gtd-cell-oneline" title="${escapeHtml(st)}">${escapeHtml(st)}</td><td>${mvp}</td></tr>`;
       }).join('');
       const areaTb = document.getElementById('gtd-sprints-area-tbody');
       const projTb = document.getElementById('gtd-sprints-project-tbody');
