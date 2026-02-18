@@ -10,6 +10,7 @@
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2/dist/chartjs-plugin-datalabels.min.js"></script>
   <style>
     :root {
       --bg: #fafafa;
@@ -1305,6 +1306,8 @@
       const gCount = goalsArea.length + goalsProj.length;
       const gAvg = gCount > 0 ? Math.round(gSum / gCount) : 0;
 
+      const chartGridOff = { x: { grid: { display: false } }, y: { grid: { display: false }, beginAtZero: true }, y1: { grid: { display: false }, position: 'right', min: 0, max: 100 } };
+      const chartDatalabels = { datalabels: { display: true, anchor: 'end', align: 'top', formatter: (v) => v } };
       destroyChart('gtd-chart-sprints-2026');
       const c1 = document.getElementById('gtd-chart-sprints-2026');
       if (c1) {
@@ -1313,11 +1316,11 @@
           data: {
             labels: ['Спринт 1','Спринт 2','Спринт 3','Спринт 4'],
             datasets: [
-              { label: 'задач', data: [s1.tasks,s2.tasks,s3.tasks,s4.taskCount], backgroundColor: 'rgba(35,131,226,0.6)' },
-              { label: '% выполнения', data: [s1.pct,s2.pct,s3.pct,s4.avgProg], type: 'line', borderColor: '#2383e2', backgroundColor: 'transparent', yAxisID: 'y1', tension: 0.2 }
+              { label: 'задач', data: [s1.tasks,s2.tasks,s3.tasks,s4.taskCount], backgroundColor: 'rgba(35,131,226,0.6)', datalabels: { formatter: (v) => v } },
+              { label: '% выполнения', data: [s1.pct,s2.pct,s3.pct,s4.avgProg], type: 'line', borderColor: '#2383e2', backgroundColor: 'transparent', yAxisID: 'y1', tension: 0.2, datalabels: { formatter: (v) => v + '%', anchor: 'end' } }
             ]
           },
-          options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true }, y1: { position: 'right', min: 0, max: 100 } } }
+          options: { responsive: true, maintainAspectRatio: false, scales: chartGridOff, plugins: chartDatalabels }
         });
       }
 
@@ -1327,10 +1330,10 @@
         gtdCharts['gtd-chart-quarter'] = new Chart(c2, {
           type: 'doughnut',
           data: {
-            labels: ['Выполнено ' + q.avgProg + '%','Осталось ' + (100 - q.avgProg) + '%'],
+            labels: ['Выполнено','Осталось'],
             datasets: [{ data: [q.avgProg, Math.max(0, 100 - q.avgProg)], backgroundColor: ['#2383e2','#e8e8e6'] }]
           },
-          options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' }, title: { display: true, text: q.taskCount + ' задач 1Q' } } }
+          options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' }, title: { display: true, text: q.taskCount + ' задач 1Q' }, datalabels: { display: true, color: '#fff', formatter: (v) => v > 5 ? v + '%' : '' } } }
         });
       }
 
@@ -1346,12 +1349,12 @@
           data: {
             labels: years.map(String),
             datasets: [
-              { label: 'задачи', data: avgTasks, backgroundColor: 'rgba(35,131,226,0.6)' },
-              { label: 'выполнено', data: avgDone, backgroundColor: 'rgba(35,131,226,0.3)' },
-              { label: '%', data: avgPct, type: 'line', borderColor: '#2383e2', backgroundColor: 'transparent', yAxisID: 'y1', tension: 0.2 }
+              { label: 'задачи', data: avgTasks, backgroundColor: 'rgba(35,131,226,0.6)', datalabels: { formatter: (v) => v } },
+              { label: 'выполнено', data: avgDone, backgroundColor: 'rgba(35,131,226,0.3)', datalabels: { formatter: (v) => v } },
+              { label: '%', data: avgPct, type: 'line', borderColor: '#2383e2', backgroundColor: 'transparent', yAxisID: 'y1', tension: 0.2, datalabels: { formatter: (v) => v + '%', anchor: 'end' } }
             ]
           },
-          options: { responsive: true, maintainAspectRatio: false, scales: { y: { stacked: false, beginAtZero: true }, y1: { position: 'right', min: 0, max: 100 } } }
+          options: { responsive: true, maintainAspectRatio: false, scales: chartGridOff, plugins: chartDatalabels }
         });
       }
 
@@ -1366,12 +1369,12 @@
           data: {
             labels: years.map(String),
             datasets: [
-              { label: 'задачи', data: goalsTasks, backgroundColor: 'rgba(35,131,226,0.6)' },
-              { label: 'выполнено', data: goalsDone, backgroundColor: 'rgba(35,131,226,0.3)' },
-              { label: '%', data: goalsPct, type: 'line', borderColor: '#2383e2', backgroundColor: 'transparent', yAxisID: 'y1', tension: 0.2 }
+              { label: 'задачи', data: goalsTasks, backgroundColor: 'rgba(35,131,226,0.6)', datalabels: { formatter: (v) => v } },
+              { label: 'выполнено', data: goalsDone, backgroundColor: 'rgba(35,131,226,0.3)', datalabels: { formatter: (v) => v } },
+              { label: '%', data: goalsPct, type: 'line', borderColor: '#2383e2', backgroundColor: 'transparent', yAxisID: 'y1', tension: 0.2, datalabels: { formatter: (v) => v + '%', anchor: 'end' } }
             ]
           },
-          options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true }, y1: { position: 'right', min: 0, max: 100 } } }
+          options: { responsive: true, maintainAspectRatio: false, scales: chartGridOff, plugins: chartDatalabels }
         });
       }
     }
