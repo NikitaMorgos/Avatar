@@ -341,6 +341,7 @@
     .gtd-table .gtd-col-desc { min-width: 280px; max-width: 480px; }
     .gtd-table .gtd-sprint4-total { font-weight: 600; background: var(--locked-bg); }
     .gtd-sprint4-table td, .gtd-sprint4-table th { vertical-align: top; line-height: 1.4; }
+    .gtd-table .gtd-sprint-total { font-weight: 600; background: var(--locked-bg); }
     .gtd-login-btn { display: inline-block; margin-top: 16px; padding: 10px 20px; background: var(--accent); color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.9375rem; }
     .gtd-login-btn:hover { background: var(--accent-hover); }
     .gtd-login-form { max-width: 320px; margin-top: 16px; }
@@ -675,6 +676,9 @@
           bindGtdTabs();
           bindGtd1Q();
           bindSprintsPanel();
+          const metricsBtn = document.getElementById('gtd-metrics-refresh-btn');
+          if (metricsBtn) metricsBtn.onclick = () => { saveSprint4FromDom(); updateSprint4Total(); updateSprintsTbodies(); updateMetrics(); };
+          updateMetrics();
         }
         return;
       }
@@ -722,6 +726,10 @@
       try { localStorage.setItem(GTD_1Q_KEY, JSON.stringify({ areaKeys: [...st.areaKeys], projectKeys: [...st.projectKeys], customFormuls: st.customFormuls||{}, manualLife: st.manualLife||[], manualDate: st.manualDate||[], sprint4Progress: st.sprint4Progress||{}, sprint4Status: st.sprint4Status||{} })); } catch(e) {}
     }
     let gtd1QState;
+
+    const METRICS_SPRINTS_2026_HIST = { s1: { tasks: 14, pct: 100 }, s2: { tasks: 5, pct: 100 }, s3: { tasks: 22, pct: 59 } };
+    const METRICS_SPRINTS_AVG_HIST = { 2019: { tasks: 9, done: 4, pct: 42 }, 2020: { tasks: 6, done: 3, pct: 59 }, 2021: { tasks: 2, done: 1, pct: 54 }, 2022: { tasks: 19, done: 7, pct: 35 }, 2023: { tasks: 16, done: 9, pct: 53 }, 2024: { tasks: 21, done: 14, pct: 66 }, 2025: { tasks: 10, done: 6, pct: 56 } };
+    const METRICS_GOALS_YEAR_HIST = { 2019: { tasks: 9, done: 4, pct: 42 }, 2020: { tasks: 6, done: 3, pct: 59 }, 2021: { tasks: 2, done: 1, pct: 54 }, 2022: { tasks: 19, done: 7, pct: 35 }, 2023: { tasks: 16, done: 9, pct: 53 }, 2024: { tasks: 21, done: 14, pct: 66 }, 2025: { tasks: 10, done: 6, pct: 56 } };
 
     const defaultGoalsByArea = [{"area":"Ironman","area1":"General","desc":"сплю в основном без подкаста. 7-8 часов","prio":"must"},{"area":"Ironman","area1":"General","desc":"провести комплексный чекап организма. задел чтоб поставить на рельсы","prio":"nice"},{"area":"Ironman","area1":"General","desc":"минимизировать влияние вируса герпеса","prio":"must"},{"area":"Ironman","area1":"General","desc":"средний объем активности не меньше 7:30","prio":"must"},{"area":"Ironman","area1":"General","desc":"болею меньше 1.2 дней в месяц в среднем","prio":"nice"},{"area":"Ironman","area1":"Run","desc":"выбежал 5 км из 23 минут","prio":"nice"},{"area":"Ironman","area1":"Swim","desc":"поучаствовал в заплыве","prio":"nice"},{"area":"Ironman","area1":"Swim","desc":"возобновить тренировки в бассейне TI-Online","prio":"must"},{"area":"Ironman","area1":"Swim","desc":"проплыл 1 км из 19 минут","prio":"nice"},{"area":"Ironman","area1":"Cycling","desc":"сходил на несколько тренировок Велобит","prio":"must"},{"area":"Ironman","area1":"Ski","desc":"опробовал флетфристайл на трассах","prio":"nice"},{"area":"Ironman","area1":"Ski","desc":"забронили каталку на 2027 с новым опытом","prio":"must"},{"area":"Ironman","area1":"Ski","desc":"поучаствовал в лыжном забеге","prio":"nice"},{"area":"Ironman","area1":"Ski","desc":"несколько раз погонял в парке с утра","prio":"must"},{"area":"Ironman","area1":"Yoga","desc":"пересобрать с AI трек фейсфит, начать делать","prio":"nice"},{"area":"Ironman","area1":"Yoga","desc":"завести трек с подводящими упражнениями к стойке на руках в пространстве, сделать несколько подходов","prio":"nice"},{"area":"Ironman","area1":"Yoga","desc":"пройти курс Animal Flow в Fitstars","prio":"must"},{"area":"Ironman","area1":"GPP","desc":"несколько подготовительных тренировок по выходу силой","prio":"nice"},{"area":"Ironman","area1":"GPP","desc":"сделал подъем переворотом 2 раза подряд","prio":"nice"},{"area":"Dance","area1":"WCS","desc":"заработать больше 2пойнтов в новисах","prio":"nice"},{"area":"Dance","area1":"WCS","desc":"поучаствовать как минимум в 1 международном ивенте","prio":"nice"},{"area":"Dance","area1":"WCS","desc":"внедрить практику кирпичики","prio":"must"},{"area":"Dance","area1":"WCS","desc":"пересобрать методику сампо (AI)","prio":"nice"},{"area":"Dance","area1":"WCS","desc":"пересобрать работу с рекапами","prio":"nice"},{"area":"Dance","area1":"WCS","desc":"выйти на новый уровень в развитии","prio":"must"},{"area":"Dance","area1":"WCS","desc":"продвинуться в свич-треке","prio":"nice"},{"area":"Family","area1":"General","desc":"обновили жилище (комнаты по-новому)","prio":"nice"},{"area":"Family","area1":"Katya","desc":"вернулись к треку 23-24 (свидания, психолог, планы)","prio":"must"},{"area":"Family","area1":"Darina","desc":"интересная поездка","prio":"nice"},{"area":"Family","area1":"Darina","desc":"сделали несколько подходов к будущей профессии","prio":"nice"},{"area":"Family","area1":"Darina","desc":"внес осмысленный вклад в выздоровление","prio":"must"},{"area":"Family","area1":"Miron","desc":"продолжить (может и развить) вечерние истории","prio":"must"},{"area":"Family","area1":"Miron","desc":"сделан подход к совместной спорт-активности","prio":"nice"},{"area":"Finance","area1":"","desc":"суммарная ЗП покрывает расходы, кредит и нефинансовые инвестиции","prio":"must"},{"area":"Finance","area1":"","desc":"среднемесячный финрез больше 60тр","prio":"nice"},{"area":"Finance","area1":"","desc":"ДВД-финрез >-426тр","prio":"nice"},{"area":"Finance","area1":"","desc":"разница между номинальными и фактическими активами < 1.5млн","prio":"nice"},{"area":"Business","area1":"General","desc":"доходы от FO+FB занимают значимую долю","prio":"nice"},{"area":"Business","area1":"Family Office","desc":"результаты 26 лучше 25","prio":"nice"},{"area":"Business","area1":"Family Business","desc":"появились устойцивые треки по бизнесам ","prio":"must"},{"area":"Profession","area1":"General","desc":"заметная трансформация CMO=>CAIO","prio":"must"},{"area":"Profession","area1":"General","desc":"суммарная удовлетворенность от работ выше 65","prio":"nice"},{"area":"Profession","area1":"CAIO","desc":"прокачался в новом качестве CEO AI-бизнесов","prio":"nice"},{"area":"Profession","area1":"CMO","desc":"заметное улучшение качества CMO","prio":"nice"},{"area":"Self","area1":"General","desc":"меньше быстрого контента, быстрых углеводов, быстрых стимулов","prio":"must"},{"area":"Self","area1":"Diary","desc":"подготовил трек к старту нового тг-канала","prio":"nice"},{"area":"Self","area1":"Diary","desc":"фотки за год собираются в разные доски","prio":"nice"},{"area":"Self","area1":"Diary","desc":"обновленный подход к летописи","prio":"nice"},{"area":"GTD","area1":"","desc":"цели 50, выполнены > 67%","prio":"must"},{"area":"GTD","area1":"","desc":"цели 30, выполнены > 67%","prio":"nice"},{"area":"Education","area1":"","desc":"стартовать стрим, с обучением, где AI выступает и методологом и преподавателем","prio":"nice"},{"area":"Network","area1":"","desc":"начать заводить новый круг знакомств в новом амплуа","prio":"nice"},{"area":"Aesthetics","area1":"","desc":"поисследовать направление архитектуры конструктивизма (как дом наркомфина, только пошире)","prio":"nice"},{"area":"Aesthetics","area1":"","desc":"прочитать пару-тройку хорошей художественной лит-ры","prio":"nice"},{"area":"Music","area1":"","desc":"пересобрать трек с гитарой на Аватаре и продолжить","prio":"nice"},{"area":"Music","area1":"","desc":"поисследовать возможности для Льва Штыка","prio":"nice"},{"area":"English","area1":"","desc":"восстановить стрим на подходящем контенте (музыка, AI, wcs)","prio":"nice"}];
     const defaultSprints1Q2026 = { byArea: [{"area":"Ironman","area1":"General","desc":"средний объем активности не меньше 7:30","prio":"must","formul":"средний объем активности в феврале не меньше 7:30"},{"area":"Ironman","area1":"Ski","desc":"поучаствовал в лыжном забеге","prio":"nice","formul":"пробежал SkiGrom 28 февраля"},{"area":"Ironman","area1":"Ski","desc":"несколько раз погонял в парке с утра","prio":"must","formul":"2 раза сгонял на тренировку в парк"},{"area":"Ironman","area1":"Yoga","desc":"пройти курс Animal Flow в Fitstars","prio":"must","formul":"сделал 3 подхода (повторил старые) из курса"},{"area":"Dance","area1":"WCS","desc":"внедрить практику кирпичики","prio":"must","formul":"сделал 3 подхода с кирпичиками"},{"area":"Dance","area1":"WCS","desc":"пересобрать работу с рекапами","prio":"nice","formul":"залил несколько настоящих рекапов и отсортировал их в ЛК"},{"area":"Family","area1":"Katya","desc":"вернулись к треку 23-24 (свидания, психолог, планы)","prio":"must","formul":"2 подхода свидания"},{"area":"Family","area1":"Darina","desc":"внес осмысленный вклад в выздоровление","prio":"must","formul":"подумал, как лучше поучаствовать"},{"area":"Family","area1":"Miron","desc":"продолжить (может и развить) вечерние истории","prio":"must","formul":"продолжил ежедневные истории, внедрил небольшое разнообразие"},{"area":"Finance","area1":"","desc":"суммарная ЗП покрывает расходы, кредит и нефинансовые инвестиции","prio":"must","formul":"по итогам 1Q ЗП покрывает все расходы"},{"area":"Business","area1":"Family Business","desc":"появились устойцивые треки по бизнесам ","prio":"must","formul":"есть 1 трек по Главе, есть 2 подхода по FD и по TI-Online"},{"area":"GTD","area1":"","desc":"цели 30, выполнены > 67%","prio":"must","formul":"в среднем по 3м спринтам выполняется цели=30, выполнение >67%"}], byProject: [{"proj":"Glava","proj1":"","area":"Business","area1":"Family Business","desc":"сервис запустился в коммерческую эксплуатацию","prio":"must","formul":"довели до MVP в составе 3х фаундеров"},{"proj":"Avatar","proj1":"GTD","area":"GTD","area1":"","desc":"работает связка годовые цели-спринт","prio":"must","formul":"обкатка связки на 3х спринтах"},{"proj":"FrameDance","proj1":"startup","area":"Business","area1":"General","desc":"сделан подход как к стартапу (кофаундер, инвестор)","prio":"nice","formul":"есть лендинг, часть MVP сделал сам, постучался к 2-3 кофаундерам"},{"proj":"PM-RU_ОМК","proj1":"","area":"Profession","area1":"CMO","desc":"портал работает полноценно, тиражируем","prio":"must","formul":"есть разделы-константы, заработал mail/PA, сотрудники пользуются этим флоу"}] };
@@ -950,11 +958,48 @@
         </div>
 
         <div id="gtd-panel-metrics" class="gtd-panel">
-          <p class="gtd-overview">Метрики и дашборды.</p>
-          <h2>% выполнения годовых целей</h2>
-          <p class="empty">Скоро появится дашборд</p>
+          <p class="gtd-overview">Метрики и дашборды. <button type="button" class="gtd-login-btn" id="gtd-metrics-refresh-btn">Обновить</button></p>
           <h2>Выполнение задач по спринтам</h2>
-          <p class="empty">Скоро появится дашборд</p>
+          <h3>Спринты 2026</h3>
+          <div class="gtd-table-wrap">
+            <table class="gtd-table gtd-metrics-table">
+              <thead><tr><th></th><th>Спринт 1</th><th>Спринт 2</th><th>Спринт 3</th><th>Спринт 4</th></tr></thead>
+              <tbody>
+                <tr><td>задач</td><td id="m-s1-tasks">14</td><td id="m-s2-tasks">5</td><td id="m-s3-tasks">22</td><td id="m-s4-tasks">-</td></tr>
+                <tr><td>% выполнения</td><td id="m-s1-pct">100%</td><td id="m-s2-pct">100%</td><td id="m-s3-pct">59%</td><td id="m-s4-pct">-</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <h3>Квартал (1Q)</h3>
+          <div class="gtd-table-wrap">
+            <table class="gtd-table gtd-metrics-table">
+              <tbody><tr><td>задач</td><td id="m-q-tasks">-</td></tr><tr><td>% выполнения</td><td id="m-q-pct">-</td></tr></tbody>
+            </table>
+          </div>
+          <h3>Спринты_среднее</h3>
+          <div class="gtd-table-wrap">
+            <table class="gtd-table gtd-metrics-table" id="gtd-metrics-sprints-avg">
+              <thead><tr><th></th><th>2019</th><th>2020</th><th>2021</th><th>2022</th><th>2023</th><th>2024</th><th>2025</th><th>2026</th></tr></thead>
+              <tbody>
+                <tr><td>цели_спринты</td><td colspan="9"></td></tr>
+                <tr><td>задачи</td><td>9</td><td>6</td><td>2</td><td>19</td><td>16</td><td>21</td><td>10</td><td id="m-avg-2026-tasks">-</td></tr>
+                <tr><td>выполнено</td><td>4</td><td>3</td><td>1</td><td>7</td><td>9</td><td>14</td><td>6</td><td id="m-avg-2026-done">-</td></tr>
+                <tr><td>выполнение</td><td>42%</td><td>59%</td><td>54%</td><td>35%</td><td>53%</td><td>66%</td><td>56%</td><td id="m-avg-2026-pct">-</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <h2>Выполнение годовых целей</h2>
+          <div class="gtd-table-wrap">
+            <table class="gtd-table gtd-metrics-table" id="gtd-metrics-goals-year">
+              <thead><tr><th></th><th>2019</th><th>2020</th><th>2021</th><th>2022</th><th>2023</th><th>2024</th><th>2025</th><th>2026</th></tr></thead>
+              <tbody>
+                <tr><td>цели_год</td><td colspan="9"></td></tr>
+                <tr><td>задачи</td><td>9</td><td>6</td><td>2</td><td>19</td><td>16</td><td>21</td><td>10</td><td id="m-year-2026-tasks">-</td></tr>
+                <tr><td>выполнено</td><td>4</td><td>3</td><td>1</td><td>7</td><td>9</td><td>14</td><td>6</td><td id="m-year-2026-done">-</td></tr>
+                <tr><td>выполнение</td><td>42%</td><td>59%</td><td>54%</td><td>35%</td><td>53%</td><td>66%</td><td>56%</td><td id="m-year-2026-pct">-</td></tr>
+              </tbody>
+            </table>
+          </div>
         </div>
 
         <div id="gtd-panel-todo" class="gtd-panel">
@@ -994,10 +1039,17 @@
         const name = goalName(key, 'project');
         return `<tr><td class="gtd-cell-oneline" title="${escapeHtml(name)}">${escapeHtml(name)}</td><td>${escapeHtml(g.proj)}</td><td>${escapeHtml(g.proj1 || '-')}</td><td class="gtd-cell-editable gtd-cell-text" contenteditable="true" data-key="${escapeHtml(key)}" data-type="project" title="Редактируемая ячейка">${escapeHtml(formul)}</td><td>${escapeHtml(g.prio || '-')}</td><td>${prog !== '' ? prog + '%' : '-'}</td><td class="gtd-cell-oneline" title="${escapeHtml(st)}">${escapeHtml(st)}</td><td>${mvp}</td></tr>`;
       }).join('');
+      const parseProg = v => { const n = parseFloat(String(v||'').replace(/%/g,'')); return isNaN(n) ? 0 : n; };
+      let areaSum = 0; area1Q.forEach(g => { const src = defaultSprints1Q2026.byArea.find(a => goalKeyArea(a) === goalKeyArea(g)); const v = (src && src.progress != null ? src.progress : g.progress) || ''; areaSum += parseProg(v); });
+      let projSum = 0; proj1Q.forEach(g => { const src = defaultSprints1Q2026.byProject.find(a => goalKeyProject(a) === goalKeyProject(g)); const v = (src && src.progress != null ? src.progress : g.progress) || ''; projSum += parseProg(v); });
+      const areaCnt = area1Q.length, projCnt = proj1Q.length;
+      const areaAvg = areaCnt > 0 ? Math.round(areaSum / areaCnt) : 0, projAvg = projCnt > 0 ? Math.round(projSum / projCnt) : 0;
+      const areaTotalRow = `<tr class="gtd-sprint-total"><td colspan="4">Total</td><td></td><td>${areaCnt} задач</td><td>${areaAvg}%</td></tr>`;
+      const projTotalRow = `<tr class="gtd-sprint-total"><td colspan="4">Total</td><td></td><td>${projCnt} задач</td><td>${projAvg}%</td><td></td></tr>`;
       const areaTb = document.getElementById('gtd-sprints-area-tbody');
       const projTb = document.getElementById('gtd-sprints-project-tbody');
-      if (areaTb) areaTb.innerHTML = areaRows;
-      if (projTb) projTb.innerHTML = projRows;
+      if (areaTb) areaTb.innerHTML = areaRows + areaTotalRow;
+      if (projTb) projTb.innerHTML = projRows + projTotalRow;
       bindGtdEditableFormuls();
     }
     function sync1QFromCheckboxes() {
@@ -1008,6 +1060,7 @@
       saveGtd1QState(gtd1QState);
       updateSprintsTbodies();
       updateSprint4Table();
+      updateMetrics();
     }
     function bindGtdEditableFormuls() {
       document.querySelectorAll('.gtd-cell-editable[contenteditable="true"]').forEach(cell => {
@@ -1194,11 +1247,66 @@
       });
       saveGtd1QState(gtd1QState);
     }
+    function computeSprint4Totals() {
+      const area1Q = defaultGoalsByArea.filter(g => gtd1QState.areaKeys.has(goalKeyArea(g)));
+      const proj1Q = defaultGoalsByProject.filter(g => gtd1QState.projectKeys.has(goalKeyProject(g)));
+      const manualLife = gtd1QState.manualLife || [];
+      const manualDate = gtd1QState.manualDate || [];
+      const getSprint4Prog = (rowId) => (gtd1QState.sprint4Progress && gtd1QState.sprint4Progress[rowId]) != null ? String(gtd1QState.sprint4Progress[rowId]) : '';
+      const parseProg = v => { const n = parseFloat(String(v||'').replace(/%/g,'')); return isNaN(n) ? null : n; };
+      let sumProg = 0;
+      const addProg = v => { const n = parseProg(v); sumProg += (n != null ? n : 0); };
+      area1Q.forEach(g => { const k = 'area|' + goalKeyArea(g); const src = defaultSprints1Q2026.byArea.find(a => goalKeyArea(a) === goalKeyArea(g)); const v = getSprint4Prog(k) || (src && src.progress != null ? src.progress : g.progress); addProg(v); });
+      proj1Q.forEach(g => { const k = 'project|' + goalKeyProject(g); const src = defaultSprints1Q2026.byProject.find(a => goalKeyProject(a) === goalKeyProject(g)); const v = getSprint4Prog(k) || (src && src.progress != null ? src.progress : g.progress); addProg(v); });
+      manualLife.forEach(m => addProg(m.progress));
+      manualDate.forEach(m => addProg(m.progress));
+      const taskCount = area1Q.length + proj1Q.length + manualLife.length + manualDate.length;
+      const avgProg = taskCount > 0 ? Math.round(sumProg / taskCount) : 0;
+      return { taskCount, avgProg };
+    }
+    function computeQuarterTotals() {
+      const area1Q = defaultGoalsByArea.filter(g => gtd1QState.areaKeys.has(goalKeyArea(g)));
+      const proj1Q = defaultGoalsByProject.filter(g => gtd1QState.projectKeys.has(goalKeyProject(g)));
+      const parseProg = v => { const n = parseFloat(String(v||'').replace(/%/g,'')); return isNaN(n) ? null : n; };
+      let sumProg = 0;
+      area1Q.forEach(g => { const src = defaultSprints1Q2026.byArea.find(a => goalKeyArea(a) === goalKeyArea(g)); const v = (src && src.progress != null ? src.progress : g.progress) || ''; const n = parseProg(v); sumProg += (n != null ? n : 0); });
+      proj1Q.forEach(g => { const src = defaultSprints1Q2026.byProject.find(a => goalKeyProject(a) === goalKeyProject(g)); const v = (src && src.progress != null ? src.progress : g.progress) || ''; const n = parseProg(v); sumProg += (n != null ? n : 0); });
+      const taskCount = area1Q.length + proj1Q.length;
+      const avgProg = taskCount > 0 ? Math.round(sumProg / taskCount) : 0;
+      return { taskCount, avgProg };
+    }
+    function updateMetrics() {
+      const s4 = computeSprint4Totals();
+      const q = computeQuarterTotals();
+      const el = id => document.getElementById(id);
+      if (el('m-s4-tasks')) el('m-s4-tasks').textContent = s4.taskCount;
+      if (el('m-s4-pct')) el('m-s4-pct').textContent = s4.avgProg + '%';
+      if (el('m-q-tasks')) el('m-q-tasks').textContent = q.taskCount;
+      if (el('m-q-pct')) el('m-q-pct').textContent = q.avgProg + '%';
+      const s1 = METRICS_SPRINTS_2026_HIST.s1, s2 = METRICS_SPRINTS_2026_HIST.s2, s3 = METRICS_SPRINTS_2026_HIST.s3;
+      const totTasks = s1.tasks + s2.tasks + s3.tasks + s4.taskCount;
+      const weightedPct = totTasks > 0 ? Math.round((s1.tasks*s1.pct + s2.tasks*s2.pct + s3.tasks*s3.pct + s4.taskCount*s4.avgProg) / totTasks) : 0;
+      const done2026 = Math.round(totTasks * weightedPct / 100);
+      if (el('m-avg-2026-tasks')) el('m-avg-2026-tasks').textContent = totTasks;
+      if (el('m-avg-2026-done')) el('m-avg-2026-done').textContent = done2026;
+      if (el('m-avg-2026-pct')) el('m-avg-2026-pct').textContent = weightedPct + '%';
+      const goalsArea = defaultGoalsByArea, goalsProj = defaultGoalsByProject;
+      let gSum = 0;
+      goalsArea.forEach(g => { const n = parseFloat(String(g.progress||'').replace(/%/g,'')); gSum += isNaN(n) ? 0 : n; });
+      goalsProj.forEach(g => { const n = parseFloat(String(g.progress||'').replace(/%/g,'')); gSum += isNaN(n) ? 0 : n; });
+      const gCount = goalsArea.length + goalsProj.length;
+      const gAvg = gCount > 0 ? Math.round(gSum / gCount) : 0;
+      const gDone = Math.round(gCount * gAvg / 100);
+      if (el('m-year-2026-tasks')) el('m-year-2026-tasks').textContent = gCount;
+      if (el('m-year-2026-done')) el('m-year-2026-done').textContent = gDone;
+      if (el('m-year-2026-pct')) el('m-year-2026-pct').textContent = gAvg + '%';
+    }
     function refreshSprints() {
       saveSprint4FromDom();
       updateSprint4Total();
       bindSprint4Editable();
       updateSprintsTbodies();
+      updateMetrics();
     }
     function addSprint4LifeRow() {
       gtd1QState.manualLife = gtd1QState.manualLife || [];
