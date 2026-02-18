@@ -127,6 +127,18 @@ def init_db() -> None:
             );
             CREATE INDEX IF NOT EXISTS idx_raw_user_created ON raw(user_id, created_at);
         """)
+        # Миграция: media_type для collect_entries (photo | video)
+        try:
+            conn.execute("ALTER TABLE collect_entries ADD COLUMN media_type TEXT DEFAULT 'photo'")
+            logger.info("Added media_type column to collect_entries")
+        except sqlite3.OperationalError:
+            pass
+        # Миграция: media_type для fallback_photos
+        try:
+            conn.execute("ALTER TABLE fallback_photos ADD COLUMN media_type TEXT DEFAULT 'photo'")
+            logger.info("Added media_type column to fallback_photos")
+        except sqlite3.OperationalError:
+            pass
         # Миграция: tags для raw (если таблица уже существовала без колонки)
         try:
             conn.execute("ALTER TABLE raw ADD COLUMN tags TEXT")
@@ -136,30 +148,32 @@ def init_db() -> None:
     logger.info("DB initialized: %s", DB_PATH)
 
 
-def save_entry(user_id: int, chat_id: int, message_id: int, photo_file_id: str, comment: str | None) -> int:
-    """Сохраняет запись в collect_entries. Возвращает id."""
+def save_entry(
+    user_id: int, chat_id: int, message_id: int, file_id: str, comment: str | None, media_type: str = "photo"
+) -> int:
+    """Сохраняет запись в collect_entries. media_type: 'photo' | 'video'. Возвращает id."""
     created_at = datetime.utcnow().isoformat()
     with sqlite3.connect(DB_PATH) as conn:
         cur = conn.execute(
             """
-            INSERT INTO collect_entries (user_id, chat_id, message_id, photo_file_id, photo_file_path, comment, created_at, tags, published_to_channel)
-            VALUES (?, ?, ?, ?, NULL, ?, ?, NULL, 0)
+            INSERT INTO collect_entries (user_id, chat_id, message_id, photo_file_id, photo_file_path, comment, created_at, tags, published_to_channel, media_type)
+            VALUES (?, ?, ?, ?, NULL, ?, ?, NULL, 0, ?)
             """,
-            (user_id, chat_id, message_id, photo_file_id, comment or "", created_at),
+            (user_id, chat_id, message_id, file_id, comment or "", created_at, media_type),
         )
         rowid = cur.lastrowid
     logger.info("Saved entry: id=%s user=%s chat=%s msg=%s", rowid, user_id, chat_id, message_id)
     return rowid
 
 
-def get_unpublished_entries() -> list[tuple[int, str, str | None]]:
-    """Возвращает [(id, photo_file_id, comment), ...] для неопубликованных записей."""
+def get_unpublished_entries() -> list[tuple[int, str, str | None, str]]:
+    """Возвращает [(id, file_id, comment, media_type), ...] для неопубликованных записей."""
     with sqlite3.connect(DB_PATH) as conn:
         conn.row_factory = sqlite3.Row
         rows = conn.execute(
-            "SELECT id, photo_file_id, comment FROM collect_entries WHERE published_to_channel = 0 ORDER BY id"
+            "SELECT id, photo_file_id, comment, COALESCE(media_type, 'photo') as media_type FROM collect_entries WHERE published_to_channel = 0 ORDER BY id"
         ).fetchall()
-    return [(r["id"], r["photo_file_id"], r["comment"] or None) for r in rows]
+    return [(r["id"], r["photo_file_id"], r["comment"] or None, r["media_type"] or "photo") for r in rows]
 
 
 def mark_published(entry_id: int) -> None:
@@ -275,13 +289,13 @@ def cancel_entry(entry_id: int, user_id: int) -> bool:
 
 # --- Заготовки (fallback) ---
 
-def add_fallback(user_id: int, photo_file_id: str) -> int:
-    """Добавляет фото в заготовки. Возвращает id."""
+def add_fallback(user_id: int, file_id: str, media_type: str = "photo") -> int:
+    """Добавляет фото/видео в заготовки. media_type: 'photo' | 'video'. Возвращает id."""
     created_at = datetime.utcnow().isoformat()
     with sqlite3.connect(DB_PATH) as conn:
         cur = conn.execute(
-            "INSERT INTO fallback_photos (user_id, photo_file_id, created_at, used_at) VALUES (?, ?, ?, NULL)",
-            (user_id, photo_file_id, created_at),
+            "INSERT INTO fallback_photos (user_id, photo_file_id, created_at, used_at, media_type) VALUES (?, ?, ?, NULL, ?)",
+            (user_id, file_id, created_at, media_type),
         )
         return cur.lastrowid
 
@@ -299,16 +313,16 @@ def get_fallback_unused_count_for_user(user_id: int) -> int:
         ).fetchone()[0]
 
 
-def get_random_unused_fallback() -> tuple[int, int, str] | None:
-    """Возвращает (id, user_id, photo_file_id) или None."""
+def get_random_unused_fallback() -> tuple[int, int, str, str] | None:
+    """Возвращает (id, user_id, file_id, media_type) или None."""
     with sqlite3.connect(DB_PATH) as conn:
         conn.row_factory = sqlite3.Row
         row = conn.execute(
-            "SELECT id, user_id, photo_file_id FROM fallback_photos WHERE used_at IS NULL ORDER BY RANDOM() LIMIT 1"
+            "SELECT id, user_id, photo_file_id, COALESCE(media_type, 'photo') as media_type FROM fallback_photos WHERE used_at IS NULL ORDER BY RANDOM() LIMIT 1"
         ).fetchone()
     if not row:
         return None
-    return (row["id"], row["user_id"], row["photo_file_id"])
+    return (row["id"], row["user_id"], row["photo_file_id"], row["media_type"] or "photo")
 
 
 def mark_fallback_used(fallback_id: int) -> None:
@@ -324,6 +338,16 @@ def count_photos_sent_today_by_user(user_id: int) -> int:
             "SELECT COUNT(*) FROM collect_entries WHERE user_id = ? AND created_at >= ?",
             (user_id, today_start),
         ).fetchone()[0]
+
+
+async def _post_media_to_channel(
+    bot: Bot, file_id: str, caption: str | None, media_type: str = "photo"
+) -> None:
+    """Публикует фото или видео в канал."""
+    if media_type == "video":
+        await bot.send_video(chat_id=CHANNEL_ID, video=file_id, caption=caption)
+    else:
+        await bot.send_photo(chat_id=CHANNEL_ID, photo=file_id, caption=caption)
 
 
 def get_owner_user_id() -> int | None:
@@ -389,10 +413,8 @@ async def on_photo(message: Message, bot: Bot) -> None:
             else:
                 # Мгновенный постинг
                 try:
-                    await bot.send_photo(
-                        chat_id=CHANNEL_ID,
-                        photo=photo_file_id,
-                        caption=comment if comment else None,
+                    await _post_media_to_channel(
+                        bot, photo_file_id, comment if comment else None, media_type="photo"
                     )
                     logger.info("Posted to channel: %s", CHANNEL_ID)
                     mark_published(rowid)
@@ -409,6 +431,74 @@ async def on_photo(message: Message, bot: Bot) -> None:
             await message.reply("Записал твой день ✓")
     except Exception as e:
         logger.exception("Error saving entry: %s", e)
+        await message.reply("Не удалось сохранить. Попробуй позже.")
+
+
+async def on_video(message: Message, bot: Bot) -> None:
+    """Обработчик: видео с подписью или без. Постит в канал как фото."""
+    user_id = message.from_user.id if message.from_user else 0
+    chat_id = message.chat.id
+    message_id = message.message_id
+    comment = message.caption or ""
+
+    video = message.video
+    if not video:
+        await message.reply("Не вижу видео. Отправь видео с подписью или без.")
+        return
+
+    video_file_id = video.file_id
+
+    # Режим «добавляю заготовки»
+    if user_id in _adding_stock:
+        add_fallback(user_id, video_file_id, media_type="video")
+        n = get_fallback_unused_count_for_user(user_id)
+        await message.reply(f"Добавил видео в заготовки ✓ Осталось заготовок: {n}. Ещё фото/видео или /done — закончить.")
+        return
+
+    # Режим «добавляю в Raw» или подпись #raw
+    is_raw = user_id in _adding_raw or (comment and re.search(r"#raw\b", comment, re.I))
+    if is_raw:
+        content = re.sub(r"#raw\b", "", comment, flags=re.I).strip() if comment else ""
+        cleaned, tags = extract_raw_tags(content)
+        raw_id = save_raw(
+            user_id, chat_id, cleaned or "🎬 Видео", source="Telegram",
+            metadata={"video_file_id": video_file_id}, tags=tags or None
+        )
+        tags_hint = f" #{','.join(tags)}" if tags else ""
+        suffix = " Ещё фото/видео или /done — закончить." if user_id in _adding_raw else ""
+        text = f"✓ В Raw #%s%s%s" % (raw_id, tags_hint, suffix)
+        kb = build_raw_tag_keyboard(raw_id, exclude_tags=tags) if not tags else None
+        await message.reply(text, reply_markup=kb)
+        return
+
+    try:
+        rowid = save_entry(user_id, chat_id, message_id, video_file_id, comment, media_type="video")
+        if CHANNEL_ID:
+            if POST_SCHEDULE_TIME:
+                await message.reply(
+                    f"Записал твой день ✓ Опубликую в канал в {POST_SCHEDULE_TIME}. "
+                    "Сейчас — нажми /postnow в меню."
+                )
+            else:
+                try:
+                    await _post_media_to_channel(
+                        bot, video_file_id, comment if comment else None, media_type="video"
+                    )
+                    logger.info("Posted video to channel: %s", CHANNEL_ID)
+                    mark_published(rowid)
+                    await message.reply("Записал твой день и опубликовал видео в канал ✓")
+                except Exception as ch_err:
+                    logger.exception("Channel post failed: %s", ch_err)
+                    await message.reply(
+                        f"Записал в БД, но не удалось опубликовать в канал.\n"
+                        f"Ошибка: {type(ch_err).__name__}: {ch_err}\n\n"
+                        "Проверь: бот админ с правом «Post messages»? /testchannel — тест."
+                    )
+                    return
+        else:
+            await message.reply("Записал твой день ✓")
+    except Exception as e:
+        logger.exception("Error saving video entry: %s", e)
         await message.reply("Не удалось сохранить. Попробуй позже.")
 
 
@@ -431,11 +521,11 @@ async def cmd_diary(message: Message) -> None:
 
 
 async def cmd_rawphoto(message: Message) -> None:
-    """Режим: следующие фото идут в Raw. /done — выйти."""
+    """Режим: следующие фото/видео идут в Raw. /done — выйти."""
     global _adding_raw
     user_id = message.from_user.id if message.from_user else 0
     _adding_raw.add(user_id)
-    await message.reply("Режим Raw: следующие фото — в Inbox. /done — закончить.")
+    await message.reply("Режим Raw: следующие фото/видео — в Inbox. /done — закончить.")
 
 
 async def cmd_raw(message: Message) -> None:
@@ -504,7 +594,7 @@ async def cmd_start(message: Message) -> None:
         "Привет. Отправь фото с подписью — я сохраню его как срез дня.\n\n"
         "Один день — одна (или несколько) фоток. Буду использовать их для канала, досок и обзоров."
         f"{schedule_hint}\n\n"
-        "Фото → Collect (канал). Фото с #raw или /rawphoto → Raw (Inbox).\n"
+        "Фото/видео → Collect (канал). Фото/видео с #raw или /rawphoto → Raw (Inbox).\n"
         "Теги: /diary или кнопки после сохранения в Raw.\n"
         "RAPA: Raw раскладывается по слоям (Assign). /review daily|weekly|monthly — обзоры.\n\n"
         "/postnow — опубликовать сейчас\n"
@@ -583,10 +673,10 @@ async def run_fallback_check(bot: Bot) -> None:
         except Exception:
             pass
         return
-    fallback_id, owner_id, photo_file_id = row
+    fallback_id, owner_id, file_id, media_type = row
     mark_fallback_used(fallback_id)  # Сразу помечаем — чтобы другие экземпляры не постили то же
     try:
-        await bot.send_photo(chat_id=CHANNEL_ID, photo=photo_file_id, caption=None)
+        await _post_media_to_channel(bot, file_id, None, media_type)
         remaining = get_fallback_unused_count_for_user(owner_id)
         await bot.send_message(
             chat_id=owner_id,
@@ -615,14 +705,10 @@ async def run_scheduled_post(bot: Bot) -> None:
     if not entries:
         logger.info("Scheduled post: nothing to publish")
         return
-    for eid, photo_id, caption in entries:
+    for eid, file_id, caption, media_type in entries:
         mark_published(eid)  # Сразу помечаем — чтобы другие экземпляры бота не постили то же
         try:
-            await bot.send_photo(
-                chat_id=CHANNEL_ID,
-                photo=photo_id,
-                caption=caption,
-            )
+            await _post_media_to_channel(bot, file_id, caption, media_type)
             logger.info("Scheduled post: published entry id=%s", eid)
         except Exception as ex:
             logger.exception("Scheduled post failed for id=%s: %s", eid, ex)
@@ -854,6 +940,7 @@ def main() -> None:
     dp.message.register(cmd_testchannel, Command("testchannel"))
     dp.message.register(on_forwarded_from_channel, F.forward_origin)  # до on_photo!
     dp.message.register(on_photo, F.photo)
+    dp.message.register(on_video, F.video)
     dp.message.register(on_text_to_raw, F.text)  # текст/ссылки → Raw
 
     # Планировщик: постинг, fallback, ежедневный RAPA-обзор
