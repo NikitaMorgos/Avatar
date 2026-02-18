@@ -840,6 +840,13 @@
         const name = goalName(key, 'project');
         return `<tr><td class="gtd-cell-oneline" title="${escapeHtml(name)}">${escapeHtml(name)}</td><td>${escapeHtml(g.proj)}</td><td>${escapeHtml(g.proj1 || '-')}</td><td class="gtd-cell-editable gtd-cell-text" contenteditable="true" data-key="${escapeHtml(key)}" data-type="project" title="Редактируемая ячейка">${escapeHtml(formul)}</td><td>${escapeHtml(g.prio || '-')}</td><td>${prog !== '' ? prog + '%' : '-'}</td><td class="gtd-cell-oneline" title="${escapeHtml(st)}">${escapeHtml(st)}</td><td>${mvp}</td></tr>`;
       }).join('');
+      const parseProg1Q = v => { const n = parseFloat(String(v||'').replace(/%/g,'')); return isNaN(n) ? 0 : n; };
+      let areaSum1Q = 0; area1Q.forEach(g => { const src = defaultSprints1Q2026.byArea.find(a => goalKeyArea(a) === goalKeyArea(g)); const v = (src && src.progress != null ? src.progress : g.progress) || ''; areaSum1Q += parseProg1Q(v); });
+      let projSum1Q = 0; proj1Q.forEach(g => { const src = defaultSprints1Q2026.byProject.find(a => goalKeyProject(a) === goalKeyProject(g)); const v = (src && src.progress != null ? src.progress : g.progress) || ''; projSum1Q += parseProg1Q(v); });
+      const areaCnt1Q = area1Q.length, projCnt1Q = proj1Q.length;
+      const areaAvg1Q = areaCnt1Q > 0 ? Math.round(areaSum1Q / areaCnt1Q) : 0, projAvg1Q = projCnt1Q > 0 ? Math.round(projSum1Q / projCnt1Q) : 0;
+      const sprintsAreaTotalRow = `<tr class="gtd-sprint-total"><td colspan="4">Total</td><td></td><td>${areaCnt1Q} задач</td><td>${areaAvg1Q}%</td></tr>`;
+      const sprintsProjTotalRow = `<tr class="gtd-sprint-total"><td colspan="4">Total</td><td></td><td>${projCnt1Q} задач</td><td>${projAvg1Q}%</td><td></td><td></td></tr>`;
 
       const getSprint4Prog = (rowId) => (gtd1QState.sprint4Progress && gtd1QState.sprint4Progress[rowId]) != null ? String(gtd1QState.sprint4Progress[rowId]) : '';
       const getSprint4St = (rowId) => (gtd1QState.sprint4Status && gtd1QState.sprint4Status[rowId]) || '';
@@ -944,14 +951,14 @@
           <div class="gtd-table-wrap">
             <table class="gtd-table">
               <thead><tr><th>Name</th><th>Area</th><th>Sub</th><th>Формулировка 1Q</th><th>Priority</th><th>Progress %</th><th>Status</th></tr></thead>
-              <tbody id="gtd-sprints-area-tbody">${sprintsByAreaRows}</tbody>
+              <tbody id="gtd-sprints-area-tbody">${sprintsByAreaRows}${sprintsAreaTotalRow}</tbody>
             </table>
           </div>
           <h2>Goals 1Q2026 по Project</h2>
           <div class="gtd-table-wrap">
             <table class="gtd-table">
               <thead><tr><th>Name</th><th>Project</th><th>Sub</th><th>Формулировка 1Q</th><th>Priority</th><th>Progress %</th><th>Status</th><th>MVP done</th></tr></thead>
-              <tbody id="gtd-sprints-project-tbody">${sprintsByProjectRows}</tbody>
+              <tbody id="gtd-sprints-project-tbody">${sprintsByProjectRows}${sprintsProjTotalRow}</tbody>
             </table>
           </div>
           </div>
@@ -1045,7 +1052,7 @@
       const areaCnt = area1Q.length, projCnt = proj1Q.length;
       const areaAvg = areaCnt > 0 ? Math.round(areaSum / areaCnt) : 0, projAvg = projCnt > 0 ? Math.round(projSum / projCnt) : 0;
       const areaTotalRow = `<tr class="gtd-sprint-total"><td colspan="4">Total</td><td></td><td>${areaCnt} задач</td><td>${areaAvg}%</td></tr>`;
-      const projTotalRow = `<tr class="gtd-sprint-total"><td colspan="4">Total</td><td></td><td>${projCnt} задач</td><td>${projAvg}%</td><td></td></tr>`;
+      const projTotalRow = `<tr class="gtd-sprint-total"><td colspan="4">Total</td><td></td><td>${projCnt} задач</td><td>${projAvg}%</td><td></td><td></td></tr>`;
       const areaTb = document.getElementById('gtd-sprints-area-tbody');
       const projTb = document.getElementById('gtd-sprints-project-tbody');
       if (areaTb) areaTb.innerHTML = areaRows + areaTotalRow;
