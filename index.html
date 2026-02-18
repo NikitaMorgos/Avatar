@@ -11,6 +11,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2/dist/chartjs-plugin-datalabels.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
   <style>
     :root {
       --bg: #fafafa;
@@ -1550,6 +1551,12 @@
         </div>
         <div id="health-panel-add" class="gtd-panel">
           <p class="gtd-overview">Добавить запись. <strong>Дата обязательна</strong> (формат ГГГГ-ММ-ДД).</p>
+          <div class="health-pdf-upload" style="margin-bottom:24px;padding:16px;border:1px dashed var(--border);border-radius:8px;background:var(--locked-bg);">
+            <label style="font-weight:500;display:block;margin-bottom:8px">Загрузить PDF</label>
+            <input type="file" id="health-pdf-input" accept=".pdf" style="margin-bottom:8px">
+            <div id="health-pdf-status" style="font-size:0.875rem;color:var(--text-muted);min-height:1.5em"></div>
+            <div id="health-pdf-preview" style="margin-top:12px;font-size:0.8125rem;max-height:200px;overflow-y:auto;display:none"></div>
+          </div>
           <form id="health-add-form" class="health-add-form">
             <div class="health-form-row">
               <label>Дата *</label>
@@ -1578,6 +1585,49 @@
         </div>
       `;
     }
+    async function extractTextFromPdf(file) {
+      const pdfjsLib = window['pdfjsLib'];
+      if (!pdfjsLib) { throw new Error('PDF.js не загружен'); }
+      pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+      const buf = await file.arrayBuffer();
+      const pdf = await pdfjsLib.getDocument({ data: buf }).promise;
+      const pages = [];
+      for (let i = 1; i <= Math.min(pdf.numPages, 10); i++) {
+        const page = await pdf.getPage(i);
+        const tc = await page.getTextContent();
+        pages.push(tc.items.map(it => it.str).join(' '));
+      }
+      return pages.join('\n');
+    }
+    function parseDateFromFilename(name) {
+      const m = name.match(/(\d{4})(\d{2})(\d{2})/);
+      if (m) return m[1] + '-' + m[2] + '-' + m[3];
+      const m2 = name.match(/(\d{4})(\d{2})/);
+      if (m2) return m2[1] + '-' + m2[2] + '-01';
+      return '';
+    }
+    function detectAnalysisTypeFromFilename(name) {
+      const n = (name || '').toLowerCase();
+      if (/спермограмм|sperm/i.test(n)) return 'sperm';
+      if (/кровь|blood|анализ|гемоглобин|витамин|фолат|d\s*\.|ферритин/i.test(n)) return 'blood';
+      return 'other';
+    }
+    function parseMetricsFromText(text) {
+      const pairs = [];
+      const t = (text || '').replace(/\s+/g, ' ');
+      const lines = (text || '').split(/[\n\r;]+/).map(s => s.trim()).filter(s => s.length > 2 && s.length < 120);
+      for (const line of lines) {
+        let kv = line.match(/^([^:：\d]+)[:：]\s*([\d.,]+)\s*([а-яa-z\/%]*)/i);
+        if (kv) { pairs.push({ name: kv[1].trim(), value: kv[2].replace(',', '.'), unit: (kv[3]||'').trim() }); continue; }
+        kv = line.match(/^([а-яa-zё\s\-]+)\s+([\d.,]+)\s*([а-яa-z\/%]*)$/i);
+        if (kv) { pairs.push({ name: kv[1].trim(), value: kv[2].replace(',', '.'), unit: (kv[3]||'').trim() }); continue; }
+        const num = line.match(/([\d.,]+)\s*([а-яa-z\/%]*)/i);
+        if (num && line.length < 60) pairs.push({ name: line.replace(/[\d.,].*$/,'').trim() || 'показатель', value: num[1].replace(',','.'), unit: (num[2]||'').trim() });
+      }
+      const weightMatch = t.match(/вес[ау]?\s*[:：]?\s*([\d.,]+)/i) || t.match(/([\d.,]+)\s*кг\b/i);
+      const pulseMatch = t.match(/пульс\s*[:：]?\s*([\d.,]+)/i) || t.match(/ЧСС\s*[:：]?\s*([\d.,]+)/i) || t.match(/сердце\s*[:：]?\s*([\d.,]+)/i);
+      return { pairs, weight: weightMatch ? weightMatch[1].replace(',','.') : null, pulse: pulseMatch ? pulseMatch[1].replace(',','.') : null };
+    }
     function bindHealth() {
       document.querySelectorAll('.gtd-tab[data-tab]').forEach(tab => {
         tab.onclick = () => {
@@ -1586,6 +1636,58 @@
           document.querySelectorAll('[id^="health-panel-"]').forEach(p => p.classList.toggle('active', p.id === 'health-panel-' + id));
         };
       });
+      const pdfInput = document.getElementById('health-pdf-input');
+      const pdfStatus = document.getElementById('health-pdf-status');
+      const pdfPreview = document.getElementById('health-pdf-preview');
+      if (pdfInput) pdfInput.onchange = async function() {
+        const file = this.files && this.files[0];
+        if (!file) return;
+        pdfStatus.textContent = 'Обработка PDF…';
+        pdfPreview.style.display = 'none';
+        try {
+          const text = await extractTextFromPdf(file);
+          const date = parseDateFromFilename(file.name) || '';
+          const type = detectAnalysisTypeFromFilename(file.name);
+          const { pairs, weight, pulse } = parseMetricsFromText(text);
+          const dateEl = document.getElementById('health-add-date');
+          const catEl = document.getElementById('health-add-category');
+          const valueEl = document.getElementById('health-add-value');
+          const descEl = document.getElementById('health-add-desc');
+          if (dateEl) dateEl.value = date;
+          if (catEl) catEl.value = type;
+          let desc = text.slice(0, 1500).replace(/\s+/g, ' ').trim();
+          if (pairs.length > 0) desc = pairs.map(p => (p.name + ': ' + p.value + (p.unit ? ' ' + p.unit : '')).trim()).join('; ') + (text.length > 1500 ? '…' : '');
+          if (descEl) descEl.value = desc;
+          if (weight && (type === 'other' || type === 'blood')) { valueEl.value = weight; if (catEl) catEl.value = 'weight'; }
+          else if (pulse) { valueEl.value = pulse; if (catEl) catEl.value = 'pulse'; }
+          else if (valueEl) valueEl.value = '';
+          pdfPreview.innerHTML = '<strong>Распознано:</strong> дата ' + (date || '—') + ', тип ' + (HEALTH_CATEGORIES.find(c=>c.id===type)?.name||type) + (pairs.length ? '<br><span style="color:var(--text-muted)">Показатели: ' + pairs.slice(0,15).map(p=>p.name+':'+p.value).join(', ') + (pairs.length>15?'…':'') + '</span>' : '');
+          pdfPreview.style.display = 'block';
+          const data = loadHealthData();
+          const effDate = date || new Date().toISOString().slice(0,10);
+          let added = false;
+          if (weight && (type === 'other' || type === 'blood' || !pairs.length)) {
+            if (!data.weight) data.weight = [];
+            data.weight.push({ date: effDate, value: weight, notes: 'из PDF ' + file.name });
+            added = true;
+          }
+          if (pulse && !weight) {
+            if (!data.pulse) data.pulse = [];
+            data.pulse.push({ date: effDate, value: pulse, notes: 'из PDF ' + file.name });
+            added = true;
+          }
+          if (type === 'blood' || type === 'sperm' || (type === 'other' && pairs.length > 0)) {
+            if (!data.analyses) data.analyses = [];
+            data.analyses.push({ date: effDate, type, description: desc, file: file.name, notes: '' });
+            added = true;
+          }
+          if (added) { saveHealthData(data); pdfStatus.textContent = 'Данные добавлены в показатели. Обновляю…'; selectSection('health'); }
+          else pdfStatus.textContent = 'Форма заполнена. Проверь и нажми «Добавить» при необходимости.';
+        } catch (e) {
+          pdfStatus.textContent = 'Ошибка: ' + (e.message || 'не удалось разобрать PDF');
+        }
+        this.value = '';
+      };
       const form = document.getElementById('health-add-form');
       if (form) form.onsubmit = function(e) {
         e.preventDefault();
