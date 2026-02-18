@@ -843,7 +843,7 @@
         const prog = getSprint4Prog(rowId) || ((src && src.progress != null) ? src.progress : (g.progress != null ? g.progress : ''));
         const st = getSprint4St(rowId) || (src && src.status && statusLabels[src.status] ? src.status : (g.status && statusLabels[g.status] ? g.status : 'не начинал'));
         const name = goalName(key, 'area');
-        return `<tr data-rowid="${escapeHtml(rowId)}" data-rowtype="area"><td>area</td><td class="gtd-cell-oneline" title="${escapeHtml(name)}">${escapeHtml(name)}</td><td>${escapeHtml(g.area)}</td><td>${escapeHtml(g.area1 || '-')}</td><td class="gtd-cell-editable gtd-cell-text" contenteditable="true" data-col="desc">${escapeHtml(formul)}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="progress">${escapeHtml(prog !== '' ? prog + (String(prog).match(/%$/) ? '' : '%') : '-')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="status">${escapeHtml(st)}</td></tr>`;
+        return `<tr data-rowid="${escapeHtml(rowId)}" data-rowtype="area"><td>area</td><td class="gtd-cell-oneline" title="${escapeHtml(name)}">${escapeHtml(name)}</td><td>${escapeHtml(g.area)}</td><td>${escapeHtml(g.area1 || '-')}</td><td class="gtd-cell-editable gtd-cell-text" contenteditable="true" data-col="desc">${escapeHtml(formul)}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="progress">${escapeHtml(prog !== '' ? prog + (String(prog).match(/%$/) ? '' : '%') : '0%')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="status">${escapeHtml(st)}</td></tr>`;
       }).join('');
       const sprint4ProjectRows = proj1Q.map(g => {
         const key = goalKeyProject(g);
@@ -853,26 +853,27 @@
         const prog = getSprint4Prog(rowId) || ((src && src.progress != null) ? src.progress : (g.progress != null ? g.progress : ''));
         const st = getSprint4St(rowId) || (src && src.status && statusLabels[src.status] ? src.status : (g.status && statusLabels[g.status] ? g.status : 'не начинал'));
         const name = goalName(key, 'project');
-        return `<tr data-rowid="${escapeHtml(rowId)}" data-rowtype="project"><td>project</td><td class="gtd-cell-oneline" title="${escapeHtml(name)}">${escapeHtml(name)}</td><td>${escapeHtml(g.proj)}</td><td>${escapeHtml(g.proj1 || '-')}</td><td class="gtd-cell-editable gtd-cell-text" contenteditable="true" data-col="desc">${escapeHtml(formul)}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="progress">${escapeHtml(prog !== '' ? prog + (String(prog).match(/%$/) ? '' : '%') : '-')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="status">${escapeHtml(st)}</td></tr>`;
+        return `<tr data-rowid="${escapeHtml(rowId)}" data-rowtype="project"><td>project</td><td class="gtd-cell-oneline" title="${escapeHtml(name)}">${escapeHtml(name)}</td><td>${escapeHtml(g.proj)}</td><td>${escapeHtml(g.proj1 || '-')}</td><td class="gtd-cell-editable gtd-cell-text" contenteditable="true" data-col="desc">${escapeHtml(formul)}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="progress">${escapeHtml(prog !== '' ? prog + (String(prog).match(/%$/) ? '' : '%') : '0%')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="status">${escapeHtml(st)}</td></tr>`;
       }).join('');
       const manualLife = gtd1QState.manualLife || defaultManualLife;
       const manualDate = gtd1QState.manualDate || defaultManualDate;
       const sprint4LifeRows = manualLife.map((m, i) => {
         const rowId = 'life|' + i;
-        return `<tr data-rowid="${escapeHtml(rowId)}" data-rowtype="life"><td>life</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="name">${escapeHtml(m.name || '')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="ap">${escapeHtml(m.ap || '')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="sub">${escapeHtml(m.sub || '')}</td><td class="gtd-cell-editable gtd-cell-text" contenteditable="true" data-col="desc">${escapeHtml(m.desc || '')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="progress">${escapeHtml(m.progress || '-')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="status">${escapeHtml(m.status || '')}</td></tr>`;
+        return `<tr data-rowid="${escapeHtml(rowId)}" data-rowtype="life"><td>life</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="name">${escapeHtml(m.name || '')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="ap">${escapeHtml(m.ap || '')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="sub">${escapeHtml(m.sub || '')}</td><td class="gtd-cell-editable gtd-cell-text" contenteditable="true" data-col="desc">${escapeHtml(m.desc || '')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="progress">${escapeHtml(m.progress || '0%')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="status">${escapeHtml(m.status || '')}</td></tr>`;
       }).join('');
       const sprint4DateRows = manualDate.map((m, i) => {
         const rowId = 'date|' + i;
-        return `<tr data-rowid="${escapeHtml(rowId)}" data-rowtype="date"><td>date</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="name">${escapeHtml(m.name || '')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="ap">${escapeHtml(m.ap || '')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="sub">${escapeHtml(m.sub || '')}</td><td class="gtd-cell-editable gtd-cell-text" contenteditable="true" data-col="desc">${escapeHtml(m.desc || '')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="progress">${escapeHtml(m.progress || '-')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="status">${escapeHtml(m.status || '')}</td></tr>`;
+        return `<tr data-rowid="${escapeHtml(rowId)}" data-rowtype="date"><td>date</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="name">${escapeHtml(m.name || '')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="ap">${escapeHtml(m.ap || '')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="sub">${escapeHtml(m.sub || '')}</td><td class="gtd-cell-editable gtd-cell-text" contenteditable="true" data-col="desc">${escapeHtml(m.desc || '')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="progress">${escapeHtml(m.progress || '0%')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="status">${escapeHtml(m.status || '')}</td></tr>`;
       }).join('');
       const taskCount = area1Q.length + proj1Q.length + manualLife.length + manualDate.length;
-      let sumProg = 0, progCnt = 0;
+      let sumProg = 0;
       const parseProg = v => { const n = parseFloat(String(v||'').replace(/%/g,'')); return isNaN(n) ? null : n; };
-      area1Q.forEach(g => { const k = 'area|' + goalKeyArea(g); const src = defaultSprints1Q2026.byArea.find(a => goalKeyArea(a) === goalKeyArea(g)); const v = getSprint4Prog(k) || (src && src.progress != null ? src.progress : g.progress); const n = parseProg(v); if (n != null) { sumProg += n; progCnt++; } });
-      proj1Q.forEach(g => { const k = 'project|' + goalKeyProject(g); const src = defaultSprints1Q2026.byProject.find(a => goalKeyProject(a) === goalKeyProject(g)); const v = getSprint4Prog(k) || (src && src.progress != null ? src.progress : g.progress); const n = parseProg(v); if (n != null) { sumProg += n; progCnt++; } });
-      manualLife.forEach(m => { const n = parseProg(m.progress); if (n != null) { sumProg += n; progCnt++; } });
-      manualDate.forEach(m => { const n = parseProg(m.progress); if (n != null) { sumProg += n; progCnt++; } });
-      const avgProg = progCnt > 0 ? Math.round(sumProg / progCnt) : 0;
+      const addProg = v => { const n = parseProg(v); sumProg += (n != null ? n : 0); };
+      area1Q.forEach(g => { const k = 'area|' + goalKeyArea(g); const src = defaultSprints1Q2026.byArea.find(a => goalKeyArea(a) === goalKeyArea(g)); const v = getSprint4Prog(k) || (src && src.progress != null ? src.progress : g.progress); addProg(v); });
+      proj1Q.forEach(g => { const k = 'project|' + goalKeyProject(g); const src = defaultSprints1Q2026.byProject.find(a => goalKeyProject(a) === goalKeyProject(g)); const v = getSprint4Prog(k) || (src && src.progress != null ? src.progress : g.progress); addProg(v); });
+      manualLife.forEach(m => addProg(m.progress));
+      manualDate.forEach(m => addProg(m.progress));
+      const avgProg = taskCount > 0 ? Math.round(sumProg / taskCount) : 0;
       const sprint4TotalRow = `<tr class="gtd-sprint4-total"><td>TOTAL</td><td colspan="4">${taskCount} задач</td><td>${avgProg}%</td><td>средн.</td></tr>`;
 
       return `
@@ -1042,8 +1043,8 @@
             } else if (col === 'progress') {
               gtd1QState.sprint4Progress = gtd1QState.sprint4Progress || {};
               const num = parseFloat(text.replace(/%/g, ''));
-              gtd1QState.sprint4Progress[rowId] = isNaN(num) ? '' : num;
-              this.textContent = (isNaN(num) || num === '') ? (text || '-') : num + '%';
+              gtd1QState.sprint4Progress[rowId] = isNaN(num) ? 0 : num;
+              this.textContent = (isNaN(num) || text === '') ? '0%' : num + '%';
             } else if (col === 'status') {
               gtd1QState.sprint4Status = gtd1QState.sprint4Status || {};
               gtd1QState.sprint4Status[rowId] = text;
@@ -1055,7 +1056,8 @@
             arr[i][col] = text;
             if (col === 'progress') {
               const num = parseFloat(text.replace(/%/g, ''));
-              this.textContent = (isNaN(num) || text === '') ? (text || '-') : num + '%';
+              arr[i].progress = (isNaN(num) || text === '') ? '0' : String(num);
+              this.textContent = (isNaN(num) || text === '') ? '0%' : num + '%';
             }
           }
           saveGtd1QState(gtd1QState);
@@ -1090,24 +1092,25 @@
         const prog = getSprint4Prog(rowId) || ((src && src.progress != null) ? src.progress : (g.progress != null ? g.progress : ''));
         const st = getSprint4St(rowId) || (src && src.status && statusLabels[src.status] ? src.status : (g.status && statusLabels[g.status] ? g.status : 'не начинал'));
         const name = goalName(key, 'project');
-        return `<tr data-rowid="${escapeHtml(rowId)}" data-rowtype="project"><td>project</td><td class="gtd-cell-oneline" title="${escapeHtml(name)}">${escapeHtml(name)}</td><td>${escapeHtml(g.proj)}</td><td>${escapeHtml(g.proj1 || '-')}</td><td class="gtd-cell-editable gtd-cell-text" contenteditable="true" data-col="desc">${escapeHtml(formul)}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="progress">${escapeHtml(prog !== '' ? prog + (String(prog).match(/%$/) ? '' : '%') : '-')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="status">${escapeHtml(st)}</td></tr>`;
+        return `<tr data-rowid="${escapeHtml(rowId)}" data-rowtype="project"><td>project</td><td class="gtd-cell-oneline" title="${escapeHtml(name)}">${escapeHtml(name)}</td><td>${escapeHtml(g.proj)}</td><td>${escapeHtml(g.proj1 || '-')}</td><td class="gtd-cell-editable gtd-cell-text" contenteditable="true" data-col="desc">${escapeHtml(formul)}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="progress">${escapeHtml(prog !== '' ? prog + (String(prog).match(/%$/) ? '' : '%') : '0%')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="status">${escapeHtml(st)}</td></tr>`;
       }).join('');
       const lifeRows = manualLife.map((m, i) => {
         const rowId = 'life|' + i;
-        return `<tr data-rowid="${escapeHtml(rowId)}" data-rowtype="life"><td>life</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="name">${escapeHtml(m.name || '')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="ap">${escapeHtml(m.ap || '')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="sub">${escapeHtml(m.sub || '')}</td><td class="gtd-cell-editable gtd-cell-text" contenteditable="true" data-col="desc">${escapeHtml(m.desc || '')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="progress">${escapeHtml(m.progress || '-')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="status">${escapeHtml(m.status || '')}</td></tr>`;
+        return `<tr data-rowid="${escapeHtml(rowId)}" data-rowtype="life"><td>life</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="name">${escapeHtml(m.name || '')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="ap">${escapeHtml(m.ap || '')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="sub">${escapeHtml(m.sub || '')}</td><td class="gtd-cell-editable gtd-cell-text" contenteditable="true" data-col="desc">${escapeHtml(m.desc || '')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="progress">${escapeHtml(m.progress || '0%')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="status">${escapeHtml(m.status || '')}</td></tr>`;
       }).join('');
       const dateRows = manualDate.map((m, i) => {
         const rowId = 'date|' + i;
-        return `<tr data-rowid="${escapeHtml(rowId)}" data-rowtype="date"><td>date</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="name">${escapeHtml(m.name || '')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="ap">${escapeHtml(m.ap || '')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="sub">${escapeHtml(m.sub || '')}</td><td class="gtd-cell-editable gtd-cell-text" contenteditable="true" data-col="desc">${escapeHtml(m.desc || '')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="progress">${escapeHtml(m.progress || '-')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="status">${escapeHtml(m.status || '')}</td></tr>`;
+        return `<tr data-rowid="${escapeHtml(rowId)}" data-rowtype="date"><td>date</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="name">${escapeHtml(m.name || '')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="ap">${escapeHtml(m.ap || '')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="sub">${escapeHtml(m.sub || '')}</td><td class="gtd-cell-editable gtd-cell-text" contenteditable="true" data-col="desc">${escapeHtml(m.desc || '')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="progress">${escapeHtml(m.progress || '0%')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="status">${escapeHtml(m.status || '')}</td></tr>`;
       }).join('');
       const taskCount = area1Q.length + proj1Q.length + manualLife.length + manualDate.length;
-      let sumProg = 0, progCnt = 0;
+      let sumProg = 0;
       const parseProg = v => { const n = parseFloat(String(v||'').replace(/%/g,'')); return isNaN(n) ? null : n; };
-      area1Q.forEach(g => { const k = 'area|' + goalKeyArea(g); const src = defaultSprints1Q2026.byArea.find(a => goalKeyArea(a) === goalKeyArea(g)); const v = getSprint4Prog(k) || (src && src.progress != null ? src.progress : g.progress); const n = parseProg(v); if (n != null) { sumProg += n; progCnt++; } });
-      proj1Q.forEach(g => { const k = 'project|' + goalKeyProject(g); const src = defaultSprints1Q2026.byProject.find(a => goalKeyProject(a) === goalKeyProject(g)); const v = getSprint4Prog(k) || (src && src.progress != null ? src.progress : g.progress); const n = parseProg(v); if (n != null) { sumProg += n; progCnt++; } });
-      manualLife.forEach(m => { const n = parseProg(m.progress); if (n != null) { sumProg += n; progCnt++; } });
-      manualDate.forEach(m => { const n = parseProg(m.progress); if (n != null) { sumProg += n; progCnt++; } });
-      const avgProg = progCnt > 0 ? Math.round(sumProg / progCnt) : 0;
+      const addProg = v => { const n = parseProg(v); sumProg += (n != null ? n : 0); };
+      area1Q.forEach(g => { const k = 'area|' + goalKeyArea(g); const src = defaultSprints1Q2026.byArea.find(a => goalKeyArea(a) === goalKeyArea(g)); const v = getSprint4Prog(k) || (src && src.progress != null ? src.progress : g.progress); addProg(v); });
+      proj1Q.forEach(g => { const k = 'project|' + goalKeyProject(g); const src = defaultSprints1Q2026.byProject.find(a => goalKeyProject(a) === goalKeyProject(g)); const v = getSprint4Prog(k) || (src && src.progress != null ? src.progress : g.progress); addProg(v); });
+      manualLife.forEach(m => addProg(m.progress));
+      manualDate.forEach(m => addProg(m.progress));
+      const avgProg = taskCount > 0 ? Math.round(sumProg / taskCount) : 0;
       const totalRow = `<tr class="gtd-sprint4-total"><td>TOTAL</td><td colspan="4">${taskCount} задач</td><td>${avgProg}%</td><td>средн.</td></tr>`;
       return areaRows + projRows + lifeRows + dateRows + totalRow;
     }
@@ -1119,7 +1122,7 @@
       const tbody = document.getElementById('gtd-sprint4-tbody');
       if (!tbody) return;
       const rows = tbody.querySelectorAll('tr:not(.gtd-sprint4-total)');
-      let sumProg = 0, progCnt = 0;
+      let sumProg = 0;
       const parseProg = v => { const n = parseFloat(String(v||'').replace(/%/g,'')); return isNaN(n) ? null : n; };
       rows.forEach(tr => {
         const rowId = tr.dataset.rowid, rowType = tr.dataset.rowtype;
@@ -1144,10 +1147,10 @@
           v = (arr[i] && arr[i].progress) || '';
         }
         const n = parseProg(v);
-        if (n != null) { sumProg += n; progCnt++; }
+        sumProg += (n != null ? n : 0);
       });
       const taskCount = rows.length;
-      const avgProg = progCnt > 0 ? Math.round(sumProg / progCnt) : 0;
+      const avgProg = taskCount > 0 ? Math.round(sumProg / taskCount) : 0;
       let totalRow = tbody.querySelector('tr.gtd-sprint4-total');
       if (totalRow) {
         totalRow.cells[1].innerHTML = taskCount + ' задач';
@@ -1170,8 +1173,8 @@
             } else if (col === 'progress') {
               gtd1QState.sprint4Progress = gtd1QState.sprint4Progress || {};
               const num = parseFloat(text.replace(/%/g, ''));
-              gtd1QState.sprint4Progress[rowId] = isNaN(num) ? '' : num;
-              cell.textContent = (isNaN(num) || num === '') ? (text || '-') : num + '%';
+              gtd1QState.sprint4Progress[rowId] = isNaN(num) ? 0 : num;
+              cell.textContent = (isNaN(num) || text === '') ? '0%' : num + '%';
             } else if (col === 'status') {
               gtd1QState.sprint4Status = gtd1QState.sprint4Status || {};
               gtd1QState.sprint4Status[rowId] = text;
@@ -1183,7 +1186,8 @@
             arr[i][col] = text;
             if (col === 'progress') {
               const num = parseFloat(text.replace(/%/g, ''));
-              cell.textContent = (isNaN(num) || text === '') ? (text || '-') : num + '%';
+              arr[i].progress = (isNaN(num) || text === '') ? '0' : String(num);
+              cell.textContent = (isNaN(num) || text === '') ? '0%' : num + '%';
             }
           }
         });
