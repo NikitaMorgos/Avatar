@@ -67,6 +67,9 @@ _adding_stock: set[int] = set()
 # Режим «добавляю в Raw»: user_id в этом set — фото идут в raw
 _adding_raw: set[int] = set()
 
+# Ожидающее видео для поста по команде /post: user_id -> { entry_id, file_id, caption, media_type }
+_pending_post: dict[int, dict] = {}
+
 # Теги для Raw — выбор из списка кнопками
 RAW_TAGS = ["diary", "работа", "идея"]
 
@@ -474,27 +477,15 @@ async def on_video(message: Message, bot: Bot) -> None:
     try:
         rowid = save_entry(user_id, chat_id, message_id, video_file_id, comment, media_type="video")
         if CHANNEL_ID:
-            if POST_SCHEDULE_TIME:
-                await message.reply(
-                    f"Записал твой день ✓ Опубликую в канал в {POST_SCHEDULE_TIME}. "
-                    "Сейчас — нажми /postnow в меню."
-                )
-            else:
-                try:
-                    await _post_media_to_channel(
-                        bot, video_file_id, comment if comment else None, media_type="video"
-                    )
-                    logger.info("Posted video to channel: %s", CHANNEL_ID)
-                    mark_published(rowid)
-                    await message.reply("Записал твой день и опубликовал видео в канал ✓")
-                except Exception as ch_err:
-                    logger.exception("Channel post failed: %s", ch_err)
-                    await message.reply(
-                        f"Записал в БД, но не удалось опубликовать в канал.\n"
-                        f"Ошибка: {type(ch_err).__name__}: {ch_err}\n\n"
-                        "Проверь: бот админ с правом «Post messages»? /testchannel — тест."
-                    )
-                    return
+            _pending_post[user_id] = {
+                "entry_id": rowid,
+                "file_id": video_file_id,
+                "caption": comment if comment else None,
+                "media_type": "video",
+            }
+            await message.reply(
+                "Видео получено ✓ Напиши /post чтобы опубликовать в канал."
+            )
         else:
             await message.reply("Записал твой день ✓")
     except Exception as e:
@@ -789,6 +780,32 @@ async def cmd_postat(message: Message, bot: Bot) -> None:
     await message.reply(f"Опубликую {len(entries)} пост(ов) в {time_str} ✓")
 
 
+async def cmd_post(message: Message, bot: Bot) -> None:
+    """Опубликовать в канал последнее сохранённое видео (после отправки видео напиши /post)."""
+    user_id = message.from_user.id if message.from_user else 0
+    if user_id not in _pending_post:
+        await message.reply("Нет сохранённого видео. Отправь видео, затем напиши /post.")
+        return
+    if not CHANNEL_ID:
+        await message.reply("CHANNEL_ID не задан.")
+        return
+    pending = _pending_post.pop(user_id)
+    try:
+        await _post_media_to_channel(
+            bot,
+            pending["file_id"],
+            pending["caption"],
+            pending.get("media_type", "video"),
+        )
+        mark_published(pending["entry_id"])
+        await message.reply("Опубликовано в канал ✓")
+        logger.info("Posted pending video to channel: %s", CHANNEL_ID)
+    except Exception as ex:
+        logger.exception("Post failed: %s", ex)
+        _pending_post[user_id] = pending  # вернуть в очередь
+        await message.reply(f"Не удалось опубликовать: {ex}. Попробуй ещё раз /post.")
+
+
 async def cmd_postnow(message: Message, bot: Bot) -> None:
     """Опубликовать сейчас все накопленные посты (при отложенном режиме)."""
     if not CHANNEL_ID:
@@ -884,6 +901,7 @@ async def setup_bot_ui(bot: Bot) -> None:
     """Регистрирует команды и устанавливает меню/кнопку слева внизу."""
     commands = [
         BotCommand(command="start", description="Начать"),
+        BotCommand(command="post", description="Опубликовать видео в канал"),
         BotCommand(command="postnow", description="Опубликовать сейчас"),
         BotCommand(command="postat", description="Опубликовать в HH:MM"),
         BotCommand(command="mylist", description="Список отложенных"),
@@ -936,6 +954,7 @@ def main() -> None:
     dp.message.register(cmd_cancel, Command("cancel"))
     dp.message.register(cmd_mylist, Command("mylist"))
     dp.message.register(cmd_postat, Command("postat"))
+    dp.message.register(cmd_post, Command("post"))
     dp.message.register(cmd_postnow, Command("postnow"))
     dp.message.register(cmd_testchannel, Command("testchannel"))
     dp.message.register(on_forwarded_from_channel, F.forward_origin)  # до on_photo!
