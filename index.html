@@ -697,6 +697,16 @@
     function goalKeyArea(g) { return (g.area||'') + '|' + (g.area1||'') + '|' + (g.desc||''); }
     function goalKeyProject(g) { return (g.proj||'') + '|' + (g.proj1||'') + '|' + (g.desc||''); }
     const GTD_1Q_KEY = 'gtd_1q_2026';
+    const MONTHS_GEN = ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
+    function getSprintDates(sprintNum, year) {
+      year = year || 2026;
+      const monthIdx = sprintNum <= 2 ? 0 : 1;
+      const lastDay = new Date(year, monthIdx + 1, 0).getDate();
+      if (sprintNum === 1 || sprintNum === 3) return `1 - 15 ${MONTHS_GEN[monthIdx]}`;
+      if (sprintNum === 2) return `16 - ${lastDay} ${MONTHS_GEN[monthIdx]}`;
+      if (sprintNum === 4) return `15 - ${lastDay} ${MONTHS_GEN[monthIdx]}`;
+      return `16 - ${lastDay} ${MONTHS_GEN[monthIdx]}`;
+    }
     const defaultManualLife = [{ name: 'Пример Life', ap: 'Self', sub: 'Diary', desc: 'жизненная цель вне квартальных', progress: '', status: '' }];
     const defaultManualDate = [{ name: 'Пример Date', ap: 'Family', sub: 'General', desc: 'событие с датой', progress: '', status: '' }];
     function loadGtd1QState(sprints1Q) {
@@ -911,7 +921,7 @@
         <div id="gtd-panel-sprints" class="gtd-panel">
           <p class="gtd-overview">Goals 1Q2026, формулировки спринта. <button type="button" class="gtd-login-btn" id="gtd-sprints-refresh-btn">Обновить</button></p>
           <div id="gtd-export-sprints">
-          <h2>Спринт 4 (15 февраля — 28 февраля)</h2>
+          <h2>Спринт 4 (${getSprintDates(4)})</h2>
           <p style="margin:0 0 8px"><button type="button" class="gtd-login-btn" id="gtd-sprint4-add-life" style="padding:6px 12px;font-size:0.8rem">+ life</button> <button type="button" class="gtd-login-btn" id="gtd-sprint4-add-date" style="padding:6px 12px;font-size:0.8rem">+ date</button></p>
           <div class="gtd-table-wrap">
             <table class="gtd-table gtd-sprint4-table">
@@ -1144,7 +1154,44 @@
         totalRow.cells[5].textContent = avgProg + '%';
       }
     }
+    function saveSprint4FromDom() {
+      const tbl = document.getElementById('gtd-sprint4-tbody');
+      if (!tbl) return;
+      tbl.querySelectorAll('tr:not(.gtd-sprint4-total)').forEach(tr => {
+        const rowId = tr.dataset.rowid, rowType = tr.dataset.rowtype;
+        if (!rowId || !rowType) return;
+        tr.querySelectorAll('.gtd-cell-editable[data-col]').forEach(cell => {
+          const col = cell.dataset.col;
+          const text = (cell.textContent || '').trim();
+          if (rowType === 'area' || rowType === 'project') {
+            if (col === 'desc') {
+              gtd1QState.customFormuls = gtd1QState.customFormuls || {};
+              if (text) gtd1QState.customFormuls[rowId] = text; else delete gtd1QState.customFormuls[rowId];
+            } else if (col === 'progress') {
+              gtd1QState.sprint4Progress = gtd1QState.sprint4Progress || {};
+              const num = parseFloat(text.replace(/%/g, ''));
+              gtd1QState.sprint4Progress[rowId] = isNaN(num) ? '' : num;
+              cell.textContent = (isNaN(num) || num === '') ? (text || '-') : num + '%';
+            } else if (col === 'status') {
+              gtd1QState.sprint4Status = gtd1QState.sprint4Status || {};
+              gtd1QState.sprint4Status[rowId] = text;
+            }
+          } else if (rowType === 'life' || rowType === 'date') {
+            const arr = rowType === 'life' ? gtd1QState.manualLife : gtd1QState.manualDate;
+            const i = parseInt(rowId.split('|')[1], 10);
+            if (!arr[i]) arr[i] = {};
+            arr[i][col] = text;
+            if (col === 'progress') {
+              const num = parseFloat(text.replace(/%/g, ''));
+              cell.textContent = (isNaN(num) || text === '') ? (text || '-') : num + '%';
+            }
+          }
+        });
+      });
+      saveGtd1QState(gtd1QState);
+    }
     function refreshSprints() {
+      saveSprint4FromDom();
       updateSprint4Total();
       bindSprint4Editable();
       updateSprintsTbodies();
