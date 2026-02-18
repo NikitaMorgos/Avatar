@@ -340,6 +340,7 @@
     .gtd-table .gtd-cell-editable:focus { outline: 2px solid var(--accent); background: #fff; }
     .gtd-table .gtd-col-desc { min-width: 280px; max-width: 480px; }
     .gtd-table .gtd-sprint4-total { font-weight: 600; background: var(--locked-bg); }
+    .gtd-sprint4-table td, .gtd-sprint4-table th { vertical-align: top; line-height: 1.4; }
     .gtd-login-btn { display: inline-block; margin-top: 16px; padding: 10px 20px; background: var(--accent); color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.9375rem; }
     .gtd-login-btn:hover { background: var(--accent-hover); }
     .gtd-login-form { max-width: 320px; margin-top: 16px; }
@@ -910,7 +911,8 @@
         <div id="gtd-panel-sprints" class="gtd-panel">
           <p class="gtd-overview">Goals 1Q2026, формулировки спринта. <button type="button" class="gtd-login-btn" id="gtd-sprints-refresh-btn">Обновить</button></p>
           <div id="gtd-export-sprints">
-          <h2>Спринт 4</h2>
+          <h2>Спринт 4 (15 февраля — 28 февраля)</h2>
+          <p style="margin:0 0 8px"><button type="button" class="gtd-login-btn" id="gtd-sprint4-add-life" style="padding:6px 12px;font-size:0.8rem">+ life</button> <button type="button" class="gtd-login-btn" id="gtd-sprint4-add-date" style="padding:6px 12px;font-size:0.8rem">+ date</button></p>
           <div class="gtd-table-wrap">
             <table class="gtd-table gtd-sprint4-table">
               <thead><tr><th>type</th><th>Name</th><th>A/P</th><th>Sub</th><th>Description</th><th>Progress %</th><th>Status</th></tr></thead>
@@ -1031,6 +1033,7 @@
               gtd1QState.sprint4Progress = gtd1QState.sprint4Progress || {};
               const num = parseFloat(text.replace(/%/g, ''));
               gtd1QState.sprint4Progress[rowId] = isNaN(num) ? '' : num;
+              this.textContent = (isNaN(num) || num === '') ? (text || '-') : num + '%';
             } else if (col === 'status') {
               gtd1QState.sprint4Status = gtd1QState.sprint4Status || {};
               gtd1QState.sprint4Status[rowId] = text;
@@ -1040,6 +1043,10 @@
             const i = parseInt(rowId.split('|')[1], 10);
             if (!arr[i]) arr[i] = {};
             arr[i][col] = text;
+            if (col === 'progress') {
+              const num = parseFloat(text.replace(/%/g, ''));
+              this.textContent = (isNaN(num) || text === '') ? (text || '-') : num + '%';
+            }
           }
           saveGtd1QState(gtd1QState);
           updateSprint4Total();
@@ -1142,9 +1149,25 @@
       bindSprint4Editable();
       updateSprintsTbodies();
     }
+    function addSprint4LifeRow() {
+      gtd1QState.manualLife = gtd1QState.manualLife || [];
+      gtd1QState.manualLife.push({ name: '', ap: '', sub: '', desc: '', progress: '', status: '' });
+      saveGtd1QState(gtd1QState);
+      updateSprint4Table();
+    }
+    function addSprint4DateRow() {
+      gtd1QState.manualDate = gtd1QState.manualDate || [];
+      gtd1QState.manualDate.push({ name: '', ap: '', sub: '', desc: '', progress: '', status: '' });
+      saveGtd1QState(gtd1QState);
+      updateSprint4Table();
+    }
     function bindSprintsPanel() {
       const btn = document.getElementById('gtd-sprints-refresh-btn');
       if (btn) btn.onclick = refreshSprints;
+      const addLifeBtn = document.getElementById('gtd-sprint4-add-life');
+      if (addLifeBtn) addLifeBtn.onclick = addSprint4LifeRow;
+      const addDateBtn = document.getElementById('gtd-sprint4-add-date');
+      if (addDateBtn) addDateBtn.onclick = addSprint4DateRow;
       bindSprint4Editable();
     }
     function bindGtdTabs() {
