@@ -9,6 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
   <style>
     :root {
       --bg: #fafafa;
@@ -327,6 +328,7 @@
     .modal .error { color: #c53030; font-size: 0.8125rem; margin-top: 8px; }
 
     .gtd-overview { font-size: 0.9375rem; color: var(--text-muted); margin-bottom: 24px; }
+    .gtd-chart-wrap { margin: 16px 0; max-width: 520px; height: 220px; }
     .gtd-table-wrap { overflow-x: auto; margin: 16px 0; }
     .main.gtd-wide .gtd-table-wrap { overflow-x: visible; }
     .gtd-table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
@@ -968,6 +970,7 @@
           <p class="gtd-overview">Метрики и дашборды. <button type="button" class="gtd-login-btn" id="gtd-metrics-refresh-btn">Обновить</button></p>
           <h2>Выполнение задач по спринтам</h2>
           <h3>Спринты 2026</h3>
+          <div class="gtd-chart-wrap"><canvas id="gtd-chart-sprints-2026"></canvas></div>
           <div class="gtd-table-wrap">
             <table class="gtd-table gtd-metrics-table">
               <thead><tr><th></th><th>Спринт 1</th><th>Спринт 2</th><th>Спринт 3</th><th>Спринт 4</th></tr></thead>
@@ -978,17 +981,18 @@
             </table>
           </div>
           <h3>Квартал (1Q)</h3>
+          <div class="gtd-chart-wrap"><canvas id="gtd-chart-quarter"></canvas></div>
           <div class="gtd-table-wrap">
             <table class="gtd-table gtd-metrics-table">
               <tbody><tr><td>задач</td><td id="m-q-tasks">-</td></tr><tr><td>% выполнения</td><td id="m-q-pct">-</td></tr></tbody>
             </table>
           </div>
           <h3>Спринты_среднее</h3>
+          <div class="gtd-chart-wrap"><canvas id="gtd-chart-sprints-avg"></canvas></div>
           <div class="gtd-table-wrap">
             <table class="gtd-table gtd-metrics-table" id="gtd-metrics-sprints-avg">
               <thead><tr><th></th><th>2019</th><th>2020</th><th>2021</th><th>2022</th><th>2023</th><th>2024</th><th>2025</th><th>2026</th></tr></thead>
               <tbody>
-                <tr><td>цели_спринты</td><td colspan="9"></td></tr>
                 <tr><td>задачи</td><td>9</td><td>6</td><td>2</td><td>19</td><td>16</td><td>21</td><td>10</td><td id="m-avg-2026-tasks">-</td></tr>
                 <tr><td>выполнено</td><td>4</td><td>3</td><td>1</td><td>7</td><td>9</td><td>14</td><td>6</td><td id="m-avg-2026-done">-</td></tr>
                 <tr><td>выполнение</td><td>42%</td><td>59%</td><td>54%</td><td>35%</td><td>53%</td><td>66%</td><td>56%</td><td id="m-avg-2026-pct">-</td></tr>
@@ -996,11 +1000,11 @@
             </table>
           </div>
           <h2>Выполнение годовых целей</h2>
+          <div class="gtd-chart-wrap"><canvas id="gtd-chart-goals-year"></canvas></div>
           <div class="gtd-table-wrap">
             <table class="gtd-table gtd-metrics-table" id="gtd-metrics-goals-year">
               <thead><tr><th></th><th>2019</th><th>2020</th><th>2021</th><th>2022</th><th>2023</th><th>2024</th><th>2025</th><th>2026</th></tr></thead>
               <tbody>
-                <tr><td>цели_год</td><td colspan="9"></td></tr>
                 <tr><td>задачи</td><td>9</td><td>6</td><td>2</td><td>19</td><td>16</td><td>21</td><td>10</td><td id="m-year-2026-tasks">-</td></tr>
                 <tr><td>выполнено</td><td>4</td><td>3</td><td>1</td><td>7</td><td>9</td><td>14</td><td>6</td><td id="m-year-2026-done">-</td></tr>
                 <tr><td>выполнение</td><td>42%</td><td>59%</td><td>54%</td><td>35%</td><td>53%</td><td>66%</td><td>56%</td><td id="m-year-2026-pct">-</td></tr>
@@ -1282,6 +1286,95 @@
       const avgProg = taskCount > 0 ? Math.round(sumProg / taskCount) : 0;
       return { taskCount, avgProg };
     }
+    let gtdCharts = {};
+    function destroyChart(id) {
+      const c = gtdCharts[id];
+      if (c) { c.destroy(); delete gtdCharts[id]; }
+    }
+    function renderMetricsCharts() {
+      if (typeof Chart === 'undefined') return;
+      const s4 = computeSprint4Totals();
+      const q = computeQuarterTotals();
+      const s1 = METRICS_SPRINTS_2026_HIST.s1, s2 = METRICS_SPRINTS_2026_HIST.s2, s3 = METRICS_SPRINTS_2026_HIST.s3;
+      const totTasks = s1.tasks + s2.tasks + s3.tasks + s4.taskCount;
+      const weightedPct = totTasks > 0 ? Math.round((s1.tasks*s1.pct + s2.tasks*s2.pct + s3.tasks*s3.pct + s4.taskCount*s4.avgProg) / totTasks) : 0;
+      const goalsArea = defaultGoalsByArea, goalsProj = defaultGoalsByProject;
+      let gSum = 0;
+      goalsArea.forEach(g => { const n = parseFloat(String(g.progress||'').replace(/%/g,'')); gSum += isNaN(n) ? 0 : n; });
+      goalsProj.forEach(g => { const n = parseFloat(String(g.progress||'').replace(/%/g,'')); gSum += isNaN(n) ? 0 : n; });
+      const gCount = goalsArea.length + goalsProj.length;
+      const gAvg = gCount > 0 ? Math.round(gSum / gCount) : 0;
+
+      destroyChart('gtd-chart-sprints-2026');
+      const c1 = document.getElementById('gtd-chart-sprints-2026');
+      if (c1) {
+        gtdCharts['gtd-chart-sprints-2026'] = new Chart(c1, {
+          type: 'bar',
+          data: {
+            labels: ['Спринт 1','Спринт 2','Спринт 3','Спринт 4'],
+            datasets: [
+              { label: 'задач', data: [s1.tasks,s2.tasks,s3.tasks,s4.taskCount], backgroundColor: 'rgba(35,131,226,0.6)' },
+              { label: '% выполнения', data: [s1.pct,s2.pct,s3.pct,s4.avgProg], type: 'line', borderColor: '#2383e2', backgroundColor: 'transparent', yAxisID: 'y1', tension: 0.2 }
+            ]
+          },
+          options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true }, y1: { position: 'right', min: 0, max: 100 } } }
+        });
+      }
+
+      destroyChart('gtd-chart-quarter');
+      const c2 = document.getElementById('gtd-chart-quarter');
+      if (c2) {
+        gtdCharts['gtd-chart-quarter'] = new Chart(c2, {
+          type: 'doughnut',
+          data: {
+            labels: ['Выполнено ' + q.avgProg + '%','Осталось ' + (100 - q.avgProg) + '%'],
+            datasets: [{ data: [q.avgProg, Math.max(0, 100 - q.avgProg)], backgroundColor: ['#2383e2','#e8e8e6'] }]
+          },
+          options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' }, title: { display: true, text: q.taskCount + ' задач 1Q' } } }
+        });
+      }
+
+      const years = [2019,2020,2021,2022,2023,2024,2025,2026];
+      const avgTasks = years.map(y => y === 2026 ? totTasks : (METRICS_SPRINTS_AVG_HIST[y]?.tasks ?? 0));
+      const avgDone = years.map(y => y === 2026 ? Math.round(totTasks * weightedPct / 100) : (METRICS_SPRINTS_AVG_HIST[y]?.done ?? 0));
+      const avgPct = years.map(y => y === 2026 ? weightedPct : (METRICS_SPRINTS_AVG_HIST[y]?.pct ?? 0));
+      destroyChart('gtd-chart-sprints-avg');
+      const c3 = document.getElementById('gtd-chart-sprints-avg');
+      if (c3) {
+        gtdCharts['gtd-chart-sprints-avg'] = new Chart(c3, {
+          type: 'bar',
+          data: {
+            labels: years.map(String),
+            datasets: [
+              { label: 'задачи', data: avgTasks, backgroundColor: 'rgba(35,131,226,0.6)' },
+              { label: 'выполнено', data: avgDone, backgroundColor: 'rgba(35,131,226,0.3)' },
+              { label: '%', data: avgPct, type: 'line', borderColor: '#2383e2', backgroundColor: 'transparent', yAxisID: 'y1', tension: 0.2 }
+            ]
+          },
+          options: { responsive: true, maintainAspectRatio: false, scales: { y: { stacked: false, beginAtZero: true }, y1: { position: 'right', min: 0, max: 100 } } }
+        });
+      }
+
+      const goalsTasks = years.map(y => y === 2026 ? gCount : (METRICS_GOALS_YEAR_HIST[y]?.tasks ?? 0));
+      const goalsDone = years.map(y => y === 2026 ? Math.round(gCount * gAvg / 100) : (METRICS_GOALS_YEAR_HIST[y]?.done ?? 0));
+      const goalsPct = years.map(y => y === 2026 ? gAvg : (METRICS_GOALS_YEAR_HIST[y]?.pct ?? 0));
+      destroyChart('gtd-chart-goals-year');
+      const c4 = document.getElementById('gtd-chart-goals-year');
+      if (c4) {
+        gtdCharts['gtd-chart-goals-year'] = new Chart(c4, {
+          type: 'bar',
+          data: {
+            labels: years.map(String),
+            datasets: [
+              { label: 'задачи', data: goalsTasks, backgroundColor: 'rgba(35,131,226,0.6)' },
+              { label: 'выполнено', data: goalsDone, backgroundColor: 'rgba(35,131,226,0.3)' },
+              { label: '%', data: goalsPct, type: 'line', borderColor: '#2383e2', backgroundColor: 'transparent', yAxisID: 'y1', tension: 0.2 }
+            ]
+          },
+          options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true }, y1: { position: 'right', min: 0, max: 100 } } }
+        });
+      }
+    }
     function updateMetrics() {
       const s4 = computeSprint4Totals();
       const q = computeQuarterTotals();
@@ -1307,6 +1400,7 @@
       if (el('m-year-2026-tasks')) el('m-year-2026-tasks').textContent = gCount;
       if (el('m-year-2026-done')) el('m-year-2026-done').textContent = gDone;
       if (el('m-year-2026-pct')) el('m-year-2026-pct').textContent = gAvg + '%';
+      renderMetricsCharts();
     }
     function refreshSprints() {
       saveSprint4FromDom();
@@ -1342,6 +1436,7 @@
           const id = tab.dataset.tab;
           document.querySelectorAll('.gtd-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === id));
           document.querySelectorAll('.gtd-panel').forEach(p => p.classList.toggle('active', p.id === 'gtd-panel-' + id));
+          if (id === 'metrics') setTimeout(() => { Object.values(gtdCharts).forEach(c => { if (c) c.resize(); }); }, 100);
         };
       });
     }
