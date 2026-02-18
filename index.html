@@ -348,6 +348,10 @@
     .gtd-login-btn { display: inline-block; margin-top: 16px; padding: 10px 20px; background: var(--accent); color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.9375rem; }
     .gtd-login-btn:hover { background: var(--accent-hover); }
     .gtd-login-form { max-width: 320px; margin-top: 16px; }
+    .health-add-form { max-width: 480px; margin-top: 16px; }
+    .health-add-form .health-form-row { margin-bottom: 12px; }
+    .health-add-form label { display: block; font-size: 0.875rem; margin-bottom: 4px; color: var(--text-muted); }
+    .health-add-form input, .health-add-form select { width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.9375rem; box-sizing: border-box; }
     .gtd-login-form input { width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 6px; margin-bottom: 12px; font-size: 0.9375rem; box-sizing: border-box; }
     .gtd-login-form input:focus { outline: none; border-color: var(--accent); }
     .gtd-tabs { display: flex; gap: 4px; margin-bottom: 20px; border-bottom: 1px solid var(--border); }
@@ -506,7 +510,7 @@
           </div>
         `
       },
-      { id: 'health', name: 'Здоровье', locked: true, content: `<p>Раздел под замком.</p>` },
+      { id: 'health', name: 'Здоровье', locked: true, authFor: 'gtd', content: null },
       { id: 'finance', name: 'Финансы', locked: true, content: `<p>Раздел под замком.</p>` },
       { id: 'family', name: 'Семья', locked: true, content: `<p>Раздел под замком.</p>` },
       {
@@ -633,8 +637,51 @@
       });
 
       const main = document.getElementById('main-content');
-      main.classList.toggle('gtd-wide', id === 'gtd');
+      main.classList.toggle('gtd-wide', id === 'gtd' || id === 'health');
 
+      if (id === 'health') {
+        const gtdUnlocked = sessionStorage.getItem('gtd_unlocked') === '1';
+        if (!gtdUnlocked) {
+          main.innerHTML = `
+            <h1 class="page-title">Здоровье</h1>
+            <p class="page-meta">🔒 Раздел под замком</p>
+            <div class="block">
+              <p>Показатели, анализы, динамика. Войди для доступа (тот же логин/пароль, что и GTD).</p>
+              <form class="gtd-login-form" id="health-login-form">
+                <input type="email" id="health-email" placeholder="Email" autocomplete="email" required>
+                <input type="password" id="health-password" placeholder="Пароль" autocomplete="current-password" required>
+                <button type="submit" class="gtd-login-btn">Войти</button>
+                <div id="health-auth-error" class="error" style="display: none; margin-top: 8px;"></div>
+              </form>
+            </div>
+          `;
+          document.getElementById('health-login-form').onsubmit = function(e) {
+            e.preventDefault();
+            const email = document.getElementById('health-email').value.trim().toLowerCase();
+            const password = document.getElementById('health-password').value.trim();
+            const errEl = document.getElementById('health-auth-error');
+            const expectedEmail = AUTH_CREDENTIALS.email.trim().toLowerCase();
+            const expectedPass = AUTH_CREDENTIALS.password;
+            if (email === expectedEmail && password === expectedPass) {
+              sessionStorage.setItem('gtd_unlocked', '1');
+              selectSection('health');
+            } else {
+              errEl.textContent = 'Неверный email или пароль';
+              errEl.style.display = 'block';
+            }
+          };
+        } else {
+          main.innerHTML = '<h1 class="page-title">Здоровье</h1><p class="page-meta">Загрузка…</p><div class="block"></div>';
+          const html = await loadHealthContent();
+          main.innerHTML = `
+            <h1 class="page-title">Здоровье</h1>
+            <p class="page-meta">Показатели, анализы, динамика</p>
+            <div class="block">${html}</div>
+          `;
+          bindHealth();
+        }
+        return;
+      }
       if (id === 'gtd') {
         const gtdUnlocked = sessionStorage.getItem('gtd_unlocked') === '1';
         if (!gtdUnlocked) {
@@ -1432,6 +1479,138 @@
       const addDateBtn = document.getElementById('gtd-sprint4-add-date');
       if (addDateBtn) addDateBtn.onclick = addSprint4DateRow;
       bindSprint4Editable();
+    }
+    const HEALTH_DATA_KEY = 'avatar_health_data';
+    const HEALTH_CATEGORIES = [
+      { id: 'weight', name: 'Вес', unit: 'кг' },
+      { id: 'pulse', name: 'Пульс', unit: 'уд/мин' },
+      { id: 'blood', name: 'Анализ крови', unit: '' },
+      { id: 'sperm', name: 'Спермограмма', unit: '' },
+      { id: 'other', name: 'Другое', unit: '' }
+    ];
+    function loadHealthData() {
+      try {
+        const raw = localStorage.getItem(HEALTH_DATA_KEY);
+        if (raw) return JSON.parse(raw);
+      } catch (e) {}
+      return { weight: [], pulse: [], analyses: [] };
+    }
+    function saveHealthData(data) {
+      try { localStorage.setItem(HEALTH_DATA_KEY, JSON.stringify(data)); } catch (e) {}
+    }
+    function loadHealthContent() {
+      const data = loadHealthData();
+      const fmtDate = d => {
+        if (!d) return '-';
+        const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(d);
+        if (m) return `${m[3]}.${m[2]}.${m[1]}`;
+        return d;
+      };
+      const weightRows = (data.weight || []).slice().sort((a,b) => (b.date||'').localeCompare(a.date||'')).slice(0, 50).map(r => `<tr><td>${escapeHtml(fmtDate(r.date))}</td><td>${escapeHtml(String(r.value??''))}</td><td>${escapeHtml(r.notes||'')}</td></tr>`).join('') || '<tr><td colspan="3" class="empty">Нет данных. Добавь в разделе «Добавить».</td></tr>';
+      const pulseRows = (data.pulse || []).slice().sort((a,b) => (b.date||'').localeCompare(a.date||'')).slice(0, 50).map(r => `<tr><td>${escapeHtml(fmtDate(r.date))}</td><td>${escapeHtml(String(r.value??''))}</td><td>${escapeHtml(r.notes||'')}</td></tr>`).join('') || '<tr><td colspan="3" class="empty">Нет данных.</td></tr>';
+      const analyses = (data.analyses || []).slice().sort((a,b) => (b.date||'').localeCompare(a.date||'')).slice(0, 100);
+      const analysesRows = analyses.map(r => {
+        const typeName = HEALTH_CATEGORIES.find(c => c.id === r.type)?.name || r.type || '—';
+        const fileName = (r.file || r.description || '').toString();
+        const isFile = /\.pdf$|[/\\]/.test(fileName);
+        const fileCell = isFile ? escapeHtml((fileName.split(/[/\\]/).pop() || fileName).slice(0, 40)) : '';
+        return `<tr><td>${escapeHtml(fmtDate(r.date))}</td><td>${escapeHtml(typeName)}</td><td>${escapeHtml((r.description||'').slice(0, 120))}</td><td>${fileCell}</td><td>${escapeHtml(r.notes||'')}</td></tr>`;
+      }).join('') || '<tr><td colspan="5" class="empty">Нет данных. Добавь в разделе «Добавить».</td></tr>';
+
+      return `
+        <div class="gtd-tabs">
+          <button type="button" class="gtd-tab active" data-tab="metrics">Показатели</button>
+          <button type="button" class="gtd-tab" data-tab="analyses">Анализы</button>
+          <button type="button" class="gtd-tab" data-tab="add">Добавить</button>
+        </div>
+        <div id="health-panel-metrics" class="gtd-panel active">
+          <h2>Вес (кг)</h2>
+          <div class="gtd-table-wrap">
+            <table class="gtd-table">
+              <thead><tr><th>Дата</th><th>Значение</th><th>Примечание</th></tr></thead>
+              <tbody id="health-weight-tbody">${weightRows}</tbody>
+            </table>
+          </div>
+          <h2>Пульс (уд/мин)</h2>
+          <div class="gtd-table-wrap">
+            <table class="gtd-table">
+              <thead><tr><th>Дата</th><th>Значение</th><th>Примечание</th></tr></thead>
+              <tbody id="health-pulse-tbody">${pulseRows}</tbody>
+            </table>
+          </div>
+        </div>
+        <div id="health-panel-analyses" class="gtd-panel">
+          <p class="gtd-overview">Результаты анализов с датами. Файлы — по ссылке или путь к PDF.</p>
+          <div class="gtd-table-wrap">
+            <table class="gtd-table">
+              <thead><tr><th>Дата</th><th>Тип</th><th>Описание / ключевые показатели</th><th>Файл</th><th>Примечание</th></tr></thead>
+              <tbody id="health-analyses-tbody">${analysesRows}</tbody>
+            </table>
+          </div>
+        </div>
+        <div id="health-panel-add" class="gtd-panel">
+          <p class="gtd-overview">Добавить запись. <strong>Дата обязательна</strong> (формат ГГГГ-ММ-ДД).</p>
+          <form id="health-add-form" class="health-add-form">
+            <div class="health-form-row">
+              <label>Дата *</label>
+              <input type="date" id="health-add-date" required>
+            </div>
+            <div class="health-form-row">
+              <label>Категория</label>
+              <select id="health-add-category">
+                ${HEALTH_CATEGORIES.map(c => `<option value="${c.id}">${c.name}</option>`).join('')}
+              </select>
+            </div>
+            <div class="health-form-row" id="health-add-value-wrap">
+              <label>Значение</label>
+              <input type="text" id="health-add-value" placeholder="число для вес/пульс">
+            </div>
+            <div class="health-form-row">
+              <label>Описание / файл</label>
+              <input type="text" id="health-add-desc" placeholder="описание или путь к файлу (для анализов)">
+            </div>
+            <div class="health-form-row">
+              <label>Примечание</label>
+              <input type="text" id="health-add-notes" placeholder="дополнительно">
+            </div>
+            <button type="submit" class="gtd-login-btn">Добавить</button>
+          </form>
+        </div>
+      `;
+    }
+    function bindHealth() {
+      document.querySelectorAll('.gtd-tab[data-tab]').forEach(tab => {
+        tab.onclick = () => {
+          const id = tab.dataset.tab;
+          document.querySelectorAll('.gtd-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === id));
+          document.querySelectorAll('[id^="health-panel-"]').forEach(p => p.classList.toggle('active', p.id === 'health-panel-' + id));
+        };
+      });
+      const form = document.getElementById('health-add-form');
+      if (form) form.onsubmit = function(e) {
+        e.preventDefault();
+        const date = (document.getElementById('health-add-date').value || '').trim();
+        const cat = (document.getElementById('health-add-category').value || 'other').trim();
+        const value = (document.getElementById('health-add-value').value || '').trim();
+        const desc = (document.getElementById('health-add-desc').value || '').trim();
+        const notes = (document.getElementById('health-add-notes').value || '').trim();
+        if (!date) { alert('Укажи дату'); return; }
+        const data = loadHealthData();
+        if (cat === 'weight' || cat === 'pulse') {
+          if (!data[cat]) data[cat] = [];
+          data[cat].push({ date, value: value || '-', notes });
+        } else {
+          if (!data.analyses) data.analyses = [];
+          const isPath = /\.(pdf|jpg|png)$|^[a-zA-Z]:[\\/]|^[\\/]/i.test(desc);
+          data.analyses.push({ date, type: cat, description: desc, file: isPath ? desc : '', notes });
+        }
+        saveHealthData(data);
+        document.getElementById('health-add-date').value = '';
+        document.getElementById('health-add-value').value = '';
+        document.getElementById('health-add-desc').value = '';
+        document.getElementById('health-add-notes').value = '';
+        selectSection('health');
+      };
     }
     function bindGtdTabs() {
       document.querySelectorAll('.gtd-tab').forEach(tab => {
