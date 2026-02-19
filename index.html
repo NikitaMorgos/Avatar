@@ -924,13 +924,14 @@
       }).join('');
       const manualLife = gtd1QState.manualLife || defaultManualLife;
       const manualDate = gtd1QState.manualDate || defaultManualDate;
+      const fmtProg = (p) => { const s = String(p || '').trim(); if (s === '') return '0%'; return s.match(/%$/) ? s : (parseFloat(s.replace(/%/g,'')) || 0) + '%'; };
       const sprint4LifeRows = manualLife.map((m, i) => {
         const rowId = 'life|' + i;
-        return `<tr data-rowid="${escapeHtml(rowId)}" data-rowtype="life"><td>life</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="name">${escapeHtml(m.name || '')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="ap">${escapeHtml(m.ap || '')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="sub">${escapeHtml(m.sub || '')}</td><td class="gtd-cell-editable gtd-cell-text" contenteditable="true" data-col="desc">${escapeHtml(m.desc || '')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="progress">${escapeHtml(m.progress || '0%')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="status">${escapeHtml(m.status || '')}</td></tr>`;
+        return `<tr data-rowid="${escapeHtml(rowId)}" data-rowtype="life"><td>life</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="name">${escapeHtml(m.name || '')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="ap">${escapeHtml(m.ap || '')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="sub">${escapeHtml(m.sub || '')}</td><td class="gtd-cell-editable gtd-cell-text" contenteditable="true" data-col="desc">${escapeHtml(m.desc || '')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="progress">${escapeHtml(fmtProg(m.progress))}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="status">${escapeHtml(m.status || '')}</td></tr>`;
       }).join('');
       const sprint4DateRows = manualDate.map((m, i) => {
         const rowId = 'date|' + i;
-        return `<tr data-rowid="${escapeHtml(rowId)}" data-rowtype="date"><td>date</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="name">${escapeHtml(m.name || '')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="ap">${escapeHtml(m.ap || '')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="sub">${escapeHtml(m.sub || '')}</td><td class="gtd-cell-editable gtd-cell-text" contenteditable="true" data-col="desc">${escapeHtml(m.desc || '')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="progress">${escapeHtml(m.progress || '0%')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="status">${escapeHtml(m.status || '')}</td></tr>`;
+        return `<tr data-rowid="${escapeHtml(rowId)}" data-rowtype="date"><td>date</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="name">${escapeHtml(m.name || '')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="ap">${escapeHtml(m.ap || '')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="sub">${escapeHtml(m.sub || '')}</td><td class="gtd-cell-editable gtd-cell-text" contenteditable="true" data-col="desc">${escapeHtml(m.desc || '')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="progress">${escapeHtml(fmtProg(m.progress))}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="status">${escapeHtml(m.status || '')}</td></tr>`;
       }).join('');
       const taskCount = area1Q.length + proj1Q.length + manualLife.length + manualDate.length;
       let sumProg = 0;
@@ -1208,13 +1209,14 @@
         const name = goalName(key, 'project');
         return `<tr data-rowid="${escapeHtml(rowId)}" data-rowtype="project"><td>project</td><td class="gtd-cell-oneline" title="${escapeHtml(name)}">${escapeHtml(name)}</td><td>${escapeHtml(g.proj)}</td><td>${escapeHtml(g.proj1 || '-')}</td><td class="gtd-cell-editable gtd-cell-text" contenteditable="true" data-col="desc">${escapeHtml(formul)}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="progress">${escapeHtml(prog !== '' ? prog + (String(prog).match(/%$/) ? '' : '%') : '0%')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="status">${escapeHtml(st)}</td></tr>`;
       }).join('');
+      const fmtProg = (p) => { const s = String(p || '').trim(); if (s === '') return '0%'; return s.match(/%$/) ? s : (parseFloat(s.replace(/%/g,'')) || 0) + '%'; };
       const lifeRows = manualLife.map((m, i) => {
         const rowId = 'life|' + i;
-        return `<tr data-rowid="${escapeHtml(rowId)}" data-rowtype="life"><td>life</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="name">${escapeHtml(m.name || '')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="ap">${escapeHtml(m.ap || '')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="sub">${escapeHtml(m.sub || '')}</td><td class="gtd-cell-editable gtd-cell-text" contenteditable="true" data-col="desc">${escapeHtml(m.desc || '')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="progress">${escapeHtml(m.progress || '0%')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="status">${escapeHtml(m.status || '')}</td></tr>`;
+        return `<tr data-rowid="${escapeHtml(rowId)}" data-rowtype="life"><td>life</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="name">${escapeHtml(m.name || '')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="ap">${escapeHtml(m.ap || '')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="sub">${escapeHtml(m.sub || '')}</td><td class="gtd-cell-editable gtd-cell-text" contenteditable="true" data-col="desc">${escapeHtml(m.desc || '')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="progress">${escapeHtml(fmtProg(m.progress))}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="status">${escapeHtml(m.status || '')}</td></tr>`;
       }).join('');
       const dateRows = manualDate.map((m, i) => {
         const rowId = 'date|' + i;
-        return `<tr data-rowid="${escapeHtml(rowId)}" data-rowtype="date"><td>date</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="name">${escapeHtml(m.name || '')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="ap">${escapeHtml(m.ap || '')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="sub">${escapeHtml(m.sub || '')}</td><td class="gtd-cell-editable gtd-cell-text" contenteditable="true" data-col="desc">${escapeHtml(m.desc || '')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="progress">${escapeHtml(m.progress || '0%')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="status">${escapeHtml(m.status || '')}</td></tr>`;
+        return `<tr data-rowid="${escapeHtml(rowId)}" data-rowtype="date"><td>date</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="name">${escapeHtml(m.name || '')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="ap">${escapeHtml(m.ap || '')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="sub">${escapeHtml(m.sub || '')}</td><td class="gtd-cell-editable gtd-cell-text" contenteditable="true" data-col="desc">${escapeHtml(m.desc || '')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="progress">${escapeHtml(fmtProg(m.progress))}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="status">${escapeHtml(m.status || '')}</td></tr>`;
       }).join('');
       const taskCount = area1Q.length + proj1Q.length + manualLife.length + manualDate.length;
       let sumProg = 0;
@@ -1463,13 +1465,13 @@
     }
     function addSprint4LifeRow() {
       gtd1QState.manualLife = gtd1QState.manualLife || [];
-      gtd1QState.manualLife.push({ name: '', ap: '', sub: '', desc: '', progress: '', status: '' });
+      gtd1QState.manualLife.push({ name: '', ap: '', sub: '', desc: '', progress: '0%', status: '' });
       saveGtd1QState(gtd1QState);
       updateSprint4Table();
     }
     function addSprint4DateRow() {
       gtd1QState.manualDate = gtd1QState.manualDate || [];
-      gtd1QState.manualDate.push({ name: '', ap: '', sub: '', desc: '', progress: '', status: '' });
+      gtd1QState.manualDate.push({ name: '', ap: '', sub: '', desc: '', progress: '0%', status: '' });
       saveGtd1QState(gtd1QState);
       updateSprint4Table();
     }
