@@ -59,6 +59,11 @@ MENU_BUTTON_URL = (os.getenv("MENU_BUTTON_URL") or "").strip() or None
 REVIEW_DAILY_TIME = (os.getenv("REVIEW_DAILY_TIME") or "").strip() or None
 RAW_OWNER_USER_ID = int(os.getenv("RAW_OWNER_USER_ID", "0")) or None
 
+# Напоминания об отчёте по спринту: с даты SPRINT_REMINDER_START, в SPRINT_REMINDER_TIME, пока не сдан.
+SPRINT_REMINDER_START = (os.getenv("SPRINT_REMINDER_START") or "2026-02-26").strip()
+SPRINT_REMINDER_TIME = (os.getenv("SPRINT_REMINDER_TIME") or "10:00").strip()
+CURRENT_SPRINT_ID = (os.getenv("CURRENT_SPRINT_ID") or "s4_2026").strip()
+
 # Глобальный планировщик (для /postat и заготовок)
 _scheduler: AsyncIOScheduler | None = None
 
@@ -148,6 +153,17 @@ def init_db() -> None:
             logger.info("Added tags column to raw")
         except sqlite3.OperationalError:
             pass  # колонка уже есть
+        # sprint_reports: сданные отчёты по спринтам (для напоминаний + Perplexity)
+        conn.executescript("""
+            CREATE TABLE IF NOT EXISTS sprint_reports (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                sprint_id TEXT NOT NULL,
+                user_id INTEGER NOT NULL,
+                submitted_at TEXT NOT NULL,
+                UNIQUE(sprint_id, user_id)
+            );
+            CREATE INDEX IF NOT EXISTS idx_sprint_reports_id ON sprint_reports(sprint_id, user_id);
+        """)
     logger.info("DB initialized: %s", DB_PATH)
 
 
@@ -346,11 +362,23 @@ def count_photos_sent_today_by_user(user_id: int) -> int:
 async def _post_media_to_channel(
     bot: Bot, file_id: str, caption: str | None, media_type: str = "photo"
 ) -> None:
-    """Публикует фото или видео в канал."""
+    """Публикует фото, видео или видеосообщение (кружок) в канал."""
     if media_type == "video":
         await bot.send_video(chat_id=CHANNEL_ID, video=file_id, caption=caption)
+    elif media_type == "video_note":
+        await bot.send_video_note(chat_id=CHANNEL_ID, video_note=file_id)
     else:
         await bot.send_photo(chat_id=CHANNEL_ID, photo=file_id, caption=caption)
+
+
+def sprint_report_submitted(sprint_id: str, user_id: int) -> bool:
+    """Проверяет, сдан ли отчёт по спринту."""
+    with sqlite3.connect(DB_PATH) as conn:
+        row = conn.execute(
+            "SELECT 1 FROM sprint_reports WHERE sprint_id = ? AND user_id = ?",
+            (sprint_id, user_id),
+        ).fetchone()
+    return row is not None
 
 
 def get_owner_user_id() -> int | None:
@@ -493,6 +521,58 @@ async def on_video(message: Message, bot: Bot) -> None:
         await message.reply("Не удалось сохранить. Попробуй позже.")
 
 
+async def on_video_note(message: Message, bot: Bot) -> None:
+    """Обработчик: видеокружок (video note). Предлагает запостить по команде /post."""
+    user_id = message.from_user.id if message.from_user else 0
+    chat_id = message.chat.id
+    message_id = message.message_id
+    comment = message.caption or ""
+
+    video_note = message.video_note
+    if not video_note:
+        await message.reply("Не вижу видеосообщение. Отправь видео или видеокружок.")
+        return
+
+    file_id = video_note.file_id
+
+    if user_id in _adding_stock:
+        add_fallback(user_id, file_id, media_type="video_note")
+        n = get_fallback_unused_count_for_user(user_id)
+        await message.reply(f"Добавил в заготовки ✓ Осталось: {n}. Ещё медиа или /done.")
+        return
+
+    is_raw = user_id in _adding_raw or (comment and re.search(r"#raw\b", comment, re.I))
+    if is_raw:
+        content = re.sub(r"#raw\b", "", comment, flags=re.I).strip() if comment else ""
+        cleaned, tags = extract_raw_tags(content)
+        raw_id = save_raw(
+            user_id, chat_id, cleaned or "🎬 Видеокружок", source="Telegram",
+            metadata={"video_note_file_id": file_id}, tags=tags or None
+        )
+        tags_hint = f" #{','.join(tags)}" if tags else ""
+        suffix = " Ещё медиа или /done." if user_id in _adding_raw else ""
+        await message.reply(f"✓ В Raw #%s%s%s" % (raw_id, tags_hint, suffix))
+        return
+
+    try:
+        rowid = save_entry(user_id, chat_id, message_id, file_id, comment, media_type="video_note")
+        if CHANNEL_ID:
+            _pending_post[user_id] = {
+                "entry_id": rowid,
+                "file_id": file_id,
+                "caption": comment if comment else None,
+                "media_type": "video_note",
+            }
+            await message.reply(
+                "Видео получено ✓ Напиши /post чтобы опубликовать в канал."
+            )
+        else:
+            await message.reply("Записал ✓")
+    except Exception as e:
+        logger.exception("Error saving video_note: %s", e)
+        await message.reply("Не удалось сохранить. Попробуй позже.")
+
+
 async def cmd_diary(message: Message) -> None:
     """/diary <текст> — сохранить в Raw с тегом diary. Шорткат для /raw + #diary."""
     user_id = message.from_user.id if message.from_user else 0
@@ -630,6 +710,27 @@ async def cmd_stock(message: Message) -> None:
     user_id = message.from_user.id if message.from_user else 0
     n = get_fallback_unused_count_for_user(user_id)
     await message.reply(f"Заготовок: {n}. Пополнить — /addstock.")
+
+
+async def run_sprint_reminder(bot: Bot) -> None:
+    """Напоминание об отчёте по спринту (с SPRINT_REMINDER_START, пока не сдан)."""
+    uid = RAW_OWNER_USER_ID or get_owner_user_id()
+    if not uid:
+        return
+    try:
+        from datetime import date
+        today = date.today().isoformat()
+        if today < SPRINT_REMINDER_START:
+            return
+        if sprint_report_submitted(CURRENT_SPRINT_ID, uid):
+            return
+        await bot.send_message(
+            chat_id=uid,
+            text="📋 Напоминание: пора сдать отчёт по спринту. Открой Avatar → СПРИНТЫ → нажми «Сдать отчёт» — Perplexity пришлёт анализ в PDF.",
+        )
+        logger.info("Sprint reminder sent to %s for %s", uid, CURRENT_SPRINT_ID)
+    except Exception as e:
+        logger.exception("Sprint reminder failed: %s", e)
 
 
 async def run_daily_review(bot: Bot) -> None:
@@ -784,7 +885,7 @@ async def cmd_post(message: Message, bot: Bot) -> None:
     """Опубликовать в канал последнее сохранённое видео (после отправки видео напиши /post)."""
     user_id = message.from_user.id if message.from_user else 0
     if user_id not in _pending_post:
-        await message.reply("Нет сохранённого видео. Отправь видео, затем напиши /post.")
+        await message.reply("Нет сохранённого видео. Отправь видео или видеокружок, затем напиши /post.")
         return
     if not CHANNEL_ID:
         await message.reply("CHANNEL_ID не задан.")
@@ -960,10 +1061,11 @@ def main() -> None:
     dp.message.register(on_forwarded_from_channel, F.forward_origin)  # до on_photo!
     dp.message.register(on_photo, F.photo)
     dp.message.register(on_video, F.video)
+    dp.message.register(on_video_note, F.video_note)
     dp.message.register(on_text_to_raw, F.text)  # текст/ссылки → Raw
 
-    # Планировщик: постинг, fallback, ежедневный RAPA-обзор
-    if CHANNEL_ID or REVIEW_DAILY_TIME:
+    # Планировщик: постинг, fallback, RAPA-обзор, напоминания по спринту
+    if CHANNEL_ID or REVIEW_DAILY_TIME or (SPRINT_REMINDER_START and CURRENT_SPRINT_ID):
         async def start_scheduler(*_):
             global _scheduler
             _scheduler = AsyncIOScheduler()
@@ -988,6 +1090,13 @@ def main() -> None:
                     logger.info("Daily review: at %s", REVIEW_DAILY_TIME)
                 except (ValueError, IndexError) as e:
                     logger.warning("Invalid REVIEW_DAILY_TIME: %s", e)
+            if SPRINT_REMINDER_START and CURRENT_SPRINT_ID:
+                try:
+                    h, m = map(int, (SPRINT_REMINDER_TIME or "10:00").strip().split(":"))
+                    _scheduler.add_job(run_sprint_reminder, "cron", hour=h, minute=m, args=[bot])
+                    logger.info("Sprint reminder: daily at %s (from %s)", SPRINT_REMINDER_TIME, SPRINT_REMINDER_START)
+                except (ValueError, IndexError) as e:
+                    logger.warning("Invalid SPRINT_REMINDER_TIME: %s", e)
             _scheduler.start()
         dp.startup.register(start_scheduler)
 

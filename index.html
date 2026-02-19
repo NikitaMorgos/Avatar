@@ -990,7 +990,7 @@
           <p class="gtd-overview">Goals 1Q2026, формулировки спринта. <button type="button" class="gtd-login-btn" id="gtd-sprints-refresh-btn">Обновить</button></p>
           <div id="gtd-export-sprints">
           <h2>Спринт 4 (${getSprintDates(4)})</h2>
-          <p style="margin:0 0 8px"><button type="button" class="gtd-login-btn" id="gtd-sprint4-add-life" style="padding:6px 12px;font-size:0.8rem">+ life</button> <button type="button" class="gtd-login-btn" id="gtd-sprint4-add-date" style="padding:6px 12px;font-size:0.8rem">+ date</button></p>
+          <p style="margin:0 0 8px"><button type="button" class="gtd-login-btn" id="gtd-sprint4-add-life" style="padding:6px 12px;font-size:0.8rem">+ life</button> <button type="button" class="gtd-login-btn" id="gtd-sprint4-add-date" style="padding:6px 12px;font-size:0.8rem">+ date</button> <button type="button" class="gtd-login-btn" id="gtd-sprint4-submit-btn" style="padding:6px 12px;font-size:0.8rem">Сдать отчёт</button></p>
           <div class="gtd-table-wrap">
             <table class="gtd-table gtd-sprint4-table">
               <thead><tr><th>type</th><th>Name</th><th>A/P</th><th>Sub</th><th>Description</th><th>Progress %</th><th>Status</th></tr></thead>
@@ -1268,7 +1268,7 @@
       let totalRow = tbody.querySelector('tr.gtd-sprint4-total');
       if (totalRow) {
         totalRow.cells[1].innerHTML = taskCount + ' задач';
-        totalRow.cells[5].textContent = avgProg + '%';
+        totalRow.cells[2].textContent = avgProg + '%';
       }
     }
     function saveSprint4FromDom() {
@@ -1473,6 +1473,49 @@
       saveGtd1QState(gtd1QState);
       updateSprint4Table();
     }
+    function buildSprintReportPayload() {
+      saveSprint4FromDom();
+      const area1Q = defaultGoalsByArea.filter(g => gtd1QState.areaKeys.has(goalKeyArea(g)));
+      const proj1Q = defaultGoalsByProject.filter(g => gtd1QState.projectKeys.has(goalKeyProject(g)));
+      const manualLife = gtd1QState.manualLife || defaultManualLife;
+      const manualDate = gtd1QState.manualDate || defaultManualDate;
+      const sprintFormul = (g, src, key, type) => (gtd1QState.customFormuls && gtd1QState.customFormuls[type + '|' + key]) || (src && src.formul) || g.formul || g.desc || '-';
+      const getProg = (rowId) => (gtd1QState.sprint4Progress && gtd1QState.sprint4Progress[rowId]) != null ? Number(gtd1QState.sprint4Progress[rowId]) : 0;
+      const parseProg = v => { const n = parseFloat(String(v||'').replace(/%/g,'')); return isNaN(n) ? 0 : n; };
+      const items = [];
+      area1Q.forEach(g => {
+        const key = goalKeyArea(g);
+        const rowId = 'area|' + key;
+        const src = defaultSprints1Q2026.byArea.find(a => goalKeyArea(a) === key);
+        const formul = sprintFormul(g, src, key, 'area');
+        const prog = getProg(rowId) || parseProg((src && src.progress != null) ? src.progress : g.progress);
+        items.push({ type: 'area', name: goalName(key, 'area'), ap: g.area, sub: g.area1 || '', description: formul, progress: prog, linked_q_goal: src ? { name: goalName(key,'area'), area: g.area, sub: g.area1||'', q_description: formul, priority: g.prio||'', q_progress: prog } : null, linked_y_goal: { name: goalName(key,'area'), area: g.area, sub: g.area1||'', y_description: g.desc||'', priority: g.prio||'', y_progress: parseProg(g.progress) } });
+      });
+      proj1Q.forEach(g => {
+        const key = goalKeyProject(g);
+        const rowId = 'project|' + key;
+        const src = defaultSprints1Q2026.byProject.find(a => goalKeyProject(a) === key);
+        const formul = sprintFormul(g, src, key, 'project');
+        const prog = getProg(rowId) || parseProg((src && src.progress != null) ? src.progress : g.progress);
+        items.push({ type: 'project', name: goalName(key, 'project'), ap: g.proj, sub: g.proj1 || '', description: formul, progress: prog, linked_q_goal: src ? { name: goalName(key,'project'), project: g.proj, q_description: formul, priority: g.prio||'', q_progress: prog } : null, linked_y_goal: { name: goalName(key,'project'), project: g.proj, y_description: g.desc||'', priority: g.prio||'', y_progress: parseProg(g.progress) } });
+      });
+      manualLife.forEach((m, i) => { const p = parseProg(m.progress); items.push({ type: 'life', name: m.name||'', ap: m.ap||'', sub: m.sub||'', description: m.desc||'', progress: p }); });
+      manualDate.forEach((m, i) => { const p = parseProg(m.progress); items.push({ type: 'date', name: m.name||'', ap: m.ap||'', sub: m.sub||'', description: m.desc||'', progress: p }); });
+      return { sprint_id: 's4_2026', sprint: { id: 'Спринт 4', dates: getSprintDates(4), comment: '' }, items, insights: [] };
+    }
+    async function submitSprintReport() {
+      const apiUrl = getCollectApiUrl();
+      if (!apiUrl) { alert('Укажи URL API Collect в настройках.'); return; }
+      const btn = document.getElementById('gtd-sprint4-submit-btn');
+      if (btn) { btn.disabled = true; btn.textContent = 'Отправляю...'; }
+      try {
+        const payload = buildSprintReportPayload();
+        const r = await fetch(apiUrl.replace(/\/+$/, '') + '/api/gtd/sprint-report', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+        const j = await r.json().catch(() => ({}));
+        if (!r.ok) { alert('Ошибка: ' + (j.error || r.statusText)); return; }
+        if (j.pdf_sent) alert('Отчёт сдан ✓ PDF с анализом Perplexity отправлен в Collect бот.'); else if (j.warning) alert('Отчёт сдан. ' + j.warning); else alert('Отчёт сдан ✓');
+      } catch (e) { alert('Ошибка сети: ' + e.message); } finally { if (btn) { btn.disabled = false; btn.textContent = 'Сдать отчёт'; } }
+    }
     function bindSprintsPanel() {
       const btn = document.getElementById('gtd-sprints-refresh-btn');
       if (btn) btn.onclick = refreshSprints;
@@ -1480,6 +1523,8 @@
       if (addLifeBtn) addLifeBtn.onclick = addSprint4LifeRow;
       const addDateBtn = document.getElementById('gtd-sprint4-add-date');
       if (addDateBtn) addDateBtn.onclick = addSprint4DateRow;
+      const submitBtn = document.getElementById('gtd-sprint4-submit-btn');
+      if (submitBtn) submitBtn.onclick = submitSprintReport;
       bindSprint4Editable();
     }
     const HEALTH_DATA_KEY = 'avatar_health_data';

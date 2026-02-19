@@ -246,6 +246,101 @@ def rapa_goals():
         return jsonify({"error": str(e)}), 500
 
 
+def _ensure_sprint_reports():
+    with sqlite3.connect(DB_PATH) as conn:
+        conn.executescript("""
+            CREATE TABLE IF NOT EXISTS sprint_reports (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                sprint_id TEXT NOT NULL,
+                user_id INTEGER NOT NULL,
+                submitted_at TEXT NOT NULL,
+                UNIQUE(sprint_id, user_id)
+            );
+        """)
+
+
+def _sprint_report_submitted(sprint_id: str, user_id: int) -> bool:
+    """Проверяет, сдан ли отчёт по спринту."""
+    with sqlite3.connect(DB_PATH) as conn:
+        row = conn.execute(
+            "SELECT 1 FROM sprint_reports WHERE sprint_id = ? AND user_id = ?",
+            (sprint_id, user_id),
+        ).fetchone()
+    return row is not None
+
+
+def _save_sprint_report(sprint_id: str, user_id: int) -> None:
+    with sqlite3.connect(DB_PATH) as conn:
+        conn.execute(
+            "INSERT OR REPLACE INTO sprint_reports (sprint_id, user_id, submitted_at) VALUES (?, ?, ?)",
+            (sprint_id, user_id, datetime.utcnow().isoformat()),
+        )
+
+
+def _send_pdf_via_bot(file_path: Path, chat_id: int, caption: str = "") -> bool:
+    """Отправляет PDF пользователю в Telegram."""
+    if not BOT_TOKEN:
+        return False
+    with open(file_path, "rb") as f:
+        r = requests.post(
+            f"https://api.telegram.org/bot{BOT_TOKEN}/sendDocument",
+            data={"chat_id": chat_id, "caption": caption or "Анализ спринта от Perplexity"},
+            files={"document": (file_path.name, f, "application/pdf")},
+            timeout=30,
+        )
+    return r.ok and r.json().get("ok")
+
+
+@app.route("/api/gtd/sprint-report", methods=["POST"])
+def api_sprint_report():
+    """
+    Приём отчёта по спринту: Perplexity-анализ → PDF → отправка в Collect бот.
+    POST JSON: { sprint_id, sprint: {...}, items: [...], insights: [...], comment?: str }
+    sprint_id например "s4_2026" для напоминаний.
+    """
+    user_id = RAW_OWNER_USER_ID
+    if not user_id:
+        return jsonify({"error": "RAW_OWNER_USER_ID not set"}), 400
+    try:
+        data = request.get_json(force=True, silent=True) or {}
+    except Exception:
+        data = {}
+    sprint_id = (data.get("sprint_id") or "s4_2026").strip()
+    sprint = data.get("sprint") or {}
+    items = data.get("items") or []
+    insights = data.get("insights") or []
+    comment = (data.get("comment") or "").strip()
+    if comment:
+        sprint = {**sprint, "comment": comment}
+    payload = {"sprint": sprint, "items": items, "insights": insights}
+    _ensure_sprint_reports()
+    _save_sprint_report(sprint_id, user_id)
+    try:
+        from api.sprint_perplexity import call_perplexity, text_to_pdf
+        analysis = call_perplexity(payload)
+    except Exception as e:
+        return jsonify({"error": f"Perplexity: {e}", "submitted": True}), 500
+    tmp_dir = Path(os.getenv("TEMP", "/tmp"))
+    out_path = tmp_dir / f"sprint_analysis_{sprint_id}_{datetime.utcnow().strftime('%Y%m%d_%H%M')}.pdf"
+    try:
+        text_to_pdf(analysis, out_path)
+    except Exception as e:
+        return jsonify({"error": f"PDF: {e}", "submitted": True, "analysis_preview": analysis[:500]}), 500
+    sent = _send_pdf_via_bot(out_path, user_id, f"Анализ спринта {sprint_id}")
+    try:
+        out_path.unlink(missing_ok=True)
+    except Exception:
+        pass
+    if not sent:
+        return jsonify({
+            "status": "ok",
+            "submitted": True,
+            "warning": "PDF не отправлен в Telegram (проверь BOT_TOKEN)",
+            "analysis_preview": analysis[:800],
+        }), 200
+    return jsonify({"status": "ok", "submitted": True, "pdf_sent": True}), 200
+
+
 @app.route("/api/photo/<int:entry_id>", methods=["GET"])
 def api_photo(entry_id: int):
     """Прокси фото из Telegram по id записи."""
