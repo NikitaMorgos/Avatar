@@ -13,7 +13,7 @@ from datetime import datetime, timedelta
 from pathlib import Path
 
 from aiogram import Bot, Dispatcher, F
-from aiogram.filters import Command
+from aiogram.filters import BaseFilter, Command
 from aiogram.types import BotCommand
 from aiogram.types import CallbackQuery
 from aiogram.types import InlineKeyboardButton
@@ -77,6 +77,17 @@ _pending_post: dict[int, dict] = {}
 
 # Теги для Raw — выбор из списка кнопками
 RAW_TAGS = ["diary", "работа", "идея"]
+
+
+class VideoDocumentFilter(BaseFilter):
+    """Документ с видео mime-type (видео, отправленное как файл)."""
+    async def __call__(self, message: Message) -> bool:
+        doc = getattr(message, "document", None)
+        if not doc:
+            return False
+        mime = (getattr(doc, "mime_type", None) or "").lower()
+        fn = (getattr(doc, "file_name", None) or "").lower()
+        return mime.startswith("video/") or any(fn.endswith(ext) for ext in (".mp4", ".mov", ".webm", ".mkv"))
 
 logging.basicConfig(
     level=logging.INFO,
@@ -467,6 +478,7 @@ async def on_photo(message: Message, bot: Bot) -> None:
 
 async def on_video(message: Message, bot: Bot) -> None:
     """Обработчик: видео с подписью или без. Постит в канал как фото."""
+    logger.info("on_video: received video from user_id=%s", message.from_user.id if message.from_user else 0)
     user_id = message.from_user.id if message.from_user else 0
     chat_id = message.chat.id
     message_id = message.message_id
@@ -521,8 +533,23 @@ async def on_video(message: Message, bot: Bot) -> None:
         await message.reply("Не удалось сохранить. Попробуй позже.")
 
 
+async def on_document_video(message: Message, bot: Bot) -> None:
+    """Видео, отправленное как документ (файл). Перенаправляем в on_video."""
+    logger.info("on_document_video: received from user_id=%s", message.from_user.id if message.from_user else 0)
+    try:
+        doc = message.document
+        class _Video:
+            file_id = doc.file_id
+        message.video = _Video()
+        await on_video(message, bot)
+    except Exception as e:
+        logger.exception("Document video handler failed: %s", e)
+        await message.reply("Не удалось обработать видео. Попробуй отправить как обычное видео (не файл).")
+
+
 async def on_video_note(message: Message, bot: Bot) -> None:
     """Обработчик: видеокружок (video note). Предлагает запостить по команде /post."""
+    logger.info("on_video_note: received from user_id=%s", message.from_user.id if message.from_user else 0)
     user_id = message.from_user.id if message.from_user else 0
     chat_id = message.chat.id
     message_id = message.message_id
@@ -656,6 +683,15 @@ async def cmd_review(message: Message) -> None:
     except Exception as e:
         logger.exception("Review failed: %s", e)
         await message.reply(f"Ошибка: {e}")
+
+
+async def on_unhandled(message: Message) -> None:
+    """Fallback: необработанный контент — логируем и отвечаем."""
+    ct = getattr(message, "content_type", "?")
+    logger.warning("Unhandled message content_type=%s from user_id=%s", ct, message.from_user.id if message.from_user else 0)
+    await message.reply(
+        f"Получил ({ct}), но не обрабатываю. Поддерживаю: фото, видео, видеокружки, текст."
+    )
 
 
 async def cmd_start(message: Message) -> None:
@@ -1061,8 +1097,10 @@ def main() -> None:
     dp.message.register(on_forwarded_from_channel, F.forward_origin)  # до on_photo!
     dp.message.register(on_photo, F.photo)
     dp.message.register(on_video, F.video)
+    dp.message.register(on_document_video, F.document, VideoDocumentFilter())
     dp.message.register(on_video_note, F.video_note)
     dp.message.register(on_text_to_raw, F.text)  # текст/ссылки → Raw
+    dp.message.register(on_unhandled)  # fallback: всё остальное
 
     # Планировщик: постинг, fallback, RAPA-обзор, напоминания по спринту
     if CHANNEL_ID or REVIEW_DAILY_TIME or (SPRINT_REMINDER_START and CURRENT_SPRINT_ID):

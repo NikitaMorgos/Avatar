@@ -346,6 +346,7 @@
     .gtd-table .gtd-sprint4-total { font-weight: 600; background: var(--locked-bg); }
     .gtd-sprint4-table td, .gtd-sprint4-table th { vertical-align: top; line-height: 1.4; }
     .gtd-table .gtd-sprint-total { font-weight: 600; background: var(--locked-bg); }
+    .gtd-todo-table select { width: 100%; max-width: 180px; padding: 4px 8px; font-size: inherit; border: 1px solid var(--border); border-radius: 4px; background: #fff; }
     .gtd-login-btn { display: inline-block; margin-top: 16px; padding: 10px 20px; background: var(--accent); color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.9375rem; }
     .gtd-login-btn:hover { background: var(--accent-hover); }
     .gtd-login-form { max-width: 320px; margin-top: 16px; }
@@ -727,6 +728,7 @@
           bindGtdTabs();
           bindGtd1Q();
           bindSprintsPanel();
+          bindTodoPanel();
           const metricsBtn = document.getElementById('gtd-metrics-refresh-btn');
           if (metricsBtn) metricsBtn.onclick = () => { saveSprint4FromDom(); updateSprint4Total(); updateSprintsTbodies(); updateMetrics(); };
           updateMetrics();
@@ -752,6 +754,7 @@
     function goalKeyArea(g) { return (g.area||'') + '|' + (g.area1||'') + '|' + (g.desc||''); }
     function goalKeyProject(g) { return (g.proj||'') + '|' + (g.proj1||'') + '|' + (g.desc||''); }
     const GTD_1Q_KEY = 'gtd_1q_2026';
+    const GTD_TODO_KEY = 'gtd_todo_2026';
     const MONTHS_GEN = ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
     function getSprintDates(sprintNum, year) {
       year = year || 2026;
@@ -776,7 +779,13 @@
     function saveGtd1QState(st) {
       try { localStorage.setItem(GTD_1Q_KEY, JSON.stringify({ areaKeys: [...st.areaKeys], projectKeys: [...st.projectKeys], customFormuls: st.customFormuls||{}, manualLife: st.manualLife||[], manualDate: st.manualDate||[], sprint4Progress: st.sprint4Progress||{}, sprint4Status: st.sprint4Status||{} })); } catch(e) {}
     }
-    let gtd1QState;
+    function loadTodoState() {
+      try { const s = localStorage.getItem(GTD_TODO_KEY); if (s) { const j = JSON.parse(s); return { tasks: j.tasks||[], ideas: j.ideas||[], wishlist: j.wishlist||[], watchRead: j.watchRead||[] }; } } catch(e) {}
+      return { tasks: [], ideas: [], wishlist: [], watchRead: [] };
+    }
+    function saveTodoState(st) { try { localStorage.setItem(GTD_TODO_KEY, JSON.stringify(st)); } catch(e) {} }
+    let gtd1QState, todoState;
+    let gtdTodoContext = {};  // { apList, getSubsForAp, todoApOpts } — для bindTodoPanel
 
     const METRICS_SPRINTS_2026_HIST = { s1: { tasks: 14, pct: 100 }, s2: { tasks: 5, pct: 100 }, s3: { tasks: 22, pct: 59 } };
     const METRICS_SPRINTS_AVG_HIST = { 2019: { tasks: 9, done: 4, pct: 42 }, 2020: { tasks: 6, done: 3, pct: 59 }, 2021: { tasks: 2, done: 1, pct: 54 }, 2022: { tasks: 19, done: 7, pct: 35 }, 2023: { tasks: 16, done: 9, pct: 53 }, 2024: { tasks: 21, done: 14, pct: 66 }, 2025: { tasks: 10, done: 6, pct: 56 } };
@@ -869,6 +878,30 @@
         } catch (e) {}
       }
       const rawRows = rawItems.length ? rawItems.map(r => `<tr><td>${escapeHtml((r.title || r.content || '').slice(0,60))}</td><td>${escapeHtml(r.source || '-')}</td><td>${escapeHtml(r.created_at ? new Date(r.created_at).toLocaleDateString('ru-RU') : '-')}</td><td>${escapeHtml(r.rapa_stage || r.gtd_type || '-')}</td></tr>`).join('') : '<tr><td colspan="4" class="empty">Нет Raw. Укажи URL API в Collect. Raw приходит из Plaud, Email, TG.</td></tr>';
+
+      if (!todoState) todoState = loadTodoState();
+      const apList = [...new Set([...goalsByArea.map(g=>g.area), ...goalsByProject.map(g=>g.proj)])].filter(Boolean).sort();
+      const getSubsForAp = (ap) => {
+        const areaMatch = goalsByArea.find(g=>g.area===ap);
+        if (areaMatch) return [...new Set(goalsByArea.filter(g=>g.area===ap).map(g=>g.area1||'').filter(Boolean))];
+        return [...new Set(goalsByProject.filter(g=>g.proj===ap).map(g=>g.proj1||'').filter(Boolean))];
+      };
+      const todoApOpts = (sel) => '<option value="">—</option>' + apList.map(a=>`<option value="${escapeHtml(a)}"${(sel||'')===a?' selected':''}>${escapeHtml(a)}</option>`).join('');
+      const WATCH_KINDS = ['книга','фильм','музыка','подкаст','курс','другое'];
+      const todoKindOpts = (sel) => '<option value="">—</option>' + WATCH_KINDS.map(k=>`<option value="${escapeHtml(k)}"${(sel||'')===k?' selected':''}>${escapeHtml(k)}</option>`).join('');
+      const todoRow = (type, i, r, hasAp) => {
+        const subs = hasAp ? getSubsForAp(r.ap||'').filter(Boolean);
+        let subOpts = '<option value="">—</option>' + subs.map(s=>`<option value="${escapeHtml(s)}"${(r.sub||'')===s?' selected':''}>${escapeHtml(s)}</option>`).join('');
+        if (hasAp && r.sub && !subs.includes(r.sub)) subOpts += `<option value="${escapeHtml(r.sub)}" selected>${escapeHtml(r.sub)}</option>`;
+        if (type==='task'||type==='idea') return `<tr data-type="${type}" data-i="${i}"><td class="gtd-cell-editable" contenteditable="true" data-col="name">${escapeHtml(r.name||'')}</td><td><select class="todo-ap-select" data-col="ap">${todoApOpts(r.ap)}</select></td><td><select class="todo-sub-select" data-col="sub">${subOpts}</select></td><td class="gtd-cell-editable" contenteditable="true" data-col="yq">${escapeHtml(r.yq||'')}</td><td class="gtd-cell-editable gtd-cell-text" contenteditable="true" data-col="desc">${escapeHtml(r.desc||'')}</td><td><button type="button" class="gtd-login-btn todo-del-btn" title="Удалить">✕</button></td></tr>`;
+        if (type==='wishlist') return `<tr data-type="wishlist" data-i="${i}"><td class="gtd-cell-editable" contenteditable="true" data-col="name">${escapeHtml(r.name||'')}</td><td class="gtd-cell-editable" contenteditable="true" data-col="link">${escapeHtml(r.link||'')}</td><td class="gtd-cell-editable gtd-cell-text" contenteditable="true" data-col="desc">${escapeHtml(r.desc||'')}</td><td class="gtd-cell-editable" contenteditable="true" data-col="comment">${escapeHtml(r.comment||'')}</td><td><button type="button" class="gtd-login-btn todo-del-btn" title="Удалить">✕</button></td></tr>`;
+        return `<tr data-type="watch" data-i="${i}"><td class="gtd-cell-editable" contenteditable="true" data-col="name">${escapeHtml(r.name||'')}</td><td><select class="todo-kind-select" data-col="kind">${todoKindOpts(r.kind)}</select></td><td class="gtd-cell-editable" contenteditable="true" data-col="link">${escapeHtml(r.link||'')}</td><td class="gtd-cell-editable" contenteditable="true" data-col="comment">${escapeHtml(r.comment||'')}</td><td><button type="button" class="gtd-login-btn todo-del-btn" title="Удалить">✕</button></td></tr>`;
+      };
+      const todoTasksRows = todoState.tasks.length ? todoState.tasks.map((r,i)=>todoRow('task',i,r,true)).join('') : '<tr class="empty"><td colspan="6">Нет задач. Нажми + задача</td></tr>';
+      const todoIdeasRows = todoState.ideas.length ? todoState.ideas.map((r,i)=>todoRow('idea',i,r,true)).join('') : '<tr class="empty"><td colspan="6">Нет идей. Нажми + идея</td></tr>';
+      const todoWishlistRows = todoState.wishlist.length ? todoState.wishlist.map((r,i)=>todoRow('wishlist',i,r)).join('') : '<tr class="empty"><td colspan="5">Нет записей. Нажми + wishlist</td></tr>';
+      const todoWatchRows = todoState.watchRead.length ? todoState.watchRead.map((r,i)=>todoRow('watch',i,r)).join('') : '<tr class="empty"><td colspan="5">Нет записей. Нажми + посмотреть</td></tr>';
+      gtdTodoContext = { apList, getSubsForAp, todoApOpts, todoKindOpts };
 
       const area1Q = goalsByArea.filter(g => gtd1QState.areaKeys.has(goalKeyArea(g)));
       const proj1Q = goalsByProject.filter(g => gtd1QState.projectKeys.has(goalKeyProject(g)));
@@ -1065,13 +1098,21 @@
         </div>
 
         <div id="gtd-panel-todo" class="gtd-panel">
-          <p class="gtd-overview">Raw из всех источников: Plaud, Email, TG. Сырьё для Assign.</p>
-          <div class="gtd-table-wrap">
-            <table class="gtd-table">
-              <thead><tr><th>Content</th><th>Source</th><th>Date</th><th>Stage</th></tr></thead>
-              <tbody>${rawRows}</tbody>
-            </table>
-          </div>
+          <p class="gtd-overview">Задачи, идеи, wishlist, посмотреть/почитать. Raw: Plaud, Email, TG.</p>
+          <h2>1. Задачи</h2>
+          <p><button type="button" class="gtd-login-btn" id="todo-add-task">+ задача</button></p>
+          <div class="gtd-table-wrap"><table class="gtd-table gtd-todo-table"><thead><tr><th>Название</th><th>AREA / Project</th><th>Sub</th><th>Год-квартал</th><th>Description</th><th></th></tr></thead><tbody id="todo-tasks-tbody">${todoTasksRows}</tbody></table></div>
+          <h2>2. Идеи</h2>
+          <p><button type="button" class="gtd-login-btn" id="todo-add-idea">+ идея</button></p>
+          <div class="gtd-table-wrap"><table class="gtd-table gtd-todo-table"><thead><tr><th>Название</th><th>AREA / Project</th><th>Sub</th><th>Год-квартал</th><th>Description</th><th></th></tr></thead><tbody id="todo-ideas-tbody">${todoIdeasRows}</tbody></table></div>
+          <h2>3. Wishlist</h2>
+          <p><button type="button" class="gtd-login-btn" id="todo-add-wishlist">+ wishlist</button></p>
+          <div class="gtd-table-wrap"><table class="gtd-table gtd-todo-table"><thead><tr><th>Название</th><th>Ссылка</th><th>Описание</th><th>Комментарий</th><th></th></tr></thead><tbody id="todo-wishlist-tbody">${todoWishlistRows}</tbody></table></div>
+          <h2>4. Посмотреть / почитать</h2>
+          <p><button type="button" class="gtd-login-btn" id="todo-add-watch">+ посмотреть</button></p>
+          <div class="gtd-table-wrap"><table class="gtd-table gtd-todo-table"><thead><tr><th>Название</th><th>Книга / фильм / музыка</th><th>Ссылка</th><th>Комментарий</th><th></th></tr></thead><tbody id="todo-watch-tbody">${todoWatchRows}</tbody></table></div>
+          <h2>Raw (из Collect)</h2>
+          <div class="gtd-table-wrap"><table class="gtd-table"><thead><tr><th>Content</th><th>Source</th><th>Date</th><th>Stage</th></tr></thead><tbody>${rawRows}</tbody></table></div>
         </div>
       `;
     }
@@ -1517,6 +1558,96 @@
         if (!r.ok) { alert('Ошибка: ' + (j.error || r.statusText)); return; }
         if (j.pdf_sent) alert('Отчёт сдан ✓ PDF с анализом Perplexity отправлен в Collect бот.'); else if (j.warning) alert('Отчёт сдан. ' + j.warning); else alert('Отчёт сдан ✓');
       } catch (e) { alert('Ошибка сети: ' + e.message); } finally { if (btn) { btn.disabled = false; btn.textContent = 'Сдать отчёт'; } }
+    }
+    function bindTodoPanel() {
+      const { apList = [], getSubsForAp = () => [], todoApOpts = () => '', todoKindOpts = () => '' } = gtdTodoContext;
+      const rebuildRow = (type, i, r) => {
+        const subs = (type==='task'||type==='idea') ? getSubsForAp(r.ap||'').filter(Boolean) : [];
+        let subOpts = '<option value="">—</option>' + subs.map(s=>`<option value="${escapeHtml(s)}"${(r.sub||'')===s?' selected':''}>${escapeHtml(s)}</option>`).join('');
+        if ((type==='task'||type==='idea') && r.sub && !subs.includes(r.sub)) subOpts += `<option value="${escapeHtml(r.sub)}" selected>${escapeHtml(r.sub)}</option>`;
+        if (type==='task'||type==='idea') return `<tr data-type="${type}" data-i="${i}"><td class="gtd-cell-editable" contenteditable="true" data-col="name">${escapeHtml(r.name||'')}</td><td><select class="todo-ap-select" data-col="ap">${todoApOpts(r.ap)}</select></td><td><select class="todo-sub-select" data-col="sub">${subOpts}</select></td><td class="gtd-cell-editable" contenteditable="true" data-col="yq">${escapeHtml(r.yq||'')}</td><td class="gtd-cell-editable gtd-cell-text" contenteditable="true" data-col="desc">${escapeHtml(r.desc||'')}</td><td><button type="button" class="gtd-login-btn todo-del-btn" title="Удалить">✕</button></td></tr>`;
+        if (type==='wishlist') return `<tr data-type="wishlist" data-i="${i}"><td class="gtd-cell-editable" contenteditable="true" data-col="name">${escapeHtml(r.name||'')}</td><td class="gtd-cell-editable" contenteditable="true" data-col="link">${escapeHtml(r.link||'')}</td><td class="gtd-cell-editable gtd-cell-text" contenteditable="true" data-col="desc">${escapeHtml(r.desc||'')}</td><td class="gtd-cell-editable" contenteditable="true" data-col="comment">${escapeHtml(r.comment||'')}</td><td><button type="button" class="gtd-login-btn todo-del-btn" title="Удалить">✕</button></td></tr>`;
+        return `<tr data-type="watch" data-i="${i}"><td class="gtd-cell-editable" contenteditable="true" data-col="name">${escapeHtml(r.name||'')}</td><td><select class="todo-kind-select" data-col="kind">${todoKindOpts(r.kind)}</select></td><td class="gtd-cell-editable" contenteditable="true" data-col="link">${escapeHtml(r.link||'')}</td><td class="gtd-cell-editable" contenteditable="true" data-col="comment">${escapeHtml(r.comment||'')}</td><td><button type="button" class="gtd-login-btn todo-del-btn" title="Удалить">✕</button></td></tr>`;
+      };
+      const updateTodoTable = (type) => {
+        const tbody = document.getElementById('todo-' + (type==='task'?'tasks':type==='idea'?'ideas':type==='wishlist'?'wishlist':'watch') + '-tbody');
+        if (!tbody) return;
+        const arr = todoState[type==='task'?'tasks':type==='idea'?'ideas':type==='wishlist'?'wishlist':'watchRead'];
+        const empty = type==='task'||type==='idea' ? '<tr class="empty"><td colspan="6">Нет ' + (type==='task'?'задач':'идей') + '.</td></tr>' : '<tr class="empty"><td colspan="5">Нет записей.</td></tr>';
+        tbody.innerHTML = arr.length ? arr.map((r,i)=>rebuildRow(type,i,r)).join('') : empty;
+        bindTodoRowHandlers(tbody);
+      };
+      const bindTodoRowHandlers = (container) => {
+        if (!container) return;
+        container.querySelectorAll('.gtd-cell-editable').forEach(cell => {
+          cell.onblur = function() {
+            const tr = this.closest('tr');
+            if (!tr || tr.classList.contains('empty')) return;
+            const type = tr.dataset.type, i = parseInt(tr.dataset.i, 10), col = this.dataset.col;
+            const arr = todoState[type==='task'?'tasks':type==='idea'?'ideas':type==='wishlist'?'wishlist':'watchRead'];
+            if (!arr[i]) return;
+            arr[i][col] = (this.textContent||'').trim();
+            saveTodoState(todoState);
+          };
+        });
+        container.querySelectorAll('.todo-ap-select').forEach(sel => {
+          sel.onchange = function() {
+            const tr = this.closest('tr');
+            if (!tr) return;
+            const type = tr.dataset.type, i = parseInt(tr.dataset.i, 10);
+            const arr = todoState[type==='task'?'tasks':'ideas'];
+            if (!arr[i]) return;
+            arr[i].ap = this.value;
+            arr[i].sub = '';
+            saveTodoState(todoState);
+            updateTodoTable(type);
+          };
+        });
+        container.querySelectorAll('.todo-sub-select').forEach(sel => {
+          sel.onchange = function() {
+            const tr = this.closest('tr');
+            if (!tr) return;
+            const type = tr.dataset.type, i = parseInt(tr.dataset.i, 10);
+            const arr = todoState[type==='task'?'tasks':'ideas'];
+            if (!arr[i]) return;
+            arr[i].sub = this.value;
+            saveTodoState(todoState);
+          };
+        });
+        container.querySelectorAll('.todo-kind-select').forEach(sel => {
+          sel.onchange = function() {
+            const tr = this.closest('tr');
+            if (!tr) return;
+            const type = tr.dataset.type, i = parseInt(tr.dataset.i, 10);
+            const arr = todoState.watchRead;
+            if (!arr[i]) return;
+            arr[i].kind = this.value;
+            saveTodoState(todoState);
+          };
+        });
+        container.querySelectorAll('.todo-del-btn').forEach(btn => {
+          btn.onclick = function() {
+            const tr = this.closest('tr');
+            if (!tr || tr.classList.contains('empty')) return;
+            const type = tr.dataset.type, i = parseInt(tr.dataset.i, 10);
+            const key = type==='task'?'tasks':type==='idea'?'ideas':type==='wishlist'?'wishlist':'watchRead';
+            todoState[key].splice(i, 1);
+            saveTodoState(todoState);
+            updateTodoTable(type);
+          };
+        });
+      };
+      const addTodo = (type, blank) => {
+        const key = type==='task'?'tasks':type==='idea'?'ideas':type==='wishlist'?'wishlist':'watchRead';
+        todoState[key].push(blank);
+        saveTodoState(todoState);
+        updateTodoTable(type);
+      };
+      document.getElementById('todo-add-task')?.addEventListener('click', () => addTodo('task', { name: '', ap: '', sub: '', yq: '2026-1Q', desc: '' }));
+      document.getElementById('todo-add-idea')?.addEventListener('click', () => addTodo('idea', { name: '', ap: '', sub: '', yq: '2026-1Q', desc: '' }));
+      document.getElementById('todo-add-wishlist')?.addEventListener('click', () => addTodo('wishlist', { name: '', link: '', desc: '', comment: '' }));
+      document.getElementById('todo-add-watch')?.addEventListener('click', () => addTodo('watch', { name: '', kind: '', link: '', comment: '' }));
+      ['todo-tasks-tbody','todo-ideas-tbody','todo-wishlist-tbody','todo-watch-tbody'].forEach(id => bindTodoRowHandlers(document.getElementById(id)));
     }
     function bindSprintsPanel() {
       const btn = document.getElementById('gtd-sprints-refresh-btn');
