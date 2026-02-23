@@ -754,7 +754,6 @@
     function goalKeyArea(g) { return (g.area||'') + '|' + (g.area1||'') + '|' + (g.desc||''); }
     function goalKeyProject(g) { return (g.proj||'') + '|' + (g.proj1||'') + '|' + (g.desc||''); }
     const GTD_1Q_KEY = 'gtd_1q_2026';
-    const GTD_TODO_KEY = 'gtd_todo_2026';
     const MONTHS_GEN = ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
     function getSprintDates(sprintNum, year) {
       year = year || 2026;
@@ -779,13 +778,14 @@
     function saveGtd1QState(st) {
       try { localStorage.setItem(GTD_1Q_KEY, JSON.stringify({ areaKeys: [...st.areaKeys], projectKeys: [...st.projectKeys], customFormuls: st.customFormuls||{}, manualLife: st.manualLife||[], manualDate: st.manualDate||[], sprint4Progress: st.sprint4Progress||{}, sprint4Status: st.sprint4Status||{} })); } catch(e) {}
     }
+    const GTD_TODO_KEY = 'gtd_todo_2026';
     function loadTodoState() {
       try { const s = localStorage.getItem(GTD_TODO_KEY); if (s) { const j = JSON.parse(s); return { tasks: j.tasks||[], ideas: j.ideas||[], wishlist: j.wishlist||[], watchRead: j.watchRead||[] }; } } catch(e) {}
       return { tasks: [], ideas: [], wishlist: [], watchRead: [] };
     }
     function saveTodoState(st) { try { localStorage.setItem(GTD_TODO_KEY, JSON.stringify(st)); } catch(e) {} }
     let gtd1QState, todoState;
-    let gtdTodoContext = {};  // { apList, getSubsForAp, todoApOpts } — для bindTodoPanel
+    let gtdTodoContext = {};
 
     const METRICS_SPRINTS_2026_HIST = { s1: { tasks: 14, pct: 100 }, s2: { tasks: 5, pct: 100 }, s3: { tasks: 22, pct: 59 } };
     const METRICS_SPRINTS_AVG_HIST = { 2019: { tasks: 9, done: 4, pct: 42 }, 2020: { tasks: 6, done: 3, pct: 59 }, 2021: { tasks: 2, done: 1, pct: 54 }, 2022: { tasks: 19, done: 7, pct: 35 }, 2023: { tasks: 16, done: 9, pct: 53 }, 2024: { tasks: 21, done: 14, pct: 66 }, 2025: { tasks: 10, done: 6, pct: 56 } };
@@ -890,7 +890,7 @@
       const WATCH_KINDS = ['книга','фильм','музыка','подкаст','курс','другое'];
       const todoKindOpts = (sel) => '<option value="">—</option>' + WATCH_KINDS.map(k=>`<option value="${escapeHtml(k)}"${(sel||'')===k?' selected':''}>${escapeHtml(k)}</option>`).join('');
       const todoRow = (type, i, r, hasAp) => {
-        const subs = hasAp ? getSubsForAp(r.ap||'').filter(Boolean);
+        const subs = hasAp ? getSubsForAp(r.ap||'').filter(Boolean) : [];
         let subOpts = '<option value="">—</option>' + subs.map(s=>`<option value="${escapeHtml(s)}"${(r.sub||'')===s?' selected':''}>${escapeHtml(s)}</option>`).join('');
         if (hasAp && r.sub && !subs.includes(r.sub)) subOpts += `<option value="${escapeHtml(r.sub)}" selected>${escapeHtml(r.sub)}</option>`;
         if (type==='task'||type==='idea') return `<tr data-type="${type}" data-i="${i}"><td class="gtd-cell-editable" contenteditable="true" data-col="name">${escapeHtml(r.name||'')}</td><td><select class="todo-ap-select" data-col="ap">${todoApOpts(r.ap)}</select></td><td><select class="todo-sub-select" data-col="sub">${subOpts}</select></td><td class="gtd-cell-editable" contenteditable="true" data-col="yq">${escapeHtml(r.yq||'')}</td><td class="gtd-cell-editable gtd-cell-text" contenteditable="true" data-col="desc">${escapeHtml(r.desc||'')}</td><td><button type="button" class="gtd-login-btn todo-del-btn" title="Удалить">✕</button></td></tr>`;
