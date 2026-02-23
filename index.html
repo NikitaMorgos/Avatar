@@ -516,6 +516,13 @@
       { id: 'finance', name: 'Финансы', locked: true, content: `<p>Раздел под замком.</p>` },
       { id: 'family', name: 'Семья', locked: true, content: `<p>Раздел под замком.</p>` },
       {
+        id: 'diary',
+        name: 'Diary',
+        locked: true,
+        authFor: 'gtd',
+        content: null
+      },
+      {
         id: 'gtd',
         name: 'GTD',
         locked: true,
@@ -639,8 +646,51 @@
       });
 
       const main = document.getElementById('main-content');
-      main.classList.toggle('gtd-wide', id === 'gtd' || id === 'health');
+      main.classList.toggle('gtd-wide', id === 'gtd' || id === 'health' || id === 'diary');
 
+      if (id === 'diary') {
+        const gtdUnlocked = sessionStorage.getItem('gtd_unlocked') === '1';
+        if (!gtdUnlocked) {
+          main.innerHTML = `
+            <h1 class="page-title">Diary</h1>
+            <p class="page-meta">🔒 Раздел под замком</p>
+            <div class="block">
+              <p>AI-дневник, импорт из Evernote. Войди для доступа (тот же логин/пароль, что и GTD).</p>
+              <form class="gtd-login-form" id="diary-login-form">
+                <input type="email" id="diary-email" placeholder="Email" autocomplete="email" required>
+                <input type="password" id="diary-password" placeholder="Пароль" autocomplete="current-password" required>
+                <button type="submit" class="gtd-login-btn">Войти</button>
+                <div id="diary-auth-error" class="error" style="display: none; margin-top: 8px;"></div>
+              </form>
+            </div>
+          `;
+          document.getElementById('diary-login-form').onsubmit = function(e) {
+            e.preventDefault();
+            const email = document.getElementById('diary-email').value.trim().toLowerCase();
+            const password = document.getElementById('diary-password').value.trim();
+            const errEl = document.getElementById('diary-auth-error');
+            const expectedEmail = AUTH_CREDENTIALS.email.trim().toLowerCase();
+            const expectedPass = AUTH_CREDENTIALS.password;
+            if (email === expectedEmail && password === expectedPass) {
+              sessionStorage.setItem('gtd_unlocked', '1');
+              selectSection('diary');
+            } else {
+              errEl.textContent = 'Неверный email или пароль';
+              errEl.style.display = 'block';
+            }
+          };
+        } else {
+          main.innerHTML = '<h1 class="page-title">Diary</h1><p class="page-meta">Загрузка…</p><div class="block"></div>';
+          const html = loadDiaryContent();
+          main.innerHTML = `
+            <h1 class="page-title">Diary</h1>
+            <p class="page-meta">AI-дневник, заметки, импорт из Evernote</p>
+            <div class="block">${html}</div>
+          `;
+          bindDiary();
+        }
+        return;
+      }
       if (id === 'health') {
         const gtdUnlocked = sessionStorage.getItem('gtd_unlocked') === '1';
         if (!gtdUnlocked) {
@@ -1660,6 +1710,119 @@
       if (submitBtn) submitBtn.onclick = submitSprintReport;
       bindSprint4Editable();
     }
+    const DIARY_EVERNOTE_KEY = 'avatar_diary_evernote';
+    function loadDiaryEvernoteNotes() {
+      try { const s = localStorage.getItem(DIARY_EVERNOTE_KEY); if (s) return JSON.parse(s); } catch (e) {}
+      return [];
+    }
+    function saveDiaryEvernoteNotes(notes) {
+      try { localStorage.setItem(DIARY_EVERNOTE_KEY, JSON.stringify(notes)); } catch (e) {}
+    }
+    function parseEvernoteDate(s) {
+      if (!s) return null;
+      const m = /^(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})/.exec(s);
+      if (m) return m[1] + '-' + m[2] + '-' + m[3] + 'T' + m[4] + ':' + m[5] + ':' + m[6] + 'Z';
+      return s;
+    }
+    function loadDiaryContent() {
+      const notes = loadDiaryEvernoteNotes();
+      const fmtDate = ts => {
+        if (!ts) return '-';
+        const d = new Date(parseEvernoteDate(ts) || ts);
+        if (isNaN(d.getTime())) return '-';
+        return d.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric' });
+      };
+      const noteRows = notes.slice().sort((a,b) => (b.created||'').localeCompare(a.created||'')).slice(0, 100).map(n => {
+        const title = escapeHtml((n.title||'').slice(0, 80));
+        const preview = escapeHtml((n.plainText||'').replace(/\s+/g,' ').slice(0, 120));
+        return `<tr><td>${fmtDate(n.created)}</td><td>${title}</td><td class="gtd-cell-text">${preview}</td></tr>`;
+      }).join('') || '<tr><td colspan="3" class="empty">Нет заметок. Экспортируй из Evernote (ENEX) и загрузи ниже.</td></tr>';
+
+      return `
+        <div class="gtd-tabs">
+          <button type="button" class="gtd-tab active" data-tab="ai-diary">AI-дневник</button>
+          <button type="button" class="gtd-tab" data-tab="notes">Заметки</button>
+        </div>
+        <div id="diary-panel-ai-diary" class="gtd-panel active">
+          <h2>AI-дневник — импорт из Evernote</h2>
+          <p class="gtd-overview">Экспортируй заметки из Evernote: Файл → Экспорт → Формат ENEX. Затем загрузи файл .enex ниже — заметки появятся в таблице.</p>
+          <div style="margin-bottom:24px;padding:20px;border:2px dashed var(--border);border-radius:8px;background:var(--locked-bg);">
+            <p style="margin:0 0 12px;font-weight:500">Загрузить ENEX</p>
+            <label for="diary-enex-input" class="gtd-login-btn" style="display:inline-block;cursor:pointer;margin-bottom:12px">Выбрать файл .enex</label>
+            <input type="file" id="diary-enex-input" accept=".enex" style="position:absolute;width:0.1px;height:0.1px;opacity:0;overflow:hidden;z-index:-1">
+            <p style="margin:0 0 8px;font-size:0.8125rem;color:var(--text-muted)">Evernote → Файл → Экспорт заметок → Формат ENEX</p>
+            <div id="diary-enex-status" style="font-size:0.875rem;color:var(--text-muted);min-height:1.5em"></div>
+          </div>
+          <h3>Импортированные заметки</h3>
+          <div class="gtd-table-wrap">
+            <table class="gtd-table">
+              <thead><tr><th>Дата</th><th>Название</th><th>Текст</th></tr></thead>
+              <tbody id="diary-evernote-tbody">${noteRows}</tbody>
+            </table>
+          </div>
+        </div>
+        <div id="diary-panel-notes" class="gtd-panel">
+          <p class="gtd-overview">Дополнительные разделы дневника — в разработке.</p>
+        </div>
+      `;
+    }
+    function bindDiary() {
+      document.querySelectorAll('.gtd-tab[data-tab]').forEach(tab => {
+        if (!tab.closest('.block')) return;
+        tab.onclick = () => {
+          const id = tab.dataset.tab;
+          tab.closest('.block').querySelectorAll('.gtd-tab[data-tab]').forEach(t => t.classList.toggle('active', t.dataset.tab === id));
+          tab.closest('.block').querySelectorAll('.gtd-panel').forEach(p => {
+            const pid = p.id;
+            p.classList.toggle('active', pid === 'diary-panel-' + id);
+          });
+        };
+      });
+      const enexInput = document.getElementById('diary-enex-input');
+      const enexStatus = document.getElementById('diary-enex-status');
+      if (enexInput && enexStatus) {
+        enexInput.onchange = async function() {
+          const file = this.files?.[0];
+          if (!file) return;
+          enexStatus.textContent = 'Читаю…';
+          try {
+            const text = await file.text();
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(text, 'text/xml');
+            const noteEls = doc.querySelectorAll('note');
+            const notes = [];
+            noteEls.forEach(el => {
+              const title = el.querySelector('title')?.textContent?.trim() || '';
+              const contentEl = el.querySelector('content');
+              let plainText = '';
+              if (contentEl) {
+                const cdata = contentEl.textContent || '';
+                const div = document.createElement('div');
+                div.innerHTML = cdata.replace(/<en-note[^>]*>|<\/en-note>/gi, '');
+                plainText = (div.textContent || div.innerText || '').replace(/\s+/g, ' ').trim();
+              }
+              const created = el.querySelector('created')?.textContent || '';
+              const updated = el.querySelector('updated')?.textContent || '';
+              notes.push({ title, plainText, created: created || updated, updated });
+            });
+            const existing = loadDiaryEvernoteNotes();
+            const merged = [...notes, ...existing.filter(e => !notes.some(n => n.title === e.title && n.created === e.created))];
+            saveDiaryEvernoteNotes(merged);
+            enexStatus.textContent = `Импортировано ${notes.length} заметок. Всего: ${merged.length}`;
+            const fmtDateDisplay = ts => { if (!ts) return '-'; const d = new Date(parseEvernoteDate(ts) || ts); return isNaN(d.getTime()) ? '-' : d.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric' }); };
+            document.getElementById('diary-evernote-tbody').innerHTML = merged.slice().sort((a,b) => (b.created||'').localeCompare(a.created||'')).slice(0, 100).map(n => {
+              const title = escapeHtml((n.title||'').slice(0, 80));
+              const preview = escapeHtml((n.plainText||'').replace(/\s+/g,' ').slice(0, 120));
+              return `<tr><td>${fmtDateDisplay(n.created)}</td><td>${title}</td><td class="gtd-cell-text">${preview}</td></tr>`;
+            }).join('') || '<tr><td colspan="3" class="empty">Нет заметок.</td></tr>';
+          } catch (e) {
+            enexStatus.textContent = 'Ошибка: ' + (e.message || 'не удалось прочитать файл');
+          }
+          this.value = '';
+        };
+      }
+    }
+
     const HEALTH_DATA_KEY = 'avatar_health_data';
     const HEALTH_CATEGORIES = [
       { id: 'weight', name: 'Вес', unit: 'кг' },
