@@ -346,9 +346,12 @@
     .gtd-table .gtd-sprint4-total { font-weight: 600; background: var(--locked-bg); }
     .gtd-sprint4-table td, .gtd-sprint4-table th { vertical-align: top; line-height: 1.4; }
     .gtd-table .gtd-sprint-total { font-weight: 600; background: var(--locked-bg); }
-    .gtd-prog-red { background: #fef2f2 !important; color: #b91c1c; }
-    .gtd-prog-yellow { background: #fefce8 !important; color: #a16207; }
-    .gtd-prog-green { background: #f0fdf4 !important; color: #15803d; }
+    .gtd-table td.gtd-prog-red,
+    .gtd-table tr:hover td.gtd-prog-red { background: #fef2f2 !important; color: #b91c1c !important; }
+    .gtd-table td.gtd-prog-yellow,
+    .gtd-table tr:hover td.gtd-prog-yellow { background: #fefce8 !important; color: #a16207 !important; }
+    .gtd-table td.gtd-prog-green,
+    .gtd-table tr:hover td.gtd-prog-green { background: #f0fdf4 !important; color: #15803d !important; }
     .gtd-todo-table select { width: 100%; max-width: 180px; padding: 4px 8px; font-size: inherit; border: 1px solid var(--border); border-radius: 4px; background: #fff; }
     .gtd-login-btn { display: inline-block; margin-top: 16px; padding: 10px 20px; background: var(--accent); color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.9375rem; }
     .gtd-login-btn:hover { background: var(--accent-hover); }
@@ -1892,12 +1895,21 @@
       { id: 'sperm', name: 'Спермограмма', unit: '' },
       { id: 'other', name: 'Другое', unit: '' }
     ];
+    const DEFAULT_HEALTH_ANALYSES = [
+      { date: '2025-08-01', type: 'blood', description: 'Витамин D: 58.9 ng/ml', notes: 'Файл: 202508_витаминD.pdf' },
+      { date: '2025-08-01', type: 'blood', description: 'Холестерол: 5.03 mmol/l; Триглицериды: 1.48 mmol/l; Холестерол - ЛПВП: 1.47 mmol/l; Холестерол - ЛПНП: 2.89 mmol/l; Гомоцистеин: 12.62 mkmol/l; Аполипопротеин А: 1.64 g/l; Аполипопротеин В: 0.90 g/l; Холестерин-ЛПОНП: 0.67 mmol/l; Холестерин-неЛПВП: 3.56 mmol/l', notes: 'Файл: 202508_профили.pdf' },
+      { date: '2025-08-01', type: 'blood', description: 'ПСА - общий: 1.687 ng/ml; ПСА - свободный: 0.363 ng/ml; РЭА: 2.99 ng/ml; АФП: 7.14 ng/ml; Общий бетта-ХГЧ: 1.00 mIU/ml', notes: 'Файл: 202508_профили2.pdf' }
+    ];
     function loadHealthData() {
       try {
         const raw = localStorage.getItem(HEALTH_DATA_KEY);
-        if (raw) return JSON.parse(raw);
+        if (raw) {
+          const data = JSON.parse(raw);
+          if (!data.analyses || data.analyses.length === 0) data.analyses = DEFAULT_HEALTH_ANALYSES.slice();
+          return data;
+        }
       } catch (e) {}
-      return { weight: [], pulse: [], analyses: [] };
+      return { weight: [], pulse: [], analyses: DEFAULT_HEALTH_ANALYSES.slice() };
     }
     function saveHealthData(data) {
       try { localStorage.setItem(HEALTH_DATA_KEY, JSON.stringify(data)); } catch (e) {}
