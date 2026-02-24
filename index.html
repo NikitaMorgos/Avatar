@@ -1905,7 +1905,14 @@
         const raw = localStorage.getItem(HEALTH_DATA_KEY);
         if (raw) {
           const data = JSON.parse(raw);
-          if (!data.analyses || data.analyses.length === 0) data.analyses = DEFAULT_HEALTH_ANALYSES.slice();
+          const existing = data.analyses || [];
+          const defaultNotes = DEFAULT_HEALTH_ANALYSES.map(a => a.notes);
+          const merged = [...DEFAULT_HEALTH_ANALYSES];
+          for (const r of existing) {
+            const isDefault = defaultNotes.some(n => (r.notes || '').indexOf('202508') >= 0);
+            if (!isDefault) merged.push(r);
+          }
+          data.analyses = merged;
           return data;
         }
       } catch (e) {}
@@ -1930,7 +1937,10 @@
         const fileName = (r.file || r.description || '').toString();
         const isFile = /\.pdf$|[/\\]/.test(fileName);
         const fileCell = isFile ? escapeHtml((fileName.split(/[/\\]/).pop() || fileName).slice(0, 40)) : '';
-        return `<tr><td>${escapeHtml(fmtDate(r.date))}</td><td>${escapeHtml(typeName)}</td><td>${escapeHtml((r.description||'').slice(0, 120))}</td><td>${fileCell}</td><td>${escapeHtml(r.notes||'')}</td></tr>`;
+        const desc = (r.description || '').trim();
+        const descShort = desc.slice(0, 200);
+        const descTitle = desc.length > 200 ? escapeHtml(desc) : '';
+        return `<tr><td>${escapeHtml(fmtDate(r.date))}</td><td>${escapeHtml(typeName)}</td><td class="gtd-cell-text"${descTitle ? ` title="${descTitle}"` : ''}>${escapeHtml(descShort)}${desc.length > 200 ? '…' : ''}</td><td>${fileCell}</td><td>${escapeHtml(r.notes||'')}</td></tr>`;
       }).join('') || '<tr><td colspan="5" class="empty">Нет данных. Добавь в разделе «Добавить».</td></tr>';
 
       return `
