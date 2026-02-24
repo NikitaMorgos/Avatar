@@ -346,6 +346,9 @@
     .gtd-table .gtd-sprint4-total { font-weight: 600; background: var(--locked-bg); }
     .gtd-sprint4-table td, .gtd-sprint4-table th { vertical-align: top; line-height: 1.4; }
     .gtd-table .gtd-sprint-total { font-weight: 600; background: var(--locked-bg); }
+    .gtd-prog-red { background: #fef2f2 !important; color: #b91c1c; }
+    .gtd-prog-yellow { background: #fefce8 !important; color: #a16207; }
+    .gtd-prog-green { background: #f0fdf4 !important; color: #15803d; }
     .gtd-todo-table select { width: 100%; max-width: 180px; padding: 4px 8px; font-size: inherit; border: 1px solid var(--border); border-radius: 4px; background: #fff; }
     .gtd-login-btn { display: inline-block; margin-top: 16px; padding: 10px 20px; background: var(--accent); color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.9375rem; }
     .gtd-login-btn:hover { background: var(--accent-hover); }
@@ -803,6 +806,13 @@
 
     function goalKeyArea(g) { return (g.area||'') + '|' + (g.area1||'') + '|' + (g.desc||''); }
     function goalKeyProject(g) { return (g.proj||'') + '|' + (g.proj1||'') + '|' + (g.desc||''); }
+    function progClass(p) {
+      const n = parseFloat(String(p||'').replace(/%/g,''));
+      if (isNaN(n)) return '';
+      if (n <= 24) return ' gtd-prog-red';
+      if (n <= 66) return ' gtd-prog-yellow';
+      return ' gtd-prog-green';
+    }
     const GTD_1Q_KEY = 'gtd_1q_2026';
     const MONTHS_GEN = ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
     function getSprintDates(sprintNum, year) {
@@ -907,7 +917,7 @@
         const prog = g.progress != null ? g.progress : '';
         const st = (g.status && statusLabels[g.status]) ? g.status : 'не начинал';
         const name = goalName(key, 'area');
-        return `<tr><td><input type="checkbox" class="gtd-1q-cb" data-type="area" data-key="${escapeHtml(key)}"${checked}></td><td class="gtd-cell-oneline" title="${escapeHtml(name)}">${escapeHtml(name)}</td><td>${escapeHtml(g.area)}</td><td>${escapeHtml(g.area1 || '-')}</td><td title="${escapeHtml(g.desc || '')}"><span class="gtd-cell-text">${escapeHtml(g.desc || '-')}</span></td><td>${escapeHtml(g.prio || '-')}</td><td>${prog !== '' ? prog + '%' : '-'}</td><td class="gtd-cell-oneline" title="${escapeHtml(st)}">${escapeHtml(st)}</td></tr>`;
+        return `<tr><td><input type="checkbox" class="gtd-1q-cb" data-type="area" data-key="${escapeHtml(key)}"${checked}></td><td class="gtd-cell-oneline" title="${escapeHtml(name)}">${escapeHtml(name)}</td><td>${escapeHtml(g.area)}</td><td>${escapeHtml(g.area1 || '-')}</td><td title="${escapeHtml(g.desc || '')}"><span class="gtd-cell-text">${escapeHtml(g.desc || '-')}</span></td><td>${escapeHtml(g.prio || '-')}</td><td class="${progClass(prog)}">${prog !== '' ? prog + '%' : '-'}</td><td class="gtd-cell-oneline" title="${escapeHtml(st)}">${escapeHtml(st)}</td></tr>`;
       }).join('');
       const goalsByProjectRows = goalsByProject.map(g => {
         const key = goalKeyProject(g);
@@ -916,7 +926,7 @@
         const st = (g.status && statusLabels[g.status]) ? g.status : 'не начинал';
         const mvp = (g.mvp === 'Y' || g.mvp === 'y') ? 'Y' : 'N';
         const name = goalName(key, 'project');
-        return `<tr><td><input type="checkbox" class="gtd-1q-cb" data-type="project" data-key="${escapeHtml(key)}"${checked}></td><td class="gtd-cell-oneline" title="${escapeHtml(name)}">${escapeHtml(name)}</td><td>${escapeHtml(g.proj)}</td><td>${escapeHtml(g.proj1 || '-')}</td><td class="gtd-col-desc" title="${escapeHtml(g.desc || '')}"><span class="gtd-cell-text">${escapeHtml(g.desc || '-')}</span></td><td>${escapeHtml(g.prio || '-')}</td><td>${prog !== '' ? prog + '%' : '-'}</td><td class="gtd-cell-oneline" title="${escapeHtml(st)}">${escapeHtml(st)}</td><td>${escapeHtml(g.area + (g.area1 ? ' / ' + g.area1 : ''))}</td><td>${mvp}</td></tr>`;
+        return `<tr><td><input type="checkbox" class="gtd-1q-cb" data-type="project" data-key="${escapeHtml(key)}"${checked}></td><td class="gtd-cell-oneline" title="${escapeHtml(name)}">${escapeHtml(name)}</td><td>${escapeHtml(g.proj)}</td><td>${escapeHtml(g.proj1 || '-')}</td><td class="gtd-col-desc" title="${escapeHtml(g.desc || '')}"><span class="gtd-cell-text">${escapeHtml(g.desc || '-')}</span></td><td>${escapeHtml(g.prio || '-')}</td><td class="${progClass(prog)}">${prog !== '' ? prog + '%' : '-'}</td><td class="gtd-cell-oneline" title="${escapeHtml(st)}">${escapeHtml(st)}</td><td>${escapeHtml(g.area + (g.area1 ? ' / ' + g.area1 : ''))}</td><td>${mvp}</td></tr>`;
       }).join('');
 
       let rawItems = [];
@@ -963,7 +973,7 @@
         const prog = (src && src.progress != null) ? src.progress : (g.progress != null ? g.progress : '');
         const st = (src && src.status && statusLabels[src.status]) ? src.status : ((g.status && statusLabels[g.status]) ? g.status : 'не начинал');
         const name = goalName(key, 'area');
-        return `<tr><td class="gtd-cell-oneline" title="${escapeHtml(name)}">${escapeHtml(name)}</td><td>${escapeHtml(g.area)}</td><td>${escapeHtml(g.area1 || '-')}</td><td class="gtd-cell-editable gtd-cell-text" contenteditable="true" data-key="${escapeHtml(key)}" data-type="area" title="Редактируемая ячейка">${escapeHtml(formul)}</td><td>${escapeHtml(g.prio || '-')}</td><td>${prog !== '' ? prog + '%' : '-'}</td><td class="gtd-cell-oneline" title="${escapeHtml(st)}">${escapeHtml(st)}</td></tr>`;
+        return `<tr><td class="gtd-cell-oneline" title="${escapeHtml(name)}">${escapeHtml(name)}</td><td>${escapeHtml(g.area)}</td><td>${escapeHtml(g.area1 || '-')}</td><td class="gtd-cell-editable gtd-cell-text" contenteditable="true" data-key="${escapeHtml(key)}" data-type="area" title="Редактируемая ячейка">${escapeHtml(formul)}</td><td>${escapeHtml(g.prio || '-')}</td><td class="${progClass(prog)}">${prog !== '' ? prog + '%' : '-'}</td><td class="gtd-cell-oneline" title="${escapeHtml(st)}">${escapeHtml(st)}</td></tr>`;
       }).join('');
       const sprintsByProjectRows = proj1Q.map(g => {
         const key = goalKeyProject(g);
@@ -973,15 +983,15 @@
         const st = (src && src.status && statusLabels[src.status]) ? src.status : ((g.status && statusLabels[g.status]) ? g.status : 'не начинал');
         const mvp = (g.mvp === 'Y' || g.mvp === 'y') ? 'Y' : 'N';
         const name = goalName(key, 'project');
-        return `<tr><td class="gtd-cell-oneline" title="${escapeHtml(name)}">${escapeHtml(name)}</td><td>${escapeHtml(g.proj)}</td><td>${escapeHtml(g.proj1 || '-')}</td><td class="gtd-cell-editable gtd-cell-text" contenteditable="true" data-key="${escapeHtml(key)}" data-type="project" title="Редактируемая ячейка">${escapeHtml(formul)}</td><td>${escapeHtml(g.prio || '-')}</td><td>${prog !== '' ? prog + '%' : '-'}</td><td class="gtd-cell-oneline" title="${escapeHtml(st)}">${escapeHtml(st)}</td><td>${mvp}</td></tr>`;
+        return `<tr><td class="gtd-cell-oneline" title="${escapeHtml(name)}">${escapeHtml(name)}</td><td>${escapeHtml(g.proj)}</td><td>${escapeHtml(g.proj1 || '-')}</td><td class="gtd-cell-editable gtd-cell-text" contenteditable="true" data-key="${escapeHtml(key)}" data-type="project" title="Редактируемая ячейка">${escapeHtml(formul)}</td><td>${escapeHtml(g.prio || '-')}</td><td class="${progClass(prog)}">${prog !== '' ? prog + '%' : '-'}</td><td class="gtd-cell-oneline" title="${escapeHtml(st)}">${escapeHtml(st)}</td><td>${mvp}</td></tr>`;
       }).join('');
       const parseProg1Q = v => { const n = parseFloat(String(v||'').replace(/%/g,'')); return isNaN(n) ? 0 : n; };
       let areaSum1Q = 0; area1Q.forEach(g => { const src = defaultSprints1Q2026.byArea.find(a => goalKeyArea(a) === goalKeyArea(g)); const v = (src && src.progress != null ? src.progress : g.progress) || ''; areaSum1Q += parseProg1Q(v); });
       let projSum1Q = 0; proj1Q.forEach(g => { const src = defaultSprints1Q2026.byProject.find(a => goalKeyProject(a) === goalKeyProject(g)); const v = (src && src.progress != null ? src.progress : g.progress) || ''; projSum1Q += parseProg1Q(v); });
       const areaCnt1Q = area1Q.length, projCnt1Q = proj1Q.length;
       const areaAvg1Q = areaCnt1Q > 0 ? Math.round(areaSum1Q / areaCnt1Q) : 0, projAvg1Q = projCnt1Q > 0 ? Math.round(projSum1Q / projCnt1Q) : 0;
-      const sprintsAreaTotalRow = `<tr class="gtd-sprint-total"><td colspan="4">Total</td><td></td><td>${areaCnt1Q} задач</td><td>${areaAvg1Q}%</td></tr>`;
-      const sprintsProjTotalRow = `<tr class="gtd-sprint-total"><td colspan="4">Total</td><td></td><td>${projCnt1Q} задач</td><td>${projAvg1Q}%</td><td></td><td></td></tr>`;
+      const sprintsAreaTotalRow = `<tr class="gtd-sprint-total"><td colspan="4">Total</td><td></td><td>${areaCnt1Q} задач</td><td class="${progClass(areaAvg1Q)}">${areaAvg1Q}%</td></tr>`;
+      const sprintsProjTotalRow = `<tr class="gtd-sprint-total"><td colspan="4">Total</td><td></td><td>${projCnt1Q} задач</td><td class="${progClass(projAvg1Q)}">${projAvg1Q}%</td><td></td><td></td></tr>`;
 
       const getSprint4Prog = (rowId) => (gtd1QState.sprint4Progress && gtd1QState.sprint4Progress[rowId]) != null ? String(gtd1QState.sprint4Progress[rowId]) : '';
       const getSprint4St = (rowId) => (gtd1QState.sprint4Status && gtd1QState.sprint4Status[rowId]) || '';
@@ -993,7 +1003,7 @@
         const prog = getSprint4Prog(rowId) || ((src && src.progress != null) ? src.progress : (g.progress != null ? g.progress : ''));
         const st = getSprint4St(rowId) || (src && src.status && statusLabels[src.status] ? src.status : (g.status && statusLabels[g.status] ? g.status : 'не начинал'));
         const name = goalName(key, 'area');
-        return `<tr data-rowid="${escapeHtml(rowId)}" data-rowtype="area"><td>area</td><td class="gtd-cell-oneline" title="${escapeHtml(name)}">${escapeHtml(name)}</td><td>${escapeHtml(g.area)}</td><td>${escapeHtml(g.area1 || '-')}</td><td class="gtd-cell-editable gtd-cell-text" contenteditable="true" data-col="desc">${escapeHtml(formul)}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="progress">${escapeHtml(prog !== '' ? prog + (String(prog).match(/%$/) ? '' : '%') : '0%')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="status">${escapeHtml(st)}</td></tr>`;
+        return `<tr data-rowid="${escapeHtml(rowId)}" data-rowtype="area"><td>area</td><td class="gtd-cell-oneline" title="${escapeHtml(name)}">${escapeHtml(name)}</td><td>${escapeHtml(g.area)}</td><td>${escapeHtml(g.area1 || '-')}</td><td class="gtd-cell-editable gtd-cell-text" contenteditable="true" data-col="desc">${escapeHtml(formul)}</td><td class="gtd-cell-editable gtd-cell-oneline${progClass(prog)}" contenteditable="true" data-col="progress">${escapeHtml(prog !== '' ? prog + (String(prog).match(/%$/) ? '' : '%') : '0%')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="status">${escapeHtml(st)}</td></tr>`;
       }).join('');
       const sprint4ProjectRows = proj1Q.map(g => {
         const key = goalKeyProject(g);
@@ -1003,18 +1013,18 @@
         const prog = getSprint4Prog(rowId) || ((src && src.progress != null) ? src.progress : (g.progress != null ? g.progress : ''));
         const st = getSprint4St(rowId) || (src && src.status && statusLabels[src.status] ? src.status : (g.status && statusLabels[g.status] ? g.status : 'не начинал'));
         const name = goalName(key, 'project');
-        return `<tr data-rowid="${escapeHtml(rowId)}" data-rowtype="project"><td>project</td><td class="gtd-cell-oneline" title="${escapeHtml(name)}">${escapeHtml(name)}</td><td>${escapeHtml(g.proj)}</td><td>${escapeHtml(g.proj1 || '-')}</td><td class="gtd-cell-editable gtd-cell-text" contenteditable="true" data-col="desc">${escapeHtml(formul)}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="progress">${escapeHtml(prog !== '' ? prog + (String(prog).match(/%$/) ? '' : '%') : '0%')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="status">${escapeHtml(st)}</td></tr>`;
+        return `<tr data-rowid="${escapeHtml(rowId)}" data-rowtype="project"><td>project</td><td class="gtd-cell-oneline" title="${escapeHtml(name)}">${escapeHtml(name)}</td><td>${escapeHtml(g.proj)}</td><td>${escapeHtml(g.proj1 || '-')}</td><td class="gtd-cell-editable gtd-cell-text" contenteditable="true" data-col="desc">${escapeHtml(formul)}</td><td class="gtd-cell-editable gtd-cell-oneline${progClass(prog)}" contenteditable="true" data-col="progress">${escapeHtml(prog !== '' ? prog + (String(prog).match(/%$/) ? '' : '%') : '0%')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="status">${escapeHtml(st)}</td></tr>`;
       }).join('');
       const manualLife = gtd1QState.manualLife || defaultManualLife;
       const manualDate = gtd1QState.manualDate || defaultManualDate;
       const fmtProg = (p) => { const s = String(p || '').trim(); if (s === '') return '0%'; return s.match(/%$/) ? s : (parseFloat(s.replace(/%/g,'')) || 0) + '%'; };
       const sprint4LifeRows = manualLife.map((m, i) => {
         const rowId = 'life|' + i;
-        return `<tr data-rowid="${escapeHtml(rowId)}" data-rowtype="life"><td>life</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="name">${escapeHtml(m.name || '')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="ap">${escapeHtml(m.ap || '')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="sub">${escapeHtml(m.sub || '')}</td><td class="gtd-cell-editable gtd-cell-text" contenteditable="true" data-col="desc">${escapeHtml(m.desc || '')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="progress">${escapeHtml(fmtProg(m.progress))}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="status">${escapeHtml(m.status || '')}</td></tr>`;
+        return `<tr data-rowid="${escapeHtml(rowId)}" data-rowtype="life"><td>life</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="name">${escapeHtml(m.name || '')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="ap">${escapeHtml(m.ap || '')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="sub">${escapeHtml(m.sub || '')}</td><td class="gtd-cell-editable gtd-cell-text" contenteditable="true" data-col="desc">${escapeHtml(m.desc || '')}</td><td class="gtd-cell-editable gtd-cell-oneline${progClass(m.progress)}" contenteditable="true" data-col="progress">${escapeHtml(fmtProg(m.progress))}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="status">${escapeHtml(m.status || '')}</td></tr>`;
       }).join('');
       const sprint4DateRows = manualDate.map((m, i) => {
         const rowId = 'date|' + i;
-        return `<tr data-rowid="${escapeHtml(rowId)}" data-rowtype="date"><td>date</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="name">${escapeHtml(m.name || '')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="ap">${escapeHtml(m.ap || '')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="sub">${escapeHtml(m.sub || '')}</td><td class="gtd-cell-editable gtd-cell-text" contenteditable="true" data-col="desc">${escapeHtml(m.desc || '')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="progress">${escapeHtml(fmtProg(m.progress))}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="status">${escapeHtml(m.status || '')}</td></tr>`;
+        return `<tr data-rowid="${escapeHtml(rowId)}" data-rowtype="date"><td>date</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="name">${escapeHtml(m.name || '')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="ap">${escapeHtml(m.ap || '')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="sub">${escapeHtml(m.sub || '')}</td><td class="gtd-cell-editable gtd-cell-text" contenteditable="true" data-col="desc">${escapeHtml(m.desc || '')}</td><td class="gtd-cell-editable gtd-cell-oneline${progClass(m.progress)}" contenteditable="true" data-col="progress">${escapeHtml(fmtProg(m.progress))}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="status">${escapeHtml(m.status || '')}</td></tr>`;
       }).join('');
       const taskCount = area1Q.length + proj1Q.length + manualLife.length + manualDate.length;
       let sumProg = 0;
@@ -1025,7 +1035,7 @@
       manualLife.forEach(m => addProg(m.progress));
       manualDate.forEach(m => addProg(m.progress));
       const avgProg = taskCount > 0 ? Math.round(sumProg / taskCount) : 0;
-      const sprint4TotalRow = `<tr class="gtd-sprint4-total"><td>TOTAL</td><td colspan="4">${taskCount} задач</td><td>${avgProg}%</td><td>средн.</td></tr>`;
+      const sprint4TotalRow = `<tr class="gtd-sprint4-total"><td>TOTAL</td><td colspan="4">${taskCount} задач</td><td class="${progClass(avgProg)}">${avgProg}%</td><td>средн.</td></tr>`;
 
       return `
         <div class="gtd-tabs">
@@ -1180,7 +1190,7 @@
         const prog = (src && src.progress != null) ? src.progress : (g.progress != null ? g.progress : '');
         const st = (src && src.status && statusLabels[src.status]) ? src.status : ((g.status && statusLabels[g.status]) ? g.status : 'не начинал');
         const name = goalName(key, 'area');
-        return `<tr><td class="gtd-cell-oneline" title="${escapeHtml(name)}">${escapeHtml(name)}</td><td>${escapeHtml(g.area)}</td><td>${escapeHtml(g.area1 || '-')}</td><td class="gtd-cell-editable gtd-cell-text" contenteditable="true" data-key="${escapeHtml(key)}" data-type="area" title="Редактируемая ячейка">${escapeHtml(formul)}</td><td>${escapeHtml(g.prio || '-')}</td><td>${prog !== '' ? prog + '%' : '-'}</td><td class="gtd-cell-oneline" title="${escapeHtml(st)}">${escapeHtml(st)}</td></tr>`;
+        return `<tr><td class="gtd-cell-oneline" title="${escapeHtml(name)}">${escapeHtml(name)}</td><td>${escapeHtml(g.area)}</td><td>${escapeHtml(g.area1 || '-')}</td><td class="gtd-cell-editable gtd-cell-text" contenteditable="true" data-key="${escapeHtml(key)}" data-type="area" title="Редактируемая ячейка">${escapeHtml(formul)}</td><td>${escapeHtml(g.prio || '-')}</td><td class="${progClass(prog)}">${prog !== '' ? prog + '%' : '-'}</td><td class="gtd-cell-oneline" title="${escapeHtml(st)}">${escapeHtml(st)}</td></tr>`;
       }).join('');
       const projRows = proj1Q.map(g => {
         const key = goalKeyProject(g);
@@ -1190,7 +1200,7 @@
         const st = (src && src.status && statusLabels[src.status]) ? src.status : ((g.status && statusLabels[g.status]) ? g.status : 'не начинал');
         const mvp = (g.mvp === 'Y' || g.mvp === 'y') ? 'Y' : 'N';
         const name = goalName(key, 'project');
-        return `<tr><td class="gtd-cell-oneline" title="${escapeHtml(name)}">${escapeHtml(name)}</td><td>${escapeHtml(g.proj)}</td><td>${escapeHtml(g.proj1 || '-')}</td><td class="gtd-cell-editable gtd-cell-text" contenteditable="true" data-key="${escapeHtml(key)}" data-type="project" title="Редактируемая ячейка">${escapeHtml(formul)}</td><td>${escapeHtml(g.prio || '-')}</td><td>${prog !== '' ? prog + '%' : '-'}</td><td class="gtd-cell-oneline" title="${escapeHtml(st)}">${escapeHtml(st)}</td><td>${mvp}</td></tr>`;
+        return `<tr><td class="gtd-cell-oneline" title="${escapeHtml(name)}">${escapeHtml(name)}</td><td>${escapeHtml(g.proj)}</td><td>${escapeHtml(g.proj1 || '-')}</td><td class="gtd-cell-editable gtd-cell-text" contenteditable="true" data-key="${escapeHtml(key)}" data-type="project" title="Редактируемая ячейка">${escapeHtml(formul)}</td><td>${escapeHtml(g.prio || '-')}</td><td class="${progClass(prog)}">${prog !== '' ? prog + '%' : '-'}</td><td class="gtd-cell-oneline" title="${escapeHtml(st)}">${escapeHtml(st)}</td><td>${mvp}</td></tr>`;
       }).join('');
       const parseProg = v => { const n = parseFloat(String(v||'').replace(/%/g,'')); return isNaN(n) ? 0 : n; };
       let areaSum = 0; area1Q.forEach(g => { const src = defaultSprints1Q2026.byArea.find(a => goalKeyArea(a) === goalKeyArea(g)); const v = (src && src.progress != null ? src.progress : g.progress) || ''; areaSum += parseProg(v); });
@@ -1288,7 +1298,7 @@
         const prog = getSprint4Prog(rowId) || ((src && src.progress != null) ? src.progress : (g.progress != null ? g.progress : ''));
         const st = getSprint4St(rowId) || (src && src.status && statusLabels[src.status] ? src.status : (g.status && statusLabels[g.status] ? g.status : 'не начинал'));
         const name = goalName(key, 'area');
-        return `<tr data-rowid="${escapeHtml(rowId)}" data-rowtype="area"><td>area</td><td class="gtd-cell-oneline" title="${escapeHtml(name)}">${escapeHtml(name)}</td><td>${escapeHtml(g.area)}</td><td>${escapeHtml(g.area1 || '-')}</td><td class="gtd-cell-editable gtd-cell-text" contenteditable="true" data-col="desc">${escapeHtml(formul)}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="progress">${escapeHtml(prog !== '' ? prog + (String(prog).match(/%$/) ? '' : '%') : '-')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="status">${escapeHtml(st)}</td></tr>`;
+        return `<tr data-rowid="${escapeHtml(rowId)}" data-rowtype="area"><td>area</td><td class="gtd-cell-oneline" title="${escapeHtml(name)}">${escapeHtml(name)}</td><td>${escapeHtml(g.area)}</td><td>${escapeHtml(g.area1 || '-')}</td><td class="gtd-cell-editable gtd-cell-text" contenteditable="true" data-col="desc">${escapeHtml(formul)}</td><td class="gtd-cell-editable gtd-cell-oneline${progClass(prog)}" contenteditable="true" data-col="progress">${escapeHtml(prog !== '' ? prog + (String(prog).match(/%$/) ? '' : '%') : '-')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="status">${escapeHtml(st)}</td></tr>`;
       }).join('');
       const projRows = proj1Q.map(g => {
         const key = goalKeyProject(g);
@@ -1298,16 +1308,16 @@
         const prog = getSprint4Prog(rowId) || ((src && src.progress != null) ? src.progress : (g.progress != null ? g.progress : ''));
         const st = getSprint4St(rowId) || (src && src.status && statusLabels[src.status] ? src.status : (g.status && statusLabels[g.status] ? g.status : 'не начинал'));
         const name = goalName(key, 'project');
-        return `<tr data-rowid="${escapeHtml(rowId)}" data-rowtype="project"><td>project</td><td class="gtd-cell-oneline" title="${escapeHtml(name)}">${escapeHtml(name)}</td><td>${escapeHtml(g.proj)}</td><td>${escapeHtml(g.proj1 || '-')}</td><td class="gtd-cell-editable gtd-cell-text" contenteditable="true" data-col="desc">${escapeHtml(formul)}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="progress">${escapeHtml(prog !== '' ? prog + (String(prog).match(/%$/) ? '' : '%') : '0%')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="status">${escapeHtml(st)}</td></tr>`;
+        return `<tr data-rowid="${escapeHtml(rowId)}" data-rowtype="project"><td>project</td><td class="gtd-cell-oneline" title="${escapeHtml(name)}">${escapeHtml(name)}</td><td>${escapeHtml(g.proj)}</td><td>${escapeHtml(g.proj1 || '-')}</td><td class="gtd-cell-editable gtd-cell-text" contenteditable="true" data-col="desc">${escapeHtml(formul)}</td><td class="gtd-cell-editable gtd-cell-oneline${progClass(prog)}" contenteditable="true" data-col="progress">${escapeHtml(prog !== '' ? prog + (String(prog).match(/%$/) ? '' : '%') : '0%')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="status">${escapeHtml(st)}</td></tr>`;
       }).join('');
       const fmtProg = (p) => { const s = String(p || '').trim(); if (s === '') return '0%'; return s.match(/%$/) ? s : (parseFloat(s.replace(/%/g,'')) || 0) + '%'; };
       const lifeRows = manualLife.map((m, i) => {
         const rowId = 'life|' + i;
-        return `<tr data-rowid="${escapeHtml(rowId)}" data-rowtype="life"><td>life</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="name">${escapeHtml(m.name || '')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="ap">${escapeHtml(m.ap || '')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="sub">${escapeHtml(m.sub || '')}</td><td class="gtd-cell-editable gtd-cell-text" contenteditable="true" data-col="desc">${escapeHtml(m.desc || '')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="progress">${escapeHtml(fmtProg(m.progress))}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="status">${escapeHtml(m.status || '')}</td></tr>`;
+        return `<tr data-rowid="${escapeHtml(rowId)}" data-rowtype="life"><td>life</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="name">${escapeHtml(m.name || '')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="ap">${escapeHtml(m.ap || '')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="sub">${escapeHtml(m.sub || '')}</td><td class="gtd-cell-editable gtd-cell-text" contenteditable="true" data-col="desc">${escapeHtml(m.desc || '')}</td><td class="gtd-cell-editable gtd-cell-oneline${progClass(m.progress)}" contenteditable="true" data-col="progress">${escapeHtml(fmtProg(m.progress))}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="status">${escapeHtml(m.status || '')}</td></tr>`;
       }).join('');
       const dateRows = manualDate.map((m, i) => {
         const rowId = 'date|' + i;
-        return `<tr data-rowid="${escapeHtml(rowId)}" data-rowtype="date"><td>date</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="name">${escapeHtml(m.name || '')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="ap">${escapeHtml(m.ap || '')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="sub">${escapeHtml(m.sub || '')}</td><td class="gtd-cell-editable gtd-cell-text" contenteditable="true" data-col="desc">${escapeHtml(m.desc || '')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="progress">${escapeHtml(fmtProg(m.progress))}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="status">${escapeHtml(m.status || '')}</td></tr>`;
+        return `<tr data-rowid="${escapeHtml(rowId)}" data-rowtype="date"><td>date</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="name">${escapeHtml(m.name || '')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="ap">${escapeHtml(m.ap || '')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="sub">${escapeHtml(m.sub || '')}</td><td class="gtd-cell-editable gtd-cell-text" contenteditable="true" data-col="desc">${escapeHtml(m.desc || '')}</td><td class="gtd-cell-editable gtd-cell-oneline${progClass(m.progress)}" contenteditable="true" data-col="progress">${escapeHtml(fmtProg(m.progress))}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="status">${escapeHtml(m.status || '')}</td></tr>`;
       }).join('');
       const taskCount = area1Q.length + proj1Q.length + manualLife.length + manualDate.length;
       let sumProg = 0;
@@ -1318,7 +1328,7 @@
       manualLife.forEach(m => addProg(m.progress));
       manualDate.forEach(m => addProg(m.progress));
       const avgProg = taskCount > 0 ? Math.round(sumProg / taskCount) : 0;
-      const totalRow = `<tr class="gtd-sprint4-total"><td>TOTAL</td><td colspan="4">${taskCount} задач</td><td>${avgProg}%</td><td>средн.</td></tr>`;
+      const totalRow = `<tr class="gtd-sprint4-total"><td>TOTAL</td><td colspan="4">${taskCount} задач</td><td class="${progClass(avgProg)}">${avgProg}%</td><td>средн.</td></tr>`;
       return areaRows + projRows + lifeRows + dateRows + totalRow;
     }
     function updateSprint4Table() {
@@ -1720,7 +1730,9 @@
     }
     function parseEvernoteDate(s) {
       if (!s) return null;
-      const m = /^(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})/.exec(s);
+      const str = String(s).trim();
+      if (/^\d{13,}$/.test(str)) return parseInt(str, 10);
+      const m = /^(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})/.exec(str);
       if (m) return m[1] + '-' + m[2] + '-' + m[3] + 'T' + m[4] + ':' + m[5] + ':' + m[6] + 'Z';
       return s;
     }
@@ -1728,7 +1740,8 @@
       const notes = loadDiaryEvernoteNotes();
       const fmtDate = ts => {
         if (!ts) return '-';
-        const d = new Date(parseEvernoteDate(ts) || ts);
+        const parsed = parseEvernoteDate(ts);
+        const d = new Date(typeof parsed === 'number' ? parsed : (parsed || ts));
         if (isNaN(d.getTime())) return '-';
         return d.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric' });
       };
@@ -1745,12 +1758,19 @@
         </div>
         <div id="diary-panel-ai-diary" class="gtd-panel active">
           <h2>AI-дневник — импорт из Evernote</h2>
-          <p class="gtd-overview">Экспортируй заметки из Evernote: Файл → Экспорт → Формат ENEX. Затем загрузи файл .enex ниже — заметки появятся в таблице.</p>
+          <p class="gtd-overview">Подключи Evernote по API (нужен URL API в настройках Collect) или загрузи файл .enex вручную.</p>
+          <div id="diary-evernote-api-block" style="margin-bottom:24px;padding:20px;border:2px dashed var(--border);border-radius:8px;background:var(--locked-bg);display:none">
+            <p style="margin:0 0 12px;font-weight:500">Подключение по API</p>
+            <p id="diary-evernote-status-text" style="font-size:0.875rem;color:var(--text-muted);margin:0 0 8px">Проверка…</p>
+            <a id="diary-evernote-connect-btn" href="#" class="gtd-login-btn" style="display:inline-block;text-decoration:none;color:inherit;margin-right:8px;margin-bottom:8px">Подключить Evernote</a>
+            <button type="button" id="diary-evernote-sync-btn" class="gtd-login-btn" style="display:none">Синхронизировать</button>
+            <div id="diary-evernote-sync-status" style="font-size:0.875rem;color:var(--text-muted);min-height:1.5em;margin-top:8px"></div>
+          </div>
           <div style="margin-bottom:24px;padding:20px;border:2px dashed var(--border);border-radius:8px;background:var(--locked-bg);">
-            <p style="margin:0 0 12px;font-weight:500">Загрузить ENEX</p>
+            <p style="margin:0 0 12px;font-weight:500">Загрузить ENEX вручную</p>
             <label for="diary-enex-input" class="gtd-login-btn" style="display:inline-block;cursor:pointer;margin-bottom:12px">Выбрать файл .enex</label>
             <input type="file" id="diary-enex-input" accept=".enex" style="position:absolute;width:0.1px;height:0.1px;opacity:0;overflow:hidden;z-index:-1">
-            <p style="margin:0 0 8px;font-size:0.8125rem;color:var(--text-muted)">Evernote → Файл → Экспорт заметок → Формат ENEX</p>
+            <p style="margin:0 0 8px;font-size:0.8125rem;color:var(--text-muted)">Evernote (приложение) → Файл → Экспорт заметок → Формат ENEX</p>
             <div id="diary-enex-status" style="font-size:0.875rem;color:var(--text-muted);min-height:1.5em"></div>
           </div>
           <h3>Импортированные заметки</h3>
@@ -1778,6 +1798,47 @@
           });
         };
       });
+      const apiUrl = getCollectApiUrl();
+      const apiBlock = document.getElementById('diary-evernote-api-block');
+      const statusText = document.getElementById('diary-evernote-status-text');
+      const connectBtn = document.getElementById('diary-evernote-connect-btn');
+      const syncBtn = document.getElementById('diary-evernote-sync-btn');
+      const syncStatus = document.getElementById('diary-evernote-sync-status');
+      if (apiBlock && apiUrl) {
+        apiBlock.style.display = 'block';
+        connectBtn.href = apiUrl.replace(/\/+$/, '') + '/api/diary/evernote/auth';
+        fetch(apiUrl.replace(/\/+$/, '') + '/api/diary/evernote/status').then(r => r.json()).then(d => {
+          statusText.textContent = d.connected ? 'Evernote подключён.' : 'Evernote не подключён. Нажми «Подключить Evernote» и разреши доступ в Evernote.';
+          if (syncBtn) syncBtn.style.display = d.connected ? 'inline-block' : 'none';
+        }).catch(() => { statusText.textContent = 'Не удалось проверить статус (проверь URL API).'; });
+        if (syncBtn) syncBtn.onclick = async function() {
+          syncStatus.textContent = 'Синхронизация…';
+          try {
+            const r = await fetch(apiUrl.replace(/\/+$/, '') + '/api/diary/evernote/notes?max=100');
+            const d = await r.json();
+            if (d.error && !d.notes) { syncStatus.textContent = d.error; return; }
+            const notes = (d.notes || []).map(n => ({
+              title: n.title || '',
+              plainText: n.plainText || '',
+              created: n.created ? String(n.created) : '',
+              updated: n.updated ? String(n.updated) : ''
+            }));
+            const existing = loadDiaryEvernoteNotes();
+            const merged = [...notes, ...existing.filter(e => !notes.some(n => n.title === e.title && String(n.created) === String(e.created)))];
+            saveDiaryEvernoteNotes(merged);
+            syncStatus.textContent = 'Загружено ' + notes.length + ' заметок. Всего: ' + merged.length;
+            const fmtDateDisplay = ts => { if (!ts) return '-'; const d = new Date(parseEvernoteDate(ts) || ts); return isNaN(d.getTime()) ? '-' : d.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric' }); };
+            const tbody = document.getElementById('diary-evernote-tbody');
+            if (tbody) tbody.innerHTML = merged.slice().sort((a,b) => (b.created||'').localeCompare(a.created||'')).slice(0, 100).map(n => {
+              const title = escapeHtml((n.title||'').slice(0, 80));
+              const preview = escapeHtml((n.plainText||'').replace(/\s+/g,' ').slice(0, 120));
+              return '<tr><td>' + fmtDateDisplay(n.created) + '</td><td>' + title + '</td><td class="gtd-cell-text">' + preview + '</td></tr>';
+            }).join('') || '<tr><td colspan="3" class="empty">Нет заметок.</td></tr>';
+          } catch (e) {
+            syncStatus.textContent = 'Ошибка: ' + (e.message || 'сеть');
+          }
+        };
+      }
       const enexInput = document.getElementById('diary-enex-input');
       const enexStatus = document.getElementById('diary-enex-status');
       if (enexInput && enexStatus) {

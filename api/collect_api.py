@@ -341,6 +341,84 @@ def api_sprint_report():
     return jsonify({"status": "ok", "submitted": True, "pdf_sent": True}), 200
 
 
+# ---------- Diary / Evernote ----------
+@app.route("/api/diary/evernote/auth", methods=["GET"])
+def api_diary_evernote_auth():
+    """Старт OAuth: редирект на Evernote. После авторизации пользователь вернётся на callback."""
+    user_id = RAW_OWNER_USER_ID
+    if not user_id:
+        return jsonify({"error": "RAW_OWNER_USER_ID not set"}), 400
+    try:
+        from api.evernote_diary import start_oauth, EVERNOTE_CALLBACK_BASE
+        base = EVERNOTE_CALLBACK_BASE or request.url_root.rstrip("/")
+        callback_url = base + "/api/diary/evernote/callback"
+        auth_url = start_oauth(callback_url)
+        from flask import redirect
+        return redirect(auth_url)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/diary/evernote/callback", methods=["GET"])
+def api_diary_evernote_callback():
+    """Callback от Evernote после OAuth. Сохраняет токен и редиректит на сайт."""
+    user_id = RAW_OWNER_USER_ID
+    if not user_id:
+        return jsonify({"error": "RAW_OWNER_USER_ID not set"}), 400
+    oauth_token = request.args.get("oauth_token")
+    oauth_verifier = request.args.get("oauth_verifier")
+    if not oauth_verifier:
+        return jsonify({"error": "Доступ не разрешён (нет oauth_verifier)"}), 400
+    if not oauth_token:
+        return jsonify({"error": "Нет oauth_token"}), 400
+    try:
+        from api.evernote_diary import finish_oauth
+        finish_oauth(oauth_token, oauth_verifier, user_id)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    # Редирект на фронт (GitHub Pages или тот же API base без пути)
+    redirect_base = os.getenv("EVERNOTE_CALLBACK_BASE", "").strip()
+    if not redirect_base:
+        redirect_base = request.url_root.rstrip("/")
+    if "github.io" in redirect_base or redirect_base.startswith("https://"):
+        front = os.getenv("AVATAR_FRONT_URL", "https://nikitamorgos.github.io/Avatar/").strip()
+    else:
+        front = redirect_base
+    from flask import redirect
+    return redirect(front + "#diary-evernote-connected")
+
+
+@app.route("/api/diary/evernote/notes", methods=["GET"])
+def api_diary_evernote_notes():
+    """Список заметок из Evernote (по сохранённому токену)."""
+    user_id = RAW_OWNER_USER_ID
+    if not user_id:
+        return jsonify({"error": "RAW_OWNER_USER_ID not set"}), 400
+    max_notes = min(int(request.args.get("max", 100)), 200)
+    try:
+        from api.evernote_diary import fetch_notes_from_evernote, get_evernote_token
+        if not get_evernote_token(user_id):
+            return jsonify({"error": "Evernote не подключён", "notes": []}), 200
+        notes = fetch_notes_from_evernote(user_id, max_notes=max_notes)
+        return jsonify({"notes": notes})
+    except Exception as e:
+        return jsonify({"error": str(e), "notes": []}), 500
+
+
+@app.route("/api/diary/evernote/status", methods=["GET"])
+def api_diary_evernote_status():
+    """Проверка: подключён ли Evernote."""
+    user_id = RAW_OWNER_USER_ID
+    if not user_id:
+        return jsonify({"connected": False})
+    try:
+        from api.evernote_diary import get_evernote_token
+        tok = get_evernote_token(user_id)
+        return jsonify({"connected": bool(tok and tok.get("access_token"))})
+    except Exception:
+        return jsonify({"connected": False})
+
+
 @app.route("/api/photo/<int:entry_id>", methods=["GET"])
 def api_photo(entry_id: int):
     """Прокси фото из Telegram по id записи."""
