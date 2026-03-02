@@ -401,6 +401,12 @@ def _get_raw_owner_user_id():
     return 0
 
 
+@app.route("/api/gtd/sprint-report-version", methods=["GET"])
+def api_sprint_report_version():
+    """Проверка: новая версия API (без PDF). Открой в браузере http://localhost:8080/api/gtd/sprint-report-version"""
+    return jsonify({"sprint_report": "text_only", "ok": True}), 200
+
+
 @app.route("/api/gtd/sprint-report", methods=["POST"])
 def api_sprint_report():
     """
@@ -443,8 +449,9 @@ def api_sprint_report():
     # Отправляем анализ текстом в Telegram (без PDF — избегаем ошибки fpdf "Not enough horizontal space")
     sent, telegram_error = _send_long_text_via_bot(user_id, analysis, f"Анализ спринта {sprint_id}")
 
+    # Всегда возвращаем analysis, чтобы на сайте можно было открыть окно с текстом
     if sent:
-        return jsonify({"status": "ok", "submitted": True, "pdf_sent": False}), 200
+        return jsonify({"status": "ok", "submitted": True, "pdf_sent": False, "analysis": analysis}), 200
     return jsonify({
         "status": "ok",
         "submitted": True,
@@ -553,4 +560,5 @@ def api_photo(entry_id: int):
 
 if __name__ == "__main__":
     port = int(os.getenv("COLLECT_API_PORT", "8080"))
+    print("Collect API: sprint-report без PDF (только текст) — порт", port)
     app.run(host="0.0.0.0", port=port, debug=False)
