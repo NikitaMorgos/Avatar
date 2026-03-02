@@ -1611,8 +1611,14 @@
       return { sprint_id: 's4_2026', sprint: { id: 'Спринт 4', dates: getSprintDates(4), comment: '' }, items, insights: [] };
     }
     async function submitSprintReport() {
-      const apiUrl = getCollectApiUrl();
-      if (!apiUrl) { alert('Укажи URL API Collect в настройках.'); return; }
+      let apiUrl = getCollectApiUrl();
+      if (!apiUrl) {
+        const url = prompt('URL API Collect не указан.\n\nВведи адрес, на котором запущен API (например при работе на своём компьютере: http://localhost:8080):', 'http://localhost:8080');
+        if (!url || !url.trim()) return;
+        localStorage.setItem('avatar_collect_api_url', url.trim().replace(/\/+$/, ''));
+        apiUrl = getCollectApiUrl();
+      }
+      if (!apiUrl) { alert('URL не сохранён.'); return; }
       const btn = document.getElementById('gtd-sprint4-submit-btn');
       if (btn) { btn.disabled = true; btn.textContent = 'Отправляю...'; }
       try {
