@@ -1626,13 +1626,14 @@
         const r = await fetch(apiUrl.replace(/\/+$/, '') + '/api/gtd/sprint-report', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
         const j = await r.json().catch(() => ({}));
         if (!r.ok) {
-          let msg = 'Ошибка: ' + (j.error || r.statusText);
-          const debug = j.debug ? '\n\nОтладка: ' + JSON.stringify(j.debug, null, 2) : '';
-          if (/PDF|horizontal space/i.test(msg)) {
-            msg += '\n\n→ Похоже, запрос ушёл на старую версию API. Сделай так:\n1) Останови старый процесс API (закрой терминал или заверши python.exe в Диспетчере задач).\n2) В новом терминале: cd папка_Avatar, затем python -m api.collect_api\n3) Убедись, что в настройках сайта URL API = http://localhost:8080 (при первом нажатии «Сдать отчёт» введи этот адрес).';
+          const raw = (j.error || r.statusText) || '';
+          if (/PDF|horizontal space/i.test(raw)) {
             localStorage.removeItem('avatar_collect_api_url');
+            alert('Запрос ушёл на старую версию API.\n\nСделай так:\n1) Закрой все терминалы с API и заверши python.exe в Диспетчере задач.\n2) Открой новый терминал: cd папка_Avatar, затем: python -m api.collect_api\n3) Нажми «Сдать отчёт» снова и введи URL: http://localhost:8080');
+            return;
           }
-          alert(msg + debug);
+          const debug = j.debug ? '\n\nОтладка: ' + JSON.stringify(j.debug, null, 2) : '';
+          alert('Ошибка: ' + raw + debug);
           return;
         }
         if (j.analysis) {
@@ -2180,8 +2181,16 @@
     }
 
     function exportGtdToPdfActiveTab() {
-      const sprints = document.getElementById('gtd-panel-sprints');
-      let el, filename;
+      function showPdfError(err) {
+        var msg = (err && err.message) ? err.message : String(err);
+        if (/horizontal space|width|too wide|render a single character/i.test(msg)) {
+          alert('Содержимое не помещается на страницу PDF.\n\nПопробуй: вкладку ЦЕЛИ или МЕТРИКИ, или уменьши масштаб страницы (Ctrl и −), затем снова «Выгрузить в PDF».');
+        } else {
+          alert('Ошибка при создании PDF: ' + msg);
+        }
+      }
+      var sprints = document.getElementById('gtd-panel-sprints');
+      var el, filename;
       if (sprints && sprints.classList.contains('active')) {
         el = document.getElementById('gtd-export-sprints');
         filename = 'GTD-Sprints-1Q2026.pdf';
@@ -2190,22 +2199,30 @@
         filename = 'GTD-2026.pdf';
       }
       if (!el || typeof html2pdf === 'undefined') { alert('Не удалось создать PDF'); return; }
-      const isSprints = !!(sprints && sprints.classList.contains('active'));
-      const opt = {
-        margin: 8,
-        filename,
-        image: { type: 'jpeg', quality: 0.95 },
-        html2canvas: { scale: isSprints ? 1.2 : 2 },
+      var isSprints = !!(sprints && sprints.classList.contains('active'));
+      var opt = {
+        margin: 6,
+        filename: filename,
+        image: { type: 'jpeg', quality: 0.92 },
+        html2canvas: { scale: isSprints ? 0.85 : 2 },
         jsPDF: { unit: 'mm', format: 'a4', orientation: isSprints ? 'landscape' : 'portrait' }
       };
-      html2pdf().set(opt).from(el).save().catch(function (err) {
-        const msg = (err && err.message) ? err.message : String(err);
-        if (/horizontal space|width|too wide/i.test(msg)) {
-          alert('Содержимое не помещается на страницу PDF. Попробуй: вкладку ЦЕЛИ или МЕТРИКИ, или уменьши масштаб страницы (Ctrl и −), затем снова «Выгрузить в PDF».');
-        } else {
-          alert('Ошибка при создании PDF: ' + msg);
+      var unhandled = function (e) {
+        if (e && e.reason && /horizontal space|render a single character|pdf/i.test(String(e.reason && e.reason.message || e.reason))) {
+          e.preventDefault();
+          showPdfError(e.reason);
         }
-      });
+      };
+      window.addEventListener('unhandledrejection', unhandled);
+      try {
+        html2pdf().set(opt).from(el).save().catch(function (err) {
+          window.removeEventListener('unhandledrejection', unhandled);
+          showPdfError(err);
+        }).then(function () { window.removeEventListener('unhandledrejection', unhandled); });
+      } catch (e) {
+        window.removeEventListener('unhandledrejection', unhandled);
+        showPdfError(e);
+      }
     }
 
     let _pendingLockedUrl = null;
