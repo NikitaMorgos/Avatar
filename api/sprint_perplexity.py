@@ -65,11 +65,32 @@ def _find_cyrillic_font() -> Path | None:
     return None
 
 
+def _wrap_line(line: str, max_chars: int = 65) -> list[str]:
+    """Разбивает длинную строку на части, чтобы не было ошибки 'Not enough horizontal space' в PDF."""
+    line = "".join(c for c in line if c.isprintable() or c in "\n\t ")
+    if len(line) <= max_chars:
+        return [line] if line.strip() else []
+    parts = []
+    while line:
+        if len(line) <= max_chars:
+            parts.append(line)
+            break
+        chunk = line[:max_chars]
+        last_space = chunk.rfind(" ")
+        if last_space > max_chars // 2:
+            chunk, line = chunk[: last_space + 1], line[last_space + 1 :].lstrip()
+        else:
+            chunk, line = chunk, line[max_chars:]
+        parts.append(chunk)
+    return parts
+
+
 def text_to_pdf(text: str, out_path: Path) -> None:
     """Сохраняет текст в PDF (fpdf2) с поддержкой кириллицы."""
     from fpdf import FPDF
     pdf = FPDF()
     pdf.set_auto_page_break(auto=True, margin=15)
+    pdf.set_margins(15, 15, 15)
     pdf.add_page()
     font_path = _find_cyrillic_font()
     if font_path:
@@ -77,8 +98,16 @@ def text_to_pdf(text: str, out_path: Path) -> None:
         pdf.set_font("Cyrillic", "", 10)
     else:
         pdf.set_font("Helvetica", size=10)
-    for line in text.replace("\r", "").split("\n"):
+    # Явная ширина ячейки (мм), чтобы не было "Not enough horizontal space"
+    cell_w = pdf.w - pdf.l_margin - pdf.r_margin
+    for raw_line in text.replace("\r", "").split("\n"):
+        line = raw_line.strip()
+        if not line:
+            pdf.ln(3)
+            continue
         if not font_path:
             line = line.encode("latin-1", "replace").decode("latin-1")
-        pdf.multi_cell(0, 6, line)
+        for part in _wrap_line(line):
+            if part:
+                pdf.multi_cell(cell_w, 6, part)
     pdf.output(str(out_path))

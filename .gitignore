@@ -1,4 +1,6 @@
 .env
+config/raw_owner_user_id.txt
+raw_owner_user_id.txt
 venv/
 __pycache__/
 *.pyc

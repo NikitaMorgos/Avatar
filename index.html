@@ -1625,8 +1625,28 @@
         const payload = buildSprintReportPayload();
         const r = await fetch(apiUrl.replace(/\/+$/, '') + '/api/gtd/sprint-report', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
         const j = await r.json().catch(() => ({}));
-        if (!r.ok) { alert('Ошибка: ' + (j.error || r.statusText)); return; }
-        if (j.pdf_sent) alert('Отчёт сдан ✓ PDF с анализом Perplexity отправлен в Collect бот.'); else if (j.warning) alert('Отчёт сдан. ' + j.warning); else alert('Отчёт сдан ✓');
+        if (!r.ok) {
+          let msg = 'Ошибка: ' + (j.error || r.statusText);
+          const debug = j.debug ? '\n\nОтладка: ' + JSON.stringify(j.debug, null, 2) : '';
+          if (/PDF|horizontal space/i.test(msg)) {
+            msg += '\n\n→ Похоже, запрос ушёл на старую версию API. Сделай так:\n1) Останови старый процесс API (закрой терминал или заверши python.exe в Диспетчере задач).\n2) В новом терминале: cd папка_Avatar, затем python -m api.collect_api\n3) Убедись, что в настройках сайта URL API = http://localhost:8080 (при первом нажатии «Сдать отчёт» введи этот адрес).';
+            localStorage.removeItem('avatar_collect_api_url');
+          }
+          alert(msg + debug);
+          return;
+        }
+        if (j.analysis) {
+          const win = window.open('', '_blank', 'width=720,height=560,scrollbars=yes');
+          if (win) {
+            win.document.write('<pre style="white-space:pre-wrap;font-family:inherit;padding:16px;font-size:14px;">' + (j.analysis || '').replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</pre>');
+            win.document.title = 'Анализ спринта';
+          }
+        }
+        if (j.pdf_sent) alert('Отчёт сдан ✓ Файл с анализом отправлен в Telegram.'); else if (j.warning) {
+          let msg = 'Отчёт сдан. В Telegram не пришло. ' + (j.telegram_error ? ' Причина: ' + j.telegram_error : '');
+          if (j.telegram_error && /can't initiate conversation|blocked|bot was blocked/i.test(j.telegram_error)) msg += ' Напиши боту @CollectMyDay_bot /start и попробуй снова.';
+          alert(msg + (j.analysis ? ' Анализ открыт в отдельном окне.' : ''));
+        } else if (!j.analysis) alert('Отчёт сдан ✓');
       } catch (e) { alert('Ошибка сети: ' + e.message); } finally { if (btn) { btn.disabled = false; btn.textContent = 'Сдать отчёт'; } }
     }
     function bindTodoPanel() {
@@ -2170,8 +2190,22 @@
         filename = 'GTD-2026.pdf';
       }
       if (!el || typeof html2pdf === 'undefined') { alert('Не удалось создать PDF'); return; }
-      const opt = { margin: 10, filename, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } };
-      html2pdf().set(opt).from(el).save();
+      const isSprints = !!(sprints && sprints.classList.contains('active'));
+      const opt = {
+        margin: 8,
+        filename,
+        image: { type: 'jpeg', quality: 0.95 },
+        html2canvas: { scale: isSprints ? 1.2 : 2 },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: isSprints ? 'landscape' : 'portrait' }
+      };
+      html2pdf().set(opt).from(el).save().catch(function (err) {
+        const msg = (err && err.message) ? err.message : String(err);
+        if (/horizontal space|width|too wide/i.test(msg)) {
+          alert('Содержимое не помещается на страницу PDF. Попробуй: вкладку ЦЕЛИ или МЕТРИКИ, или уменьши масштаб страницы (Ctrl и −), затем снова «Выгрузить в PDF».');
+        } else {
+          alert('Ошибка при создании PDF: ' + msg);
+        }
+      });
     }
 
     let _pendingLockedUrl = null;

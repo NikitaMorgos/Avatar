@@ -18,16 +18,49 @@ from flask_cors import CORS
 
 BASE = Path(__file__).resolve().parent.parent
 import sys
+import re
 if str(BASE) not in sys.path:
     sys.path.insert(0, str(BASE))
 for p in [BASE / ".env", Path.cwd() / ".env", BASE / "config" / ".env"]:
     if p.exists():
         load_dotenv(dotenv_path=p, override=True)
         break
+if (BASE / ".env").exists():
+    load_dotenv(dotenv_path=BASE / ".env", override=True)
 
 BOT_TOKEN = (os.getenv("BOT_TOKEN") or "").strip()
 DB_PATH = os.getenv("DB_PATH", str(BASE / "db" / "collect.db"))
-RAW_OWNER_USER_ID = int(os.getenv("RAW_OWNER_USER_ID", "0"))
+
+
+def _init_raw_owner_user_id():
+    """Один раз при старте: env, файлы raw_owner_user_id.txt, .env по regex, fallback для локального запуска."""
+    raw = (os.getenv("RAW_OWNER_USER_ID") or "").strip()
+    if raw.isdigit():
+        return int(raw)
+    for base in [BASE, Path.cwd(), Path.cwd().parent]:
+        for sub in ["config/raw_owner_user_id.txt", "raw_owner_user_id.txt"]:
+            p = base / sub
+            if p.exists():
+                try:
+                    s = p.read_text(encoding="utf-8").strip()
+                    if s.isdigit():
+                        return int(s)
+                except Exception:
+                    pass
+    for env_path in [BASE / ".env", Path.cwd() / ".env", BASE / "config" / ".env"]:
+        if env_path.exists():
+            try:
+                text = env_path.read_text(encoding="utf-8-sig")
+                m = re.search(r"RAW_OWNER_USER_ID\s*=\s*(\d+)", text, re.I)
+                if m:
+                    return int(m.group(1))
+            except Exception:
+                pass
+    # Локальный запуск: если ничего не нашли, используй этот id (замени на свой при необходимости)
+    return 577528
+
+
+RAW_OWNER_USER_ID = _init_raw_owner_user_id()
 
 app = Flask(__name__)
 CORS(app)
@@ -277,30 +310,117 @@ def _save_sprint_report(sprint_id: str, user_id: int) -> None:
         )
 
 
-def _send_pdf_via_bot(file_path: Path, chat_id: int, caption: str = "") -> bool:
-    """Отправляет PDF пользователю в Telegram."""
+def _send_doc_via_bot(file_path: Path, chat_id: int, caption: str = "") -> tuple[bool, str]:
+    """Отправляет документ в Telegram. Возвращает (успех, ошибка_или_пусто)."""
     if not BOT_TOKEN:
-        return False
-    with open(file_path, "rb") as f:
-        r = requests.post(
-            f"https://api.telegram.org/bot{BOT_TOKEN}/sendDocument",
-            data={"chat_id": chat_id, "caption": caption or "Анализ спринта от Perplexity"},
-            files={"document": (file_path.name, f, "application/pdf")},
-            timeout=30,
-        )
-    return r.ok and r.json().get("ok")
+        return False, "BOT_TOKEN не задан"
+    mime = "text/plain; charset=utf-8" if file_path.suffix.lower() == ".txt" else "application/pdf"
+    try:
+        with open(file_path, "rb") as f:
+            r = requests.post(
+                f"https://api.telegram.org/bot{BOT_TOKEN}/sendDocument",
+                data={"chat_id": chat_id, "caption": caption or "Анализ спринта от Perplexity"},
+                files={"document": (file_path.name, f, mime)},
+                timeout=30,
+            )
+        j = r.json() if r.ok else {}
+        if j.get("ok"):
+            return True, ""
+        return False, j.get("description", r.text or str(r.status_code))
+    except Exception as e:
+        return False, str(e)
+
+
+def _send_long_text_via_bot(chat_id: int, text: str, title: str = "Анализ спринта") -> tuple[bool, str]:
+    """Отправляет длинный текст в Telegram частями. Возвращает (успех, ошибка_или_пусто)."""
+    if not BOT_TOKEN:
+        return False, "BOT_TOKEN не задан"
+    if not text:
+        return False, "пустой текст"
+    chunk_size = 4000
+    parts = [text[i : i + chunk_size] for i in range(0, len(text), chunk_size)]
+    last_err = ""
+    for i, part in enumerate(parts):
+        prefix = f"📋 {title} (часть {i + 1}/{len(parts)})\n\n" if len(parts) > 1 and i == 0 else ("\n\n" if i else "")
+        msg = (prefix + part) if i == 0 else part
+        try:
+            r = requests.post(
+                f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage",
+                json={"chat_id": chat_id, "text": msg},
+                timeout=30,
+            )
+            j = r.json() if r.ok else {}
+            if not j.get("ok"):
+                last_err = j.get("description", r.text or str(r.status_code))
+                return False, last_err
+        except Exception as e:
+            return False, str(e)
+    return True, ""
+
+
+def _read_raw_owner_from_file(env_path: Path) -> int:
+    """Читает RAW_OWNER_USER_ID напрямую из файла .env (utf-8-sig на случай BOM)."""
+    import re
+    try:
+        with open(env_path, "r", encoding="utf-8-sig") as f:
+            text = f.read()
+        # Ищем RAW_OWNER_USER_ID=число в любом месте
+        m = re.search(r"RAW_OWNER_USER_ID\s*=\s*(\d+)", text, re.IGNORECASE)
+        if m:
+            return int(m.group(1))
+    except Exception:
+        pass
+    return 0
+
+
+def _get_raw_owner_user_id():
+    """RAW_OWNER_USER_ID: при старте, .env в нескольких путях, затем config/raw_owner_user_id.txt."""
+    uid = RAW_OWNER_USER_ID
+    if uid:
+        return uid
+    for env_path in [BASE / ".env", Path.cwd() / ".env", BASE / "config" / ".env"]:
+        if not env_path.exists():
+            continue
+        load_dotenv(dotenv_path=env_path, override=True)
+        raw = (os.getenv("RAW_OWNER_USER_ID") or "").strip()
+        if raw.isdigit():
+            return int(raw)
+        uid = _read_raw_owner_from_file(env_path)
+        if uid:
+            return uid
+    # Запасной вариант: файл с одной строкой — число (твой Telegram user id)
+    for dir_path in [BASE / "config", BASE, Path.cwd()]:
+        fallback = dir_path / "raw_owner_user_id.txt"
+        if fallback.exists():
+            try:
+                raw = fallback.read_text(encoding="utf-8").strip()
+                if raw.isdigit():
+                    return int(raw)
+            except Exception:
+                pass
+    return 0
 
 
 @app.route("/api/gtd/sprint-report", methods=["POST"])
 def api_sprint_report():
     """
-    Приём отчёта по спринту: Perplexity-анализ → PDF → отправка в Collect бот.
+    Приём отчёта по спринту: Perplexity-анализ → отправка текстом в Collect бот (без PDF).
     POST JSON: { sprint_id, sprint: {...}, items: [...], insights: [...], comment?: str }
     sprint_id например "s4_2026" для напоминаний.
     """
-    user_id = RAW_OWNER_USER_ID
+    user_id = _get_raw_owner_user_id()
     if not user_id:
-        return jsonify({"error": "RAW_OWNER_USER_ID not set"}), 400
+        # Отладка: откуда API ищет .env
+        tried = [
+            ("BASE", BASE / ".env"),
+            ("cwd", Path.cwd() / ".env"),
+            ("config", BASE / "config" / ".env"),
+        ]
+        exists = [(name, str(p), p.exists()) for name, p in tried]
+        return jsonify({
+            "error": "RAW_OWNER_USER_ID not set. Добавь в .env: RAW_OWNER_USER_ID=твой_telegram_id",
+            "debug": {"BASE": str(BASE), "cwd": str(Path.cwd()), "env_checked": exists},
+        }), 400
     try:
         data = request.get_json(force=True, silent=True) or {}
     except Exception:
@@ -316,29 +436,22 @@ def api_sprint_report():
     _ensure_sprint_reports()
     _save_sprint_report(sprint_id, user_id)
     try:
-        from api.sprint_perplexity import call_perplexity, text_to_pdf
+        from api.sprint_perplexity import call_perplexity
         analysis = call_perplexity(payload)
     except Exception as e:
         return jsonify({"error": f"Perplexity: {e}", "submitted": True}), 500
-    tmp_dir = Path(os.getenv("TEMP", "/tmp"))
-    out_path = tmp_dir / f"sprint_analysis_{sprint_id}_{datetime.utcnow().strftime('%Y%m%d_%H%M')}.pdf"
-    try:
-        text_to_pdf(analysis, out_path)
-    except Exception as e:
-        return jsonify({"error": f"PDF: {e}", "submitted": True, "analysis_preview": analysis[:500]}), 500
-    sent = _send_pdf_via_bot(out_path, user_id, f"Анализ спринта {sprint_id}")
-    try:
-        out_path.unlink(missing_ok=True)
-    except Exception:
-        pass
-    if not sent:
-        return jsonify({
-            "status": "ok",
-            "submitted": True,
-            "warning": "PDF не отправлен в Telegram (проверь BOT_TOKEN)",
-            "analysis_preview": analysis[:800],
-        }), 200
-    return jsonify({"status": "ok", "submitted": True, "pdf_sent": True}), 200
+    # Отправляем анализ текстом в Telegram (без PDF — избегаем ошибки fpdf "Not enough horizontal space")
+    sent, telegram_error = _send_long_text_via_bot(user_id, analysis, f"Анализ спринта {sprint_id}")
+
+    if sent:
+        return jsonify({"status": "ok", "submitted": True, "pdf_sent": False}), 200
+    return jsonify({
+        "status": "ok",
+        "submitted": True,
+        "warning": "В Telegram не отправилось.",
+        "telegram_error": telegram_error,
+        "analysis": analysis,
+    }), 200
 
 
 # ---------- Diary / Evernote ----------
