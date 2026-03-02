@@ -1088,7 +1088,7 @@
           <p class="gtd-overview">Goals 1Q2026, формулировки спринта. <button type="button" class="gtd-login-btn" id="gtd-sprints-refresh-btn">Обновить</button></p>
           <div id="gtd-export-sprints">
           <h2>Спринт 4 (${getSprintDates(4)})</h2>
-          <p style="margin:0 0 8px"><button type="button" class="gtd-login-btn" id="gtd-sprint4-add-life" style="padding:6px 12px;font-size:0.8rem">+ life</button> <button type="button" class="gtd-login-btn" id="gtd-sprint4-add-date" style="padding:6px 12px;font-size:0.8rem">+ date</button> <button type="button" class="gtd-login-btn" id="gtd-sprint4-submit-btn" style="padding:6px 12px;font-size:0.8rem">Сдать отчёт</button></p>
+          <p style="margin:0 0 8px"><button type="button" class="gtd-login-btn" id="gtd-sprint4-add-life" style="padding:6px 12px;font-size:0.8rem">+ life</button> <button type="button" class="gtd-login-btn" id="gtd-sprint4-add-date" style="padding:6px 12px;font-size:0.8rem">+ date</button> <button type="button" class="gtd-login-btn" id="gtd-sprint4-submit-btn" style="padding:6px 12px;font-size:0.8rem">Сдать отчёт</button> <span id="gtd-sprint-api-wrap" style="font-size:0.75rem;color:var(--text-muted);margin-left:10px">API: <span id="gtd-sprint-api-display">—</span> <button type="button" class="gtd-login-btn" id="gtd-sprint-api-set" style="padding:2px 8px;font-size:0.7rem">Указать URL</button></span></p>
           <div class="gtd-table-wrap">
             <table class="gtd-table gtd-sprint4-table">
               <thead><tr><th>type</th><th>Name</th><th>A/P</th><th>Sub</th><th>Description</th><th>Progress %</th><th>Status</th></tr></thead>
@@ -1629,7 +1629,8 @@
           const raw = (j.error || r.statusText) || '';
           if (/PDF|horizontal space/i.test(raw)) {
             localStorage.removeItem('avatar_collect_api_url');
-            alert('Запрос ушёл на старую версию API.\n\nСделай так:\n1) Закрой все терминалы с API и заверши python.exe в Диспетчере задач.\n2) Открой новый терминал: cd папка_Avatar, затем: python -m api.collect_api\n3) Нажми «Сдать отчёт» снова и введи URL: http://localhost:8080');
+            if (typeof updateSprintApiUrlDisplay === 'function') updateSprintApiUrlDisplay();
+            alert('Запрос ушёл на старую версию API.\n\nНажми «Указать URL» рядом с кнопкой «Сдать отчёт», введи: http://localhost:8080\n(сначала запусти API в терминале: python -m api.collect_api)');
             return;
           }
           const debug = j.debug ? '\n\nОтладка: ' + JSON.stringify(j.debug, null, 2) : '';
@@ -1749,7 +1750,20 @@
       if (addDateBtn) addDateBtn.onclick = addSprint4DateRow;
       const submitBtn = document.getElementById('gtd-sprint4-submit-btn');
       if (submitBtn) submitBtn.onclick = submitSprintReport;
+      const apiSetBtn = document.getElementById('gtd-sprint-api-set');
+      if (apiSetBtn) apiSetBtn.onclick = function() {
+        const url = prompt('URL API (должен быть запущен на твоём компьютере):', getCollectApiUrl() || 'http://localhost:8080');
+        if (url != null && url.trim()) {
+          localStorage.setItem('avatar_collect_api_url', url.trim().replace(/\/+$/, ''));
+          updateSprintApiUrlDisplay();
+        }
+      };
+      updateSprintApiUrlDisplay();
       bindSprint4Editable();
+    }
+    function updateSprintApiUrlDisplay() {
+      const el = document.getElementById('gtd-sprint-api-display');
+      if (el) el.textContent = getCollectApiUrl() || 'не указан';
     }
     const DIARY_EVERNOTE_KEY = 'avatar_diary_evernote';
     function loadDiaryEvernoteNotes() {
