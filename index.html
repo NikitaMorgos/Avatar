@@ -346,6 +346,8 @@
     .gtd-table .gtd-col-desc { min-width: 280px; }
     .gtd-table .gtd-sprint4-total { font-weight: 600; background: var(--locked-bg); }
     .gtd-sprint4-table td, .gtd-sprint4-table th { vertical-align: top; line-height: 1.4; }
+    .gtd-sprint-del-btn { font-size: 0.65rem; padding: 2px 5px; min-width: auto; line-height: 1; margin-left: 2px; }
+    .gtd-sprint-add-btn { font-size: 0.65rem; padding: 2px 5px; min-width: auto; line-height: 1; margin-right: 2px; }
     .gtd-table .gtd-sprint-total { font-weight: 600; background: var(--locked-bg); }
     .gtd-table td.gtd-prog-red,
     .gtd-table tr:hover td.gtd-prog-red { background: #fef2f2 !important; color: #b91c1c !important; }
@@ -1010,7 +1012,7 @@
         const prog = getSprint4Prog(rowId) || ((src && src.progress != null) ? src.progress : (g.progress != null ? g.progress : ''));
         const st = getSprint4St(rowId) || (src && src.status && statusLabels[src.status] ? src.status : (g.status && statusLabels[g.status] ? g.status : 'не начинал'));
         const name = goalName(key, 'area');
-        return `<tr data-rowid="${escapeHtml(rowId)}" data-rowtype="area"><td>area</td><td class="gtd-cell-oneline" title="${escapeHtml(name)}">${escapeHtml(name)}</td><td>${escapeHtml(g.area)}</td><td>${escapeHtml(g.area1 || '-')}</td><td class="gtd-cell-editable gtd-cell-text" contenteditable="true" data-col="desc">${escapeHtml(formul)}</td><td class="gtd-cell-editable gtd-cell-oneline${progClass(prog)}" contenteditable="true" data-col="progress">${escapeHtml(prog !== '' ? prog + (String(prog).match(/%$/) ? '' : '%') : '0%')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="status">${escapeHtml(st)}</td><td><button type="button" class="gtd-login-btn gtd-sprint-del-btn" title="Удалить">✕</button></td></tr>`;
+        return `<tr data-rowid="${escapeHtml(rowId)}" data-rowtype="area"><td>area</td><td class="gtd-cell-oneline" title="${escapeHtml(name)}">${escapeHtml(name)}</td><td>${escapeHtml(g.area)}</td><td>${escapeHtml(g.area1 || '-')}</td><td class="gtd-cell-editable gtd-cell-text" contenteditable="true" data-col="desc">${escapeHtml(formul)}</td><td class="gtd-cell-editable gtd-cell-oneline${progClass(prog)}" contenteditable="true" data-col="progress">${escapeHtml(prog !== '' ? prog + (String(prog).match(/%$/) ? '' : '%') : '0%')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="status">${escapeHtml(st)}</td><td><button type="button" class="gtd-login-btn gtd-sprint-add-btn" title="Добавить задачу ниже">+</button> <button type="button" class="gtd-login-btn gtd-sprint-del-btn" title="Удалить">✕</button></td></tr>`;
       }).join('');
       const sprint4ProjectRows = proj1Q.filter(g => !sprint4Hidden.has('project|' + goalKeyProject(g))).map(g => {
         const key = goalKeyProject(g);
@@ -1020,18 +1022,18 @@
         const prog = getSprint4Prog(rowId) || ((src && src.progress != null) ? src.progress : (g.progress != null ? g.progress : ''));
         const st = getSprint4St(rowId) || (src && src.status && statusLabels[src.status] ? src.status : (g.status && statusLabels[g.status] ? g.status : 'не начинал'));
         const name = goalName(key, 'project');
-        return `<tr data-rowid="${escapeHtml(rowId)}" data-rowtype="project"><td>project</td><td class="gtd-cell-oneline" title="${escapeHtml(name)}">${escapeHtml(name)}</td><td>${escapeHtml(g.proj)}</td><td>${escapeHtml(g.proj1 || '-')}</td><td class="gtd-cell-editable gtd-cell-text" contenteditable="true" data-col="desc">${escapeHtml(formul)}</td><td class="gtd-cell-editable gtd-cell-oneline${progClass(prog)}" contenteditable="true" data-col="progress">${escapeHtml(prog !== '' ? prog + (String(prog).match(/%$/) ? '' : '%') : '0%')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="status">${escapeHtml(st)}</td><td><button type="button" class="gtd-login-btn gtd-sprint-del-btn" title="Удалить">✕</button></td></tr>`;
+        return `<tr data-rowid="${escapeHtml(rowId)}" data-rowtype="project"><td>project</td><td class="gtd-cell-oneline" title="${escapeHtml(name)}">${escapeHtml(name)}</td><td>${escapeHtml(g.proj)}</td><td>${escapeHtml(g.proj1 || '-')}</td><td class="gtd-cell-editable gtd-cell-text" contenteditable="true" data-col="desc">${escapeHtml(formul)}</td><td class="gtd-cell-editable gtd-cell-oneline${progClass(prog)}" contenteditable="true" data-col="progress">${escapeHtml(prog !== '' ? prog + (String(prog).match(/%$/) ? '' : '%') : '0%')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="status">${escapeHtml(st)}</td><td><button type="button" class="gtd-login-btn gtd-sprint-add-btn" title="Добавить задачу ниже">+</button> <button type="button" class="gtd-login-btn gtd-sprint-del-btn" title="Удалить">✕</button></td></tr>`;
       }).join('');
       const manualLife = gtd1QState.manualLife || defaultManualLife;
       const manualDate = gtd1QState.manualDate || defaultManualDate;
       const fmtProg = (p) => { const s = String(p || '').trim(); if (s === '') return '0%'; return s.match(/%$/) ? s : (parseFloat(s.replace(/%/g,'')) || 0) + '%'; };
       const sprint4LifeRows = manualLife.map((m, i) => {
         const rowId = 'life|' + i;
-        return `<tr data-rowid="${escapeHtml(rowId)}" data-rowtype="life"><td>life</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="name">${escapeHtml(m.name || '')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="ap">${escapeHtml(m.ap || '')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="sub">${escapeHtml(m.sub || '')}</td><td class="gtd-cell-editable gtd-cell-text" contenteditable="true" data-col="desc">${escapeHtml(m.desc || '')}</td><td class="gtd-cell-editable gtd-cell-oneline${progClass(m.progress)}" contenteditable="true" data-col="progress">${escapeHtml(fmtProg(m.progress))}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="status">${escapeHtml(m.status || '')}</td><td><button type="button" class="gtd-login-btn gtd-sprint-del-btn" title="Удалить">✕</button></td></tr>`;
+        return `<tr data-rowid="${escapeHtml(rowId)}" data-rowtype="life"><td>life</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="name">${escapeHtml(m.name || '')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="ap">${escapeHtml(m.ap || '')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="sub">${escapeHtml(m.sub || '')}</td><td class="gtd-cell-editable gtd-cell-text" contenteditable="true" data-col="desc">${escapeHtml(m.desc || '')}</td><td class="gtd-cell-editable gtd-cell-oneline${progClass(m.progress)}" contenteditable="true" data-col="progress">${escapeHtml(fmtProg(m.progress))}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="status">${escapeHtml(m.status || '')}</td><td><button type="button" class="gtd-login-btn gtd-sprint-add-btn" title="Добавить задачу ниже">+</button> <button type="button" class="gtd-login-btn gtd-sprint-del-btn" title="Удалить">✕</button></td></tr>`;
       }).join('');
       const sprint4DateRows = manualDate.map((m, i) => {
         const rowId = 'date|' + i;
-        return `<tr data-rowid="${escapeHtml(rowId)}" data-rowtype="date"><td>date</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="name">${escapeHtml(m.name || '')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="ap">${escapeHtml(m.ap || '')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="sub">${escapeHtml(m.sub || '')}</td><td class="gtd-cell-editable gtd-cell-text" contenteditable="true" data-col="desc">${escapeHtml(m.desc || '')}</td><td class="gtd-cell-editable gtd-cell-oneline${progClass(m.progress)}" contenteditable="true" data-col="progress">${escapeHtml(fmtProg(m.progress))}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="status">${escapeHtml(m.status || '')}</td><td><button type="button" class="gtd-login-btn gtd-sprint-del-btn" title="Удалить">✕</button></td></tr>`;
+        return `<tr data-rowid="${escapeHtml(rowId)}" data-rowtype="date"><td>date</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="name">${escapeHtml(m.name || '')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="ap">${escapeHtml(m.ap || '')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="sub">${escapeHtml(m.sub || '')}</td><td class="gtd-cell-editable gtd-cell-text" contenteditable="true" data-col="desc">${escapeHtml(m.desc || '')}</td><td class="gtd-cell-editable gtd-cell-oneline${progClass(m.progress)}" contenteditable="true" data-col="progress">${escapeHtml(fmtProg(m.progress))}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="status">${escapeHtml(m.status || '')}</td><td><button type="button" class="gtd-login-btn gtd-sprint-add-btn" title="Добавить задачу ниже">+</button> <button type="button" class="gtd-login-btn gtd-sprint-del-btn" title="Удалить">✕</button></td></tr>`;
       }).join('');
       const sprint4Manual = gtd1QState.sprint4Manual || [];
       const sprintApOpts = (sel) => '<option value="">—</option>' + apList.map(a=>`<option value="${escapeHtml(a)}"${(sel||'')===a?' selected':''}>${escapeHtml(a)}</option>`).join('');
@@ -1040,7 +1042,7 @@
         const subs = getSubsForAp(m.ap||'').filter(Boolean);
         let subOpts = '<option value="">—</option>' + subs.map(s=>`<option value="${escapeHtml(s)}"${(m.sub||'')===s?' selected':''}>${escapeHtml(s)}</option>`).join('');
         if (m.sub && !subs.includes(m.sub)) subOpts += `<option value="${escapeHtml(m.sub)}" selected>${escapeHtml(m.sub)}</option>`;
-        return `<tr data-rowid="${escapeHtml(rowId)}" data-rowtype="manual"><td><select class="gtd-sprint-type-select" data-col="type">${sprintTypeOpts(m.type)}</select></td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="name">${escapeHtml(m.name||'')}</td><td><select class="gtd-sprint-ap-select" data-col="ap">${sprintApOpts(m.ap)}</select></td><td><select class="gtd-sprint-sub-select" data-col="sub">${subOpts}</select></td><td class="gtd-cell-editable gtd-cell-text" contenteditable="true" data-col="desc">${escapeHtml(m.desc||'')}</td><td class="gtd-cell-editable gtd-cell-oneline${progClass(m.progress)}" contenteditable="true" data-col="progress">${escapeHtml(fmtProg(m.progress))}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="status">${escapeHtml(m.status||'')}</td><td><button type="button" class="gtd-login-btn gtd-sprint-del-btn" title="Удалить">✕</button></td></tr>`;
+        return `<tr data-rowid="${escapeHtml(rowId)}" data-rowtype="manual"><td><select class="gtd-sprint-type-select" data-col="type">${sprintTypeOpts(m.type)}</select></td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="name">${escapeHtml(m.name||'')}</td><td><select class="gtd-sprint-ap-select" data-col="ap">${sprintApOpts(m.ap)}</select></td><td><select class="gtd-sprint-sub-select" data-col="sub">${subOpts}</select></td><td class="gtd-cell-editable gtd-cell-text" contenteditable="true" data-col="desc">${escapeHtml(m.desc||'')}</td><td class="gtd-cell-editable gtd-cell-oneline${progClass(m.progress)}" contenteditable="true" data-col="progress">${escapeHtml(fmtProg(m.progress))}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="status">${escapeHtml(m.status||'')}</td><td><button type="button" class="gtd-login-btn gtd-sprint-add-btn" title="Добавить задачу ниже">+</button> <button type="button" class="gtd-login-btn gtd-sprint-del-btn" title="Удалить">✕</button></td></tr>`;
       }).join('');
       const taskCount = area1Q.filter(g=>!sprint4Hidden.has('area|'+goalKeyArea(g))).length + proj1Q.filter(g=>!sprint4Hidden.has('project|'+goalKeyProject(g))).length + manualLife.length + manualDate.length + sprint4Manual.length;
       let sumProg = 0;
@@ -1068,7 +1070,7 @@
         const subs = getSubsForAp(m.ap||'').filter(Boolean);
         let subOpts = '<option value="">—</option>' + subs.map(s=>`<option value="${escapeHtml(s)}"${(m.sub||'')===s?' selected':''}>${escapeHtml(s)}</option>`).join('');
         if (m.sub && !subs.includes(m.sub)) subOpts += `<option value="${escapeHtml(m.sub)}" selected>${escapeHtml(m.sub)}</option>`;
-        return `<tr data-rowid="s5|${i}" data-rowtype="s5"><td><select class="gtd-sprint-type-select" data-col="type">${sprintTypeOpts(m.type)}</select></td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="name">${escapeHtml(m.name||'')}</td><td><select class="gtd-sprint-ap-select" data-col="ap">${sprintApOpts(m.ap)}</select></td><td><select class="gtd-sprint-sub-select" data-col="sub">${subOpts}</select></td><td class="gtd-cell-editable gtd-cell-text" contenteditable="true" data-col="desc">${escapeHtml(m.desc||'')}</td><td class="gtd-cell-editable gtd-cell-oneline${progClass(m.progress)}" contenteditable="true" data-col="progress">${escapeHtml(fmtProg(m.progress))}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="status">${escapeHtml(m.status||'')}</td><td><button type="button" class="gtd-login-btn gtd-sprint-del-btn" title="Удалить">✕</button></td></tr>`;
+        return `<tr data-rowid="s5|${i}" data-rowtype="s5"><td><select class="gtd-sprint-type-select" data-col="type">${sprintTypeOpts(m.type)}</select></td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="name">${escapeHtml(m.name||'')}</td><td><select class="gtd-sprint-ap-select" data-col="ap">${sprintApOpts(m.ap)}</select></td><td><select class="gtd-sprint-sub-select" data-col="sub">${subOpts}</select></td><td class="gtd-cell-editable gtd-cell-text" contenteditable="true" data-col="desc">${escapeHtml(m.desc||'')}</td><td class="gtd-cell-editable gtd-cell-oneline${progClass(m.progress)}" contenteditable="true" data-col="progress">${escapeHtml(fmtProg(m.progress))}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="status">${escapeHtml(m.status||'')}</td><td><button type="button" class="gtd-login-btn gtd-sprint-add-btn" title="Добавить задачу ниже">+</button> <button type="button" class="gtd-login-btn gtd-sprint-del-btn" title="Удалить">✕</button></td></tr>`;
       }).join('');
       const sprint5TaskCount = sprint5Tasks.length;
       let sprint5Sum = 0; sprint5Tasks.forEach(m => { const n = parseFloat(String(m.progress||'').replace(/%/g,'')); sprint5Sum += isNaN(n) ? 0 : n; });
@@ -1121,6 +1123,16 @@
         <div id="gtd-panel-sprints" class="gtd-panel">
           <p class="gtd-overview">Goals 1Q2026, формулировки спринта. <button type="button" class="gtd-login-btn" id="gtd-sprints-refresh-btn">Обновить</button></p>
           <div id="gtd-export-sprints">
+          <h2>Спринт 5 (${getSprintDates(5)})</h2>
+          <p style="margin:0 0 8px"><button type="button" class="gtd-login-btn" id="gtd-sprint5-add-task" style="padding:6px 12px;font-size:0.8rem">+ задача</button></p>
+          <div class="gtd-table-wrap">
+            <table class="gtd-table gtd-sprint4-table">
+              <thead><tr><th>type</th><th>Name</th><th>A/P</th><th>Sub</th><th>Description</th><th>Progress %</th><th>Status</th><th></th></tr></thead>
+              <tbody id="gtd-sprint5-tbody">
+                ${sprint5Rows}${sprint5TotalRow}
+              </tbody>
+            </table>
+          </div>
           <details class="gtd-sprint-details" id="gtd-sprint4-details">
             <summary style="cursor:pointer;font-weight:600;margin-bottom:6px">Спринт 4 (${getSprintDates(4)}) ▼</summary>
             <p style="margin:0 0 8px"><button type="button" class="gtd-login-btn" id="gtd-sprint4-add-life" style="padding:6px 12px;font-size:0.8rem">+ life</button> <button type="button" class="gtd-login-btn" id="gtd-sprint4-add-date" style="padding:6px 12px;font-size:0.8rem">+ date</button> <button type="button" class="gtd-login-btn" id="gtd-sprint4-add-task" style="padding:6px 12px;font-size:0.8rem">+ задача</button> <button type="button" class="gtd-login-btn" id="gtd-sprint4-submit-btn" style="padding:6px 12px;font-size:0.8rem">Сдать отчёт</button> <span id="gtd-sprint-api-wrap" style="font-size:0.75rem;color:var(--text-muted);margin-left:10px">API: <span id="gtd-sprint-api-display">—</span> <button type="button" class="gtd-login-btn" id="gtd-sprint-api-set" style="padding:2px 8px;font-size:0.7rem">Указать URL</button></span></p>
@@ -1133,16 +1145,6 @@
               </table>
             </div>
           </details>
-          <h2>Спринт 5 (${getSprintDates(5)})</h2>
-          <p style="margin:0 0 8px"><button type="button" class="gtd-login-btn" id="gtd-sprint5-add-task" style="padding:6px 12px;font-size:0.8rem">+ задача</button></p>
-          <div class="gtd-table-wrap">
-            <table class="gtd-table gtd-sprint4-table">
-              <thead><tr><th>type</th><th>Name</th><th>A/P</th><th>Sub</th><th>Description</th><th>Progress %</th><th>Status</th><th></th></tr></thead>
-              <tbody id="gtd-sprint5-tbody">
-                ${sprint5Rows}${sprint5TotalRow}
-              </tbody>
-            </table>
-          </div>
           <h2>Goals 1Q2026 по AREA</h2>
           <div class="gtd-table-wrap">
             <table class="gtd-table">
@@ -1316,7 +1318,7 @@
         const subs = getSubsForAp(m.ap||'').filter(Boolean);
         let subOpts = '<option value="">—</option>' + subs.map(s=>`<option value="${escapeHtml(s)}"${(m.sub||'')===s?' selected':''}>${escapeHtml(s)}</option>`).join('');
         if (m.sub && !subs.includes(m.sub)) subOpts += `<option value="${escapeHtml(m.sub)}" selected>${escapeHtml(m.sub)}</option>`;
-        return `<tr data-rowid="s5|${i}" data-rowtype="s5"><td><select class="gtd-sprint-type-select" data-col="type">${sprintTypeOpts(m.type)}</select></td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="name">${escapeHtml(m.name||'')}</td><td><select class="gtd-sprint-ap-select" data-col="ap">${sprintApOpts(m.ap)}</select></td><td><select class="gtd-sprint-sub-select" data-col="sub">${subOpts}</select></td><td class="gtd-cell-editable gtd-cell-text" contenteditable="true" data-col="desc">${escapeHtml(m.desc||'')}</td><td class="gtd-cell-editable gtd-cell-oneline${progClass(m.progress)}" contenteditable="true" data-col="progress">${escapeHtml(fmtProg(m.progress))}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="status">${escapeHtml(m.status||'')}</td><td><button type="button" class="gtd-login-btn gtd-sprint-del-btn" title="Удалить">✕</button></td></tr>`;
+        return `<tr data-rowid="s5|${i}" data-rowtype="s5"><td><select class="gtd-sprint-type-select" data-col="type">${sprintTypeOpts(m.type)}</select></td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="name">${escapeHtml(m.name||'')}</td><td><select class="gtd-sprint-ap-select" data-col="ap">${sprintApOpts(m.ap)}</select></td><td><select class="gtd-sprint-sub-select" data-col="sub">${subOpts}</select></td><td class="gtd-cell-editable gtd-cell-text" contenteditable="true" data-col="desc">${escapeHtml(m.desc||'')}</td><td class="gtd-cell-editable gtd-cell-oneline${progClass(m.progress)}" contenteditable="true" data-col="progress">${escapeHtml(fmtProg(m.progress))}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="status">${escapeHtml(m.status||'')}</td><td><button type="button" class="gtd-login-btn gtd-sprint-add-btn" title="Добавить задачу ниже">+</button> <button type="button" class="gtd-login-btn gtd-sprint-del-btn" title="Удалить">✕</button></td></tr>`;
       }).join('');
       let sum = 0; tasks.forEach(m => { const n = parseFloat(String(m.progress||'').replace(/%/g,'')); sum += isNaN(n) ? 0 : n; });
       const avg = tasks.length > 0 ? Math.round(sum / tasks.length) : 0;
@@ -1427,7 +1429,7 @@
         const prog = getSprint4Prog(rowId) || ((src && src.progress != null) ? src.progress : (g.progress != null ? g.progress : ''));
         const st = getSprint4St(rowId) || (src && src.status && statusLabels[src.status] ? src.status : (g.status && statusLabels[g.status] ? g.status : 'не начинал'));
         const name = goalName(key, 'area');
-        return `<tr data-rowid="${escapeHtml(rowId)}" data-rowtype="area"><td>area</td><td class="gtd-cell-oneline" title="${escapeHtml(name)}">${escapeHtml(name)}</td><td>${escapeHtml(g.area)}</td><td>${escapeHtml(g.area1 || '-')}</td><td class="gtd-cell-editable gtd-cell-text" contenteditable="true" data-col="desc">${escapeHtml(formul)}</td><td class="gtd-cell-editable gtd-cell-oneline${progClass(prog)}" contenteditable="true" data-col="progress">${escapeHtml(prog !== '' ? prog + (String(prog).match(/%$/) ? '' : '%') : '-')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="status">${escapeHtml(st)}</td><td><button type="button" class="gtd-login-btn gtd-sprint-del-btn" title="Удалить">✕</button></td></tr>`;
+        return `<tr data-rowid="${escapeHtml(rowId)}" data-rowtype="area"><td>area</td><td class="gtd-cell-oneline" title="${escapeHtml(name)}">${escapeHtml(name)}</td><td>${escapeHtml(g.area)}</td><td>${escapeHtml(g.area1 || '-')}</td><td class="gtd-cell-editable gtd-cell-text" contenteditable="true" data-col="desc">${escapeHtml(formul)}</td><td class="gtd-cell-editable gtd-cell-oneline${progClass(prog)}" contenteditable="true" data-col="progress">${escapeHtml(prog !== '' ? prog + (String(prog).match(/%$/) ? '' : '%') : '-')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="status">${escapeHtml(st)}</td><td><button type="button" class="gtd-login-btn gtd-sprint-add-btn" title="Добавить задачу ниже">+</button> <button type="button" class="gtd-login-btn gtd-sprint-del-btn" title="Удалить">✕</button></td></tr>`;
       }).join('');
       const projRows = proj1Q.filter(g => !sprint4Hidden.has('project|' + goalKeyProject(g))).map(g => {
         const key = goalKeyProject(g);
@@ -1437,23 +1439,23 @@
         const prog = getSprint4Prog(rowId) || ((src && src.progress != null) ? src.progress : (g.progress != null ? g.progress : ''));
         const st = getSprint4St(rowId) || (src && src.status && statusLabels[src.status] ? src.status : (g.status && statusLabels[g.status] ? g.status : 'не начинал'));
         const name = goalName(key, 'project');
-        return `<tr data-rowid="${escapeHtml(rowId)}" data-rowtype="project"><td>project</td><td class="gtd-cell-oneline" title="${escapeHtml(name)}">${escapeHtml(name)}</td><td>${escapeHtml(g.proj)}</td><td>${escapeHtml(g.proj1 || '-')}</td><td class="gtd-cell-editable gtd-cell-text" contenteditable="true" data-col="desc">${escapeHtml(formul)}</td><td class="gtd-cell-editable gtd-cell-oneline${progClass(prog)}" contenteditable="true" data-col="progress">${escapeHtml(prog !== '' ? prog + (String(prog).match(/%$/) ? '' : '%') : '0%')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="status">${escapeHtml(st)}</td><td><button type="button" class="gtd-login-btn gtd-sprint-del-btn" title="Удалить">✕</button></td></tr>`;
+        return `<tr data-rowid="${escapeHtml(rowId)}" data-rowtype="project"><td>project</td><td class="gtd-cell-oneline" title="${escapeHtml(name)}">${escapeHtml(name)}</td><td>${escapeHtml(g.proj)}</td><td>${escapeHtml(g.proj1 || '-')}</td><td class="gtd-cell-editable gtd-cell-text" contenteditable="true" data-col="desc">${escapeHtml(formul)}</td><td class="gtd-cell-editable gtd-cell-oneline${progClass(prog)}" contenteditable="true" data-col="progress">${escapeHtml(prog !== '' ? prog + (String(prog).match(/%$/) ? '' : '%') : '0%')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="status">${escapeHtml(st)}</td><td><button type="button" class="gtd-login-btn gtd-sprint-add-btn" title="Добавить задачу ниже">+</button> <button type="button" class="gtd-login-btn gtd-sprint-del-btn" title="Удалить">✕</button></td></tr>`;
       }).join('');
       const fmtProg = (p) => { const s = String(p || '').trim(); if (s === '') return '0%'; return s.match(/%$/) ? s : (parseFloat(s.replace(/%/g,'')) || 0) + '%'; };
       const lifeRows = manualLife.map((m, i) => {
         const rowId = 'life|' + i;
-        return `<tr data-rowid="${escapeHtml(rowId)}" data-rowtype="life"><td>life</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="name">${escapeHtml(m.name || '')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="ap">${escapeHtml(m.ap || '')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="sub">${escapeHtml(m.sub || '')}</td><td class="gtd-cell-editable gtd-cell-text" contenteditable="true" data-col="desc">${escapeHtml(m.desc || '')}</td><td class="gtd-cell-editable gtd-cell-oneline${progClass(m.progress)}" contenteditable="true" data-col="progress">${escapeHtml(fmtProg(m.progress))}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="status">${escapeHtml(m.status || '')}</td><td><button type="button" class="gtd-login-btn gtd-sprint-del-btn" title="Удалить">✕</button></td></tr>`;
+        return `<tr data-rowid="${escapeHtml(rowId)}" data-rowtype="life"><td>life</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="name">${escapeHtml(m.name || '')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="ap">${escapeHtml(m.ap || '')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="sub">${escapeHtml(m.sub || '')}</td><td class="gtd-cell-editable gtd-cell-text" contenteditable="true" data-col="desc">${escapeHtml(m.desc || '')}</td><td class="gtd-cell-editable gtd-cell-oneline${progClass(m.progress)}" contenteditable="true" data-col="progress">${escapeHtml(fmtProg(m.progress))}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="status">${escapeHtml(m.status || '')}</td><td><button type="button" class="gtd-login-btn gtd-sprint-add-btn" title="Добавить задачу ниже">+</button> <button type="button" class="gtd-login-btn gtd-sprint-del-btn" title="Удалить">✕</button></td></tr>`;
       }).join('');
       const dateRows = manualDate.map((m, i) => {
         const rowId = 'date|' + i;
-        return `<tr data-rowid="${escapeHtml(rowId)}" data-rowtype="date"><td>date</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="name">${escapeHtml(m.name || '')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="ap">${escapeHtml(m.ap || '')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="sub">${escapeHtml(m.sub || '')}</td><td class="gtd-cell-editable gtd-cell-text" contenteditable="true" data-col="desc">${escapeHtml(m.desc || '')}</td><td class="gtd-cell-editable gtd-cell-oneline${progClass(m.progress)}" contenteditable="true" data-col="progress">${escapeHtml(fmtProg(m.progress))}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="status">${escapeHtml(m.status || '')}</td><td><button type="button" class="gtd-login-btn gtd-sprint-del-btn" title="Удалить">✕</button></td></tr>`;
+        return `<tr data-rowid="${escapeHtml(rowId)}" data-rowtype="date"><td>date</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="name">${escapeHtml(m.name || '')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="ap">${escapeHtml(m.ap || '')}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="sub">${escapeHtml(m.sub || '')}</td><td class="gtd-cell-editable gtd-cell-text" contenteditable="true" data-col="desc">${escapeHtml(m.desc || '')}</td><td class="gtd-cell-editable gtd-cell-oneline${progClass(m.progress)}" contenteditable="true" data-col="progress">${escapeHtml(fmtProg(m.progress))}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="status">${escapeHtml(m.status || '')}</td><td><button type="button" class="gtd-login-btn gtd-sprint-add-btn" title="Добавить задачу ниже">+</button> <button type="button" class="gtd-login-btn gtd-sprint-del-btn" title="Удалить">✕</button></td></tr>`;
       }).join('');
       const sprint4ManualRows = sprint4Manual.map((m, i) => {
         const rowId = 'manual|' + i;
         const subs = getSubsForAp(m.ap||'').filter(Boolean);
         let subOpts = '<option value="">—</option>' + subs.map(s=>`<option value="${escapeHtml(s)}"${(m.sub||'')===s?' selected':''}>${escapeHtml(s)}</option>`).join('');
         if (m.sub && !subs.includes(m.sub)) subOpts += `<option value="${escapeHtml(m.sub)}" selected>${escapeHtml(m.sub)}</option>`;
-        return `<tr data-rowid="${escapeHtml(rowId)}" data-rowtype="manual"><td><select class="gtd-sprint-type-select" data-col="type">${sprintTypeOpts(m.type)}</select></td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="name">${escapeHtml(m.name||'')}</td><td><select class="gtd-sprint-ap-select" data-col="ap">${sprintApOpts(m.ap)}</select></td><td><select class="gtd-sprint-sub-select" data-col="sub">${subOpts}</select></td><td class="gtd-cell-editable gtd-cell-text" contenteditable="true" data-col="desc">${escapeHtml(m.desc||'')}</td><td class="gtd-cell-editable gtd-cell-oneline${progClass(m.progress)}" contenteditable="true" data-col="progress">${escapeHtml(fmtProg(m.progress))}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="status">${escapeHtml(m.status||'')}</td><td><button type="button" class="gtd-login-btn gtd-sprint-del-btn" title="Удалить">✕</button></td></tr>`;
+        return `<tr data-rowid="${escapeHtml(rowId)}" data-rowtype="manual"><td><select class="gtd-sprint-type-select" data-col="type">${sprintTypeOpts(m.type)}</select></td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="name">${escapeHtml(m.name||'')}</td><td><select class="gtd-sprint-ap-select" data-col="ap">${sprintApOpts(m.ap)}</select></td><td><select class="gtd-sprint-sub-select" data-col="sub">${subOpts}</select></td><td class="gtd-cell-editable gtd-cell-text" contenteditable="true" data-col="desc">${escapeHtml(m.desc||'')}</td><td class="gtd-cell-editable gtd-cell-oneline${progClass(m.progress)}" contenteditable="true" data-col="progress">${escapeHtml(fmtProg(m.progress))}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="status">${escapeHtml(m.status||'')}</td><td><button type="button" class="gtd-login-btn gtd-sprint-add-btn" title="Добавить задачу ниже">+</button> <button type="button" class="gtd-login-btn gtd-sprint-del-btn" title="Удалить">✕</button></td></tr>`;
       }).join('');
       const taskCount = area1Q.filter(g=>!sprint4Hidden.has('area|'+goalKeyArea(g))).length + proj1Q.filter(g=>!sprint4Hidden.has('project|'+goalKeyProject(g))).length + manualLife.length + manualDate.length + sprint4Manual.length;
       let sumProg = 0;
@@ -1906,10 +1908,44 @@
       };
       const panel = document.getElementById('gtd-panel-sprints');
       if (panel) panel.addEventListener('click', function(e) {
-        if (!e.target.classList.contains('gtd-sprint-del-btn')) return;
         const tr = e.target.closest('tr');
         if (!tr || tr.classList.contains('gtd-sprint4-total')) return;
         const rowId = tr.dataset.rowid, rowType = tr.dataset.rowtype;
+        const tbody = tr.closest('tbody');
+        const tbodyId = tbody ? tbody.id : '';
+
+        if (e.target.classList.contains('gtd-sprint-add-btn')) {
+          const newTask = { type: 'life', name: '', ap: '', sub: '', desc: '', progress: 0, status: '' };
+          if (tbodyId === 'gtd-sprint5-tbody' && rowType === 's5') {
+            const i = parseInt(rowId.split('|')[1], 10);
+            gtd1QState.sprint5Tasks = gtd1QState.sprint5Tasks || [];
+            gtd1QState.sprint5Tasks.splice(i + 1, 0, newTask);
+            saveGtd1QState(gtd1QState);
+            updateSprint5Table();
+          } else if (tbodyId === 'gtd-sprint4-tbody' && rowId && rowType) {
+            if (rowType === 'manual') {
+              const i = parseInt(rowId.split('|')[1], 10);
+              gtd1QState.sprint4Manual = gtd1QState.sprint4Manual || [];
+              gtd1QState.sprint4Manual.splice(i + 1, 0, newTask);
+            } else if (rowType === 'life') {
+              const i = parseInt(rowId.split('|')[1], 10);
+              gtd1QState.manualLife = gtd1QState.manualLife || [];
+              gtd1QState.manualLife.splice(i + 1, 0, { name: '', ap: '', sub: '', desc: '', progress: 0, status: '' });
+            } else if (rowType === 'date') {
+              const i = parseInt(rowId.split('|')[1], 10);
+              gtd1QState.manualDate = gtd1QState.manualDate || [];
+              gtd1QState.manualDate.splice(i + 1, 0, { name: '', ap: '', sub: '', desc: '', progress: 0, status: '' });
+            } else if (rowType === 'area' || rowType === 'project') {
+              gtd1QState.sprint4Manual = gtd1QState.sprint4Manual || [];
+              gtd1QState.sprint4Manual.push(newTask);
+            }
+            saveGtd1QState(gtd1QState);
+            updateSprint4Table();
+          }
+          return;
+        }
+
+        if (!e.target.classList.contains('gtd-sprint-del-btn')) return;
         if (!rowId || !rowType) return;
         gtd1QState.sprint4Hidden = gtd1QState.sprint4Hidden || new Set();
         if (rowType === 'area' || rowType === 'project') {
