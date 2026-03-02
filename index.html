@@ -1627,10 +1627,15 @@
         const j = await r.json().catch(() => ({}));
         if (!r.ok) {
           const raw = (j.error || r.statusText) || '';
+          const isLocal = /localhost|127\.0\.0\.1/i.test(apiUrl);
           if (/PDF|horizontal space/i.test(raw)) {
-            localStorage.removeItem('avatar_collect_api_url');
-            if (typeof updateSprintApiUrlDisplay === 'function') updateSprintApiUrlDisplay();
-            alert('Запрос ушёл на старую версию API.\n\nНажми «Указать URL» рядом с кнопкой «Сдать отчёт», введи: http://localhost:8080\n(сначала запусти API в терминале: python -m api.collect_api)');
+            if (isLocal) {
+              alert('Ошибка с твоего API: ' + raw + '\n\nНа твоём компьютере запущена старая версия. В терминале:\n1) Ctrl+C (остановить API)\n2) git pull origin main\n3) python -m api.collect_api\nПотом снова нажми «Сдать отчёт».');
+            } else {
+              localStorage.removeItem('avatar_collect_api_url');
+              if (typeof updateSprintApiUrlDisplay === 'function') updateSprintApiUrlDisplay();
+              alert('Запрос ушёл на старую версию API.\n\nУкажи URL: http://localhost:8080 и запусти API локально: python -m api.collect_api');
+            }
             return;
           }
           const debug = j.debug ? '\n\nОтладка: ' + JSON.stringify(j.debug, null, 2) : '';
