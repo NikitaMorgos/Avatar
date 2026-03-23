@@ -825,6 +825,7 @@
     function getSprintDates(sprintNum, year) {
       year = year || 2026;
       if (sprintNum === 5) return '1 - 14 марта';
+      if (sprintNum === 6) return '15 - 31 марта';
       const monthIdx = sprintNum <= 2 ? 0 : 1;
       const lastDay = new Date(year, monthIdx + 1, 0).getDate();
       if (sprintNum === 1 || sprintNum === 3) return `1 - 15 ${MONTHS_GEN[monthIdx]}`;
@@ -837,14 +838,14 @@
     function loadGtd1QState(sprints1Q) {
       try {
         const s = localStorage.getItem(GTD_1Q_KEY);
-        if (s) { const j = JSON.parse(s); return { areaKeys: new Set(j.areaKeys||[]), projectKeys: new Set(j.projectKeys||[]), customFormuls: j.customFormuls||{}, manualLife: (j.manualLife&&j.manualLife.length)?j.manualLife:defaultManualLife, manualDate: (j.manualDate&&j.manualDate.length)?j.manualDate:defaultManualDate, sprint4Progress: j.sprint4Progress||{}, sprint4Status: j.sprint4Status||{}, sprint4Hidden: new Set(j.sprint4Hidden||[]), sprint4Manual: j.sprint4Manual||[], sprint5Tasks: j.sprint5Tasks||[] }; }
+        if (s) { const j = JSON.parse(s); return { areaKeys: new Set(j.areaKeys||[]), projectKeys: new Set(j.projectKeys||[]), customFormuls: j.customFormuls||{}, manualLife: (j.manualLife&&j.manualLife.length)?j.manualLife:defaultManualLife, manualDate: (j.manualDate&&j.manualDate.length)?j.manualDate:defaultManualDate, sprint4Progress: j.sprint4Progress||{}, sprint4Status: j.sprint4Status||{}, sprint4Hidden: new Set(j.sprint4Hidden||[]), sprint4Manual: j.sprint4Manual||[], sprint5Tasks: j.sprint5Tasks||[], sprint6Tasks: j.sprint6Tasks||[] }; }
       } catch(e) {}
       const areaKeys = new Set(), projectKeys = new Set();
       if (sprints1Q) { sprints1Q.byArea.forEach(g => areaKeys.add(goalKeyArea(g))); sprints1Q.byProject.forEach(g => projectKeys.add(goalKeyProject(g))); }
-      return { areaKeys, projectKeys, customFormuls: {}, manualLife: defaultManualLife, manualDate: defaultManualDate, sprint4Progress: {}, sprint4Status: {}, sprint4Hidden: new Set(), sprint4Manual: [], sprint5Tasks: [] };
+      return { areaKeys, projectKeys, customFormuls: {}, manualLife: defaultManualLife, manualDate: defaultManualDate, sprint4Progress: {}, sprint4Status: {}, sprint4Hidden: new Set(), sprint4Manual: [], sprint5Tasks: [], sprint6Tasks: [] };
     }
     function saveGtd1QState(st) {
-      try { localStorage.setItem(GTD_1Q_KEY, JSON.stringify({ areaKeys: [...st.areaKeys], projectKeys: [...st.projectKeys], customFormuls: st.customFormuls||{}, manualLife: st.manualLife||[], manualDate: st.manualDate||[], sprint4Progress: st.sprint4Progress||{}, sprint4Status: st.sprint4Status||{}, sprint4Hidden: [...(st.sprint4Hidden||[])], sprint4Manual: st.sprint4Manual||[], sprint5Tasks: st.sprint5Tasks||[] })); } catch(e) {}
+      try { localStorage.setItem(GTD_1Q_KEY, JSON.stringify({ areaKeys: [...st.areaKeys], projectKeys: [...st.projectKeys], customFormuls: st.customFormuls||{}, manualLife: st.manualLife||[], manualDate: st.manualDate||[], sprint4Progress: st.sprint4Progress||{}, sprint4Status: st.sprint4Status||{}, sprint4Hidden: [...(st.sprint4Hidden||[])], sprint4Manual: st.sprint4Manual||[], sprint5Tasks: st.sprint5Tasks||[], sprint6Tasks: st.sprint6Tasks||[] })); } catch(e) {}
     }
     const GTD_TODO_KEY = 'gtd_todo_2026';
     function loadTodoState() {
@@ -1078,6 +1079,23 @@
       const sprint5Avg = sprint5TaskCount > 0 ? Math.round(sprint5Sum / sprint5TaskCount) : 0;
       const sprint5TotalRow = `<tr class="gtd-sprint4-total"><td>TOTAL</td><td colspan="4">${sprint5TaskCount} задач</td><td class="${progClass(sprint5Avg)}">${sprint5Avg}%</td><td>средн.</td><td></td></tr>`;
 
+      const sprint6Tasks = (gtd1QState.sprint6Tasks && gtd1QState.sprint6Tasks.length) ? gtd1QState.sprint6Tasks : (() => {
+        const list = [];
+        (sprint5Tasks || []).forEach(m => list.push({ type: m.type||'life', name: m.name||'', ap: m.ap||'', sub: m.sub||'', desc: m.desc||'', progress: 0, status: m.status||'' }));
+        return list;
+      })();
+      if (!gtd1QState.sprint6Tasks || !gtd1QState.sprint6Tasks.length) { gtd1QState.sprint6Tasks = sprint6Tasks; saveGtd1QState(gtd1QState); }
+      const sprint6Rows = sprint6Tasks.map((m, i) => {
+        const subs = getSubsForAp(m.ap||'').filter(Boolean);
+        let subOpts = '<option value="">—</option>' + subs.map(s=>`<option value="${escapeHtml(s)}"${(m.sub||'')===s?' selected':''}>${escapeHtml(s)}</option>`).join('');
+        if (m.sub && !subs.includes(m.sub)) subOpts += `<option value="${escapeHtml(m.sub)}" selected>${escapeHtml(m.sub)}</option>`;
+        return `<tr data-rowid="s6|${i}" data-rowtype="s6"><td><select class="gtd-sprint-type-select" data-col="type">${sprintTypeOpts(m.type)}</select></td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="name">${escapeHtml(m.name||'')}</td><td><select class="gtd-sprint-ap-select" data-col="ap">${sprintApOpts(m.ap)}</select></td><td><select class="gtd-sprint-sub-select" data-col="sub">${subOpts}</select></td><td class="gtd-cell-editable gtd-cell-text" contenteditable="true" data-col="desc">${escapeHtml(m.desc||'')}</td><td class="gtd-cell-editable gtd-cell-oneline${progClass(m.progress)}" contenteditable="true" data-col="progress">${escapeHtml(fmtProg(m.progress))}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="status">${escapeHtml(m.status||'')}</td><td><button type="button" class="gtd-login-btn gtd-sprint-add-btn" title="Добавить задачу ниже">+</button> <button type="button" class="gtd-login-btn gtd-sprint-del-btn" title="Удалить">✕</button></td></tr>`;
+      }).join('');
+      const sprint6TaskCount = sprint6Tasks.length;
+      let sprint6Sum = 0; sprint6Tasks.forEach(m => { const n = parseFloat(String(m.progress||'').replace(/%/g,'')); sprint6Sum += isNaN(n) ? 0 : n; });
+      const sprint6Avg = sprint6TaskCount > 0 ? Math.round(sprint6Sum / sprint6TaskCount) : 0;
+      const sprint6TotalRow = `<tr class="gtd-sprint4-total"><td>TOTAL</td><td colspan="4">${sprint6TaskCount} задач</td><td class="${progClass(sprint6Avg)}">${sprint6Avg}%</td><td>средн.</td><td></td></tr>`;
+
       return `
         <div class="gtd-tabs">
           <button type="button" class="gtd-tab active" data-tab="goals">ЦЕЛИ</button>
@@ -1124,19 +1142,32 @@
         <div id="gtd-panel-sprints" class="gtd-panel">
           <p class="gtd-overview">Goals 1Q2026, формулировки спринта. <button type="button" class="gtd-login-btn" id="gtd-sprints-refresh-btn">Обновить</button></p>
           <div id="gtd-export-sprints">
-          <h2>Спринт 5 (${getSprintDates(5)})</h2>
-          <p style="margin:0 0 8px"><button type="button" class="gtd-login-btn" id="gtd-sprint5-add-task" style="padding:6px 12px;font-size:0.8rem">+ задача</button></p>
+          <p style="margin:0 0 12px;font-size:0.75rem;color:var(--text-muted)">API Collect: <span class="gtd-sprint-api-display">—</span> <button type="button" class="gtd-login-btn" id="gtd-sprint-api-set" style="padding:2px 8px;font-size:0.7rem">Указать URL</button></p>
+          <h2>Спринт 6 (${getSprintDates(6)})</h2>
+          <p style="margin:0 0 8px"><button type="button" class="gtd-login-btn" id="gtd-sprint6-add-task" style="padding:6px 12px;font-size:0.8rem">+ задача</button> <button type="button" class="gtd-login-btn" id="gtd-sprint6-submit-btn" style="padding:6px 12px;font-size:0.8rem">Сдать отчёт</button></p>
           <div class="gtd-table-wrap">
             <table class="gtd-table gtd-sprint4-table">
               <thead><tr><th>type</th><th>Name</th><th>A/P</th><th>Sub</th><th>Description</th><th>Progress %</th><th>Status</th><th></th></tr></thead>
-              <tbody id="gtd-sprint5-tbody">
-                ${sprint5Rows}${sprint5TotalRow}
+              <tbody id="gtd-sprint6-tbody">
+                ${sprint6Rows}${sprint6TotalRow}
               </tbody>
             </table>
           </div>
+          <details class="gtd-sprint-details" id="gtd-sprint5-details">
+            <summary style="cursor:pointer;font-weight:600;margin-bottom:6px">Спринт 5 (${getSprintDates(5)}) ▼</summary>
+            <p style="margin:0 0 8px"><button type="button" class="gtd-login-btn" id="gtd-sprint5-add-task" style="padding:6px 12px;font-size:0.8rem">+ задача</button> <button type="button" class="gtd-login-btn" id="gtd-sprint5-submit-btn" style="padding:6px 12px;font-size:0.8rem">Сдать отчёт</button></p>
+            <div class="gtd-table-wrap">
+              <table class="gtd-table gtd-sprint4-table">
+                <thead><tr><th>type</th><th>Name</th><th>A/P</th><th>Sub</th><th>Description</th><th>Progress %</th><th>Status</th><th></th></tr></thead>
+                <tbody id="gtd-sprint5-tbody">
+                  ${sprint5Rows}${sprint5TotalRow}
+                </tbody>
+              </table>
+            </div>
+          </details>
           <details class="gtd-sprint-details" id="gtd-sprint4-details">
             <summary style="cursor:pointer;font-weight:600;margin-bottom:6px">Спринт 4 (${getSprintDates(4)}) ▼</summary>
-            <p style="margin:0 0 8px"><button type="button" class="gtd-login-btn" id="gtd-sprint4-add-life" style="padding:6px 12px;font-size:0.8rem">+ life</button> <button type="button" class="gtd-login-btn" id="gtd-sprint4-add-date" style="padding:6px 12px;font-size:0.8rem">+ date</button> <button type="button" class="gtd-login-btn" id="gtd-sprint4-add-task" style="padding:6px 12px;font-size:0.8rem">+ задача</button> <button type="button" class="gtd-login-btn" id="gtd-sprint4-submit-btn" style="padding:6px 12px;font-size:0.8rem">Сдать отчёт</button> <span id="gtd-sprint-api-wrap" style="font-size:0.75rem;color:var(--text-muted);margin-left:10px">API: <span id="gtd-sprint-api-display">—</span> <button type="button" class="gtd-login-btn" id="gtd-sprint-api-set" style="padding:2px 8px;font-size:0.7rem">Указать URL</button></span></p>
+            <p style="margin:0 0 8px"><button type="button" class="gtd-login-btn" id="gtd-sprint4-add-life" style="padding:6px 12px;font-size:0.8rem">+ life</button> <button type="button" class="gtd-login-btn" id="gtd-sprint4-add-date" style="padding:6px 12px;font-size:0.8rem">+ date</button> <button type="button" class="gtd-login-btn" id="gtd-sprint4-add-task" style="padding:6px 12px;font-size:0.8rem">+ задача</button> <button type="button" class="gtd-login-btn" id="gtd-sprint4-submit-btn" style="padding:6px 12px;font-size:0.8rem">Сдать отчёт</button></p>
             <div class="gtd-table-wrap">
               <table class="gtd-table gtd-sprint4-table">
                 <thead><tr><th>type</th><th>Name</th><th>A/P</th><th>Sub</th><th>Description</th><th>Progress %</th><th>Status</th><th></th></tr></thead>
@@ -1306,6 +1337,12 @@
       saveGtd1QState(gtd1QState);
       updateSprint5Table();
     }
+    function addSprint6Task() {
+      gtd1QState.sprint6Tasks = gtd1QState.sprint6Tasks || [];
+      gtd1QState.sprint6Tasks.push({ type: 'life', name: '', ap: '', sub: '', desc: '', progress: 0, status: '' });
+      saveGtd1QState(gtd1QState);
+      updateSprint6Table();
+    }
     function buildSprint5Rows() {
       const tasks = gtd1QState.sprint5Tasks || [];
       const area1Q = defaultGoalsByArea.filter(g => gtd1QState.areaKeys.has(goalKeyArea(g)));
@@ -1326,9 +1363,33 @@
       const totalRow = `<tr class="gtd-sprint4-total"><td>TOTAL</td><td colspan="4">${tasks.length} задач</td><td class="${progClass(avg)}">${avg}%</td><td>средн.</td><td></td></tr>`;
       return rows + totalRow;
     }
+    function buildSprint6Rows() {
+      const tasks = gtd1QState.sprint6Tasks || [];
+      const area1Q = defaultGoalsByArea.filter(g => gtd1QState.areaKeys.has(goalKeyArea(g)));
+      const proj1Q = defaultGoalsByProject.filter(g => gtd1QState.projectKeys.has(goalKeyProject(g)));
+      const apList = [...new Set([...area1Q.map(g=>g.area), ...proj1Q.map(g=>g.proj)])].filter(Boolean).sort();
+      const getSubsForAp = (ap) => { const areaMatch = area1Q.find(g=>g.area===ap); if (areaMatch) return [...new Set(area1Q.filter(g=>g.area===ap).map(g=>g.area1||'').filter(Boolean))]; return [...new Set(proj1Q.filter(g=>g.proj===ap).map(g=>g.proj1||'').filter(Boolean))]; };
+      const sprintTypeOpts = (sel) => '<option value="">—</option>' + ['area','project','life','date'].map(t=>`<option value="${t}"${(sel||'')===t?' selected':''}>${t}</option>`).join('');
+      const sprintApOpts = (sel) => '<option value="">—</option>' + apList.map(a=>`<option value="${escapeHtml(a)}"${(sel||'')===a?' selected':''}>${escapeHtml(a)}</option>`).join('');
+      const fmtProg = (p) => { const s = String(p || '').trim(); if (s === '') return '0%'; return s.match(/%$/) ? s : (parseFloat(s.replace(/%/g,'')) || 0) + '%'; };
+      const rows = tasks.map((m, i) => {
+        const subs = getSubsForAp(m.ap||'').filter(Boolean);
+        let subOpts = '<option value="">—</option>' + subs.map(s=>`<option value="${escapeHtml(s)}"${(m.sub||'')===s?' selected':''}>${escapeHtml(s)}</option>`).join('');
+        if (m.sub && !subs.includes(m.sub)) subOpts += `<option value="${escapeHtml(m.sub)}" selected>${escapeHtml(m.sub)}</option>`;
+        return `<tr data-rowid="s6|${i}" data-rowtype="s6"><td><select class="gtd-sprint-type-select" data-col="type">${sprintTypeOpts(m.type)}</select></td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="name">${escapeHtml(m.name||'')}</td><td><select class="gtd-sprint-ap-select" data-col="ap">${sprintApOpts(m.ap)}</select></td><td><select class="gtd-sprint-sub-select" data-col="sub">${subOpts}</select></td><td class="gtd-cell-editable gtd-cell-text" contenteditable="true" data-col="desc">${escapeHtml(m.desc||'')}</td><td class="gtd-cell-editable gtd-cell-oneline${progClass(m.progress)}" contenteditable="true" data-col="progress">${escapeHtml(fmtProg(m.progress))}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-col="status">${escapeHtml(m.status||'')}</td><td><button type="button" class="gtd-login-btn gtd-sprint-add-btn" title="Добавить задачу ниже">+</button> <button type="button" class="gtd-login-btn gtd-sprint-del-btn" title="Удалить">✕</button></td></tr>`;
+      }).join('');
+      let sum = 0; tasks.forEach(m => { const n = parseFloat(String(m.progress||'').replace(/%/g,'')); sum += isNaN(n) ? 0 : n; });
+      const avg = tasks.length > 0 ? Math.round(sum / tasks.length) : 0;
+      const totalRow = `<tr class="gtd-sprint4-total"><td>TOTAL</td><td colspan="4">${tasks.length} задач</td><td class="${progClass(avg)}">${avg}%</td><td>средн.</td><td></td></tr>`;
+      return rows + totalRow;
+    }
     function updateSprint5Table() {
       const tbody = document.getElementById('gtd-sprint5-tbody');
       if (tbody) { tbody.innerHTML = buildSprint5Rows(); bindSprint4Editable(); }
+    }
+    function updateSprint6Table() {
+      const tbody = document.getElementById('gtd-sprint6-tbody');
+      if (tbody) { tbody.innerHTML = buildSprint6Rows(); bindSprint4Editable(); }
     }
     function updateSprint5Total() {
       const tbody = document.getElementById('gtd-sprint5-tbody');
@@ -1341,8 +1402,19 @@
         totalRow.cells[2].textContent = (n > 0 ? Math.round(sum / n) : 0) + '%';
       }
     }
+    function updateSprint6Total() {
+      const tbody = document.getElementById('gtd-sprint6-tbody');
+      if (!tbody) return;
+      const totalRow = tbody.querySelector('tr.gtd-sprint4-total');
+      if (totalRow && gtd1QState.sprint6Tasks) {
+        const n = gtd1QState.sprint6Tasks.length;
+        let sum = 0; gtd1QState.sprint6Tasks.forEach(m => { const v = parseFloat(String(m.progress||'').replace(/%/g,'')); sum += isNaN(v) ? 0 : v; });
+        totalRow.cells[1].innerHTML = n + ' задач';
+        totalRow.cells[2].textContent = (n > 0 ? Math.round(sum / n) : 0) + '%';
+      }
+    }
     function bindSprint4Editable() {
-      const tbls = [document.getElementById('gtd-sprint4-tbody'), document.getElementById('gtd-sprint5-tbody')].filter(Boolean);
+      const tbls = [document.getElementById('gtd-sprint4-tbody'), document.getElementById('gtd-sprint5-tbody'), document.getElementById('gtd-sprint6-tbody')].filter(Boolean);
       tbls.forEach(tbl => {
       tbl.querySelectorAll('.gtd-cell-editable[contenteditable="true"]').forEach(cell => {
         cell.onblur = function() {
@@ -1383,9 +1455,13 @@
             const i = parseInt(rowId.split('|')[1], 10);
             const arr = gtd1QState.sprint5Tasks || [];
             if (arr[i]) { arr[i][col] = text; if (col === 'progress') { const num = parseFloat(text.replace(/%/g,'')); arr[i].progress = (isNaN(num) || text === '') ? 0 : num; this.textContent = (isNaN(num) || text === '') ? '0%' : num + '%'; } saveGtd1QState(gtd1QState); updateSprint5Total(); return; }
+          } else if (rowType === 's6') {
+            const i = parseInt(rowId.split('|')[1], 10);
+            const arr = gtd1QState.sprint6Tasks || [];
+            if (arr[i]) { arr[i][col] = text; if (col === 'progress') { const num = parseFloat(text.replace(/%/g,'')); arr[i].progress = (isNaN(num) || text === '') ? 0 : num; this.textContent = (isNaN(num) || text === '') ? '0%' : num + '%'; } saveGtd1QState(gtd1QState); updateSprint6Total(); return; }
           }
           saveGtd1QState(gtd1QState);
-          if (rowType === 's5') updateSprint5Total(); else updateSprint4Total();
+          if (rowType === 's5') updateSprint5Total(); else if (rowType === 's6') updateSprint6Total(); else updateSprint4Total();
         };
       });
       });
@@ -1402,6 +1478,9 @@
             } else if (rowType === 's5') {
               const i = parseInt(rowId.split('|')[1], 10);
               if ((gtd1QState.sprint5Tasks || [])[i]) { gtd1QState.sprint5Tasks[i][col] = val; saveGtd1QState(gtd1QState); updateSprint5Table(); }
+            } else if (rowType === 's6') {
+              const i = parseInt(rowId.split('|')[1], 10);
+              if ((gtd1QState.sprint6Tasks || [])[i]) { gtd1QState.sprint6Tasks[i][col] = val; saveGtd1QState(gtd1QState); updateSprint6Table(); }
             }
           };
         });
@@ -1750,7 +1829,12 @@
       manualDate.forEach((m, i) => { const p = parseProg(m.progress); items.push({ type: 'date', name: m.name||'', ap: m.ap||'', sub: m.sub||'', description: m.desc||'', progress: p }); });
       return { sprint_id: 's4_2026', sprint: { id: 'Спринт 4', dates: getSprintDates(4), comment: '' }, items, insights: [] };
     }
-    async function submitSprintReport() {
+    function buildSprintTasksOnlyPayload(tasks, sprintNum, sprintId) {
+      const parseProg = v => { const n = parseFloat(String(v||'').replace(/%/g,'')); return isNaN(n) ? 0 : n; };
+      const items = (tasks || []).map(m => ({ type: m.type || 'life', name: m.name || '', ap: m.ap || '', sub: m.sub || '', description: m.desc || '', progress: parseProg(m.progress) }));
+      return { sprint_id: sprintId, sprint: { id: 'Спринт ' + sprintNum, dates: getSprintDates(sprintNum), comment: '' }, items, insights: [] };
+    }
+    async function submitSprintReportCore(payload, btn) {
       let apiUrl = getCollectApiUrl();
       if (!apiUrl) {
         const url = prompt('URL API Collect не указан.\n\nВведи адрес, на котором запущен API (например при работе на своём компьютере: http://localhost:8080):', 'http://localhost:8080');
@@ -1759,10 +1843,8 @@
         apiUrl = getCollectApiUrl();
       }
       if (!apiUrl) { alert('URL не сохранён.'); return; }
-      const btn = document.getElementById('gtd-sprint4-submit-btn');
       if (btn) { btn.disabled = true; btn.textContent = 'Отправляю...'; }
       try {
-        const payload = buildSprintReportPayload();
         const r = await fetch(apiUrl.replace(/\/+$/, '') + '/api/gtd/sprint-report', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
         const j = await r.json().catch(() => ({}));
         if (!r.ok) {
@@ -1795,6 +1877,16 @@
           alert(msg + (j.analysis ? ' Анализ открыт в отдельном окне.' : ''));
         } else if (!j.analysis) alert('Отчёт сдан ✓');
       } catch (e) { alert('Ошибка сети: ' + e.message); } finally { if (btn) { btn.disabled = false; btn.textContent = 'Сдать отчёт'; } }
+    }
+    async function submitSprintReport() {
+      saveSprint4FromDom();
+      await submitSprintReportCore(buildSprintReportPayload(), document.getElementById('gtd-sprint4-submit-btn'));
+    }
+    async function submitSprint5Report() {
+      await submitSprintReportCore(buildSprintTasksOnlyPayload(gtd1QState.sprint5Tasks, 5, 's5_2026'), document.getElementById('gtd-sprint5-submit-btn'));
+    }
+    async function submitSprint6Report() {
+      await submitSprintReportCore(buildSprintTasksOnlyPayload(gtd1QState.sprint6Tasks, 6, 's6_2026'), document.getElementById('gtd-sprint6-submit-btn'));
     }
     function bindTodoPanel() {
       const { apList = [], getSubsForAp = () => [], todoApOpts = () => '', todoKindOpts = () => '' } = gtdTodoContext;
@@ -1897,8 +1989,14 @@
       if (addTask4Btn) addTask4Btn.onclick = addSprint4Task;
       const addTask5Btn = document.getElementById('gtd-sprint5-add-task');
       if (addTask5Btn) addTask5Btn.onclick = addSprint5Task;
+      const addTask6Btn = document.getElementById('gtd-sprint6-add-task');
+      if (addTask6Btn) addTask6Btn.onclick = addSprint6Task;
       const submitBtn = document.getElementById('gtd-sprint4-submit-btn');
       if (submitBtn) submitBtn.onclick = submitSprintReport;
+      const submit5Btn = document.getElementById('gtd-sprint5-submit-btn');
+      if (submit5Btn) submit5Btn.onclick = submitSprint5Report;
+      const submit6Btn = document.getElementById('gtd-sprint6-submit-btn');
+      if (submit6Btn) submit6Btn.onclick = submitSprint6Report;
       const apiSetBtn = document.getElementById('gtd-sprint-api-set');
       if (apiSetBtn) apiSetBtn.onclick = function() {
         const url = prompt('URL API (должен быть запущен на твоём компьютере):', getCollectApiUrl() || 'http://localhost:8080');
@@ -1917,7 +2015,13 @@
 
         if (e.target.classList.contains('gtd-sprint-add-btn')) {
           const newTask = { type: 'life', name: '', ap: '', sub: '', desc: '', progress: 0, status: '' };
-          if (tbodyId === 'gtd-sprint5-tbody' && rowType === 's5') {
+          if (tbodyId === 'gtd-sprint6-tbody' && rowType === 's6') {
+            const i = parseInt(rowId.split('|')[1], 10);
+            gtd1QState.sprint6Tasks = gtd1QState.sprint6Tasks || [];
+            gtd1QState.sprint6Tasks.splice(i + 1, 0, newTask);
+            saveGtd1QState(gtd1QState);
+            updateSprint6Table();
+          } else if (tbodyId === 'gtd-sprint5-tbody' && rowType === 's5') {
             const i = parseInt(rowId.split('|')[1], 10);
             gtd1QState.sprint5Tasks = gtd1QState.sprint5Tasks || [];
             gtd1QState.sprint5Tasks.splice(i + 1, 0, newTask);
@@ -1975,14 +2079,20 @@
           gtd1QState.sprint5Tasks.splice(i, 1);
           saveGtd1QState(gtd1QState);
           updateSprint5Table();
+        } else if (rowType === 's6') {
+          const i = parseInt(rowId.split('|')[1], 10);
+          gtd1QState.sprint6Tasks = gtd1QState.sprint6Tasks || [];
+          gtd1QState.sprint6Tasks.splice(i, 1);
+          saveGtd1QState(gtd1QState);
+          updateSprint6Table();
         }
       });
       updateSprintApiUrlDisplay();
       bindSprint4Editable();
     }
     function updateSprintApiUrlDisplay() {
-      const el = document.getElementById('gtd-sprint-api-display');
-      if (el) el.textContent = getCollectApiUrl() || 'не указан';
+      const url = getCollectApiUrl() || 'не указан';
+      document.querySelectorAll('.gtd-sprint-api-display').forEach(el => { el.textContent = url; });
     }
     const DIARY_EVERNOTE_KEY = 'avatar_diary_evernote';
     function loadDiaryEvernoteNotes() {
