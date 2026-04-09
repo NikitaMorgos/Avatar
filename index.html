@@ -859,6 +859,12 @@
     const METRICS_SPRINTS_2026_HIST = { s1: { tasks: 14, pct: 100 }, s2: { tasks: 5, pct: 100 }, s3: { tasks: 22, pct: 59 } };
     const METRICS_SPRINTS_AVG_HIST = { 2019: { tasks: 9, done: 4, pct: 42 }, 2020: { tasks: 6, done: 3, pct: 59 }, 2021: { tasks: 2, done: 1, pct: 54 }, 2022: { tasks: 19, done: 7, pct: 35 }, 2023: { tasks: 16, done: 9, pct: 53 }, 2024: { tasks: 21, done: 14, pct: 66 }, 2025: { tasks: 10, done: 6, pct: 56 } };
     const METRICS_GOALS_YEAR_HIST = { 2019: { tasks: 9, done: 4, pct: 42 }, 2020: { tasks: 6, done: 3, pct: 59 }, 2021: { tasks: 2, done: 1, pct: 54 }, 2022: { tasks: 19, done: 7, pct: 35 }, 2023: { tasks: 16, done: 9, pct: 53 }, 2024: { tasks: 21, done: 14, pct: 66 }, 2025: { tasks: 10, done: 6, pct: 56 } };
+    const METRICS_QUARTERLY_HIST = {
+      '1q2025': { tasks: 23, done: 11, pct: 49 },
+      '2q2025': { tasks: 7,  done: 6,  pct: 75 },
+      '3q2025': { tasks: 9.5, done: 5.5, pct: 58 },
+      '4q2025': { tasks: 3,  done: 1,  pct: 33 }
+    };
 
     const defaultGoalsByArea = [{"area":"Ironman","area1":"General","desc":"сплю в основном без подкаста. 7-8 часов","prio":"must"},{"area":"Ironman","area1":"General","desc":"провести комплексный чекап организма. задел чтоб поставить на рельсы","prio":"nice"},{"area":"Ironman","area1":"General","desc":"минимизировать влияние вируса герпеса","prio":"must"},{"area":"Ironman","area1":"General","desc":"средний объем активности не меньше 7:30","prio":"must"},{"area":"Ironman","area1":"General","desc":"болею меньше 1.2 дней в месяц в среднем","prio":"nice"},{"area":"Ironman","area1":"Run","desc":"выбежал 5 км из 23 минут","prio":"nice"},{"area":"Ironman","area1":"Swim","desc":"поучаствовал в заплыве","prio":"nice"},{"area":"Ironman","area1":"Swim","desc":"возобновить тренировки в бассейне TI-Online","prio":"must"},{"area":"Ironman","area1":"Swim","desc":"проплыл 1 км из 19 минут","prio":"nice"},{"area":"Ironman","area1":"Cycling","desc":"сходил на несколько тренировок Велобит","prio":"must"},{"area":"Ironman","area1":"Ski","desc":"опробовал флетфристайл на трассах","prio":"nice"},{"area":"Ironman","area1":"Ski","desc":"забронили каталку на 2027 с новым опытом","prio":"must"},{"area":"Ironman","area1":"Ski","desc":"поучаствовал в лыжном забеге","prio":"nice"},{"area":"Ironman","area1":"Ski","desc":"несколько раз погонял в парке с утра","prio":"must"},{"area":"Ironman","area1":"Yoga","desc":"пересобрать с AI трек фейсфит, начать делать","prio":"nice"},{"area":"Ironman","area1":"Yoga","desc":"завести трек с подводящими упражнениями к стойке на руках в пространстве, сделать несколько подходов","prio":"nice"},{"area":"Ironman","area1":"Yoga","desc":"пройти курс Animal Flow в Fitstars","prio":"must"},{"area":"Ironman","area1":"GPP","desc":"несколько подготовительных тренировок по выходу силой","prio":"nice"},{"area":"Ironman","area1":"GPP","desc":"сделал подъем переворотом 2 раза подряд","prio":"nice"},{"area":"Dance","area1":"WCS","desc":"заработать больше 2пойнтов в новисах","prio":"nice"},{"area":"Dance","area1":"WCS","desc":"поучаствовать как минимум в 1 международном ивенте","prio":"nice"},{"area":"Dance","area1":"WCS","desc":"внедрить практику кирпичики","prio":"must"},{"area":"Dance","area1":"WCS","desc":"пересобрать методику сампо (AI)","prio":"nice"},{"area":"Dance","area1":"WCS","desc":"пересобрать работу с рекапами","prio":"nice"},{"area":"Dance","area1":"WCS","desc":"выйти на новый уровень в развитии","prio":"must"},{"area":"Dance","area1":"WCS","desc":"продвинуться в свич-треке","prio":"nice"},{"area":"Family","area1":"General","desc":"обновили жилище (комнаты по-новому)","prio":"nice"},{"area":"Family","area1":"Katya","desc":"вернулись к треку 23-24 (свидания, психолог, планы)","prio":"must"},{"area":"Family","area1":"Darina","desc":"интересная поездка","prio":"nice"},{"area":"Family","area1":"Darina","desc":"сделали несколько подходов к будущей профессии","prio":"nice"},{"area":"Family","area1":"Darina","desc":"внес осмысленный вклад в выздоровление","prio":"must"},{"area":"Family","area1":"Miron","desc":"продолжить (может и развить) вечерние истории","prio":"must"},{"area":"Family","area1":"Miron","desc":"сделан подход к совместной спорт-активности","prio":"nice"},{"area":"Finance","area1":"","desc":"суммарная ЗП покрывает расходы, кредит и нефинансовые инвестиции","prio":"must"},{"area":"Finance","area1":"","desc":"среднемесячный финрез больше 60тр","prio":"nice"},{"area":"Finance","area1":"","desc":"ДВД-финрез >-426тр","prio":"nice"},{"area":"Finance","area1":"","desc":"разница между номинальными и фактическими активами < 1.5млн","prio":"nice"},{"area":"Business","area1":"General","desc":"доходы от FO+FB занимают значимую долю","prio":"nice"},{"area":"Business","area1":"Family Office","desc":"результаты 26 лучше 25","prio":"nice"},{"area":"Business","area1":"Family Business","desc":"появились устойцивые треки по бизнесам ","prio":"must"},{"area":"Profession","area1":"General","desc":"заметная трансформация CMO=>CAIO","prio":"must"},{"area":"Profession","area1":"General","desc":"суммарная удовлетворенность от работ выше 65","prio":"nice"},{"area":"Profession","area1":"CAIO","desc":"прокачался в новом качестве CEO AI-бизнесов","prio":"nice"},{"area":"Profession","area1":"CMO","desc":"заметное улучшение качества CMO","prio":"nice"},{"area":"Self","area1":"General","desc":"меньше быстрого контента, быстрых углеводов, быстрых стимулов","prio":"must"},{"area":"Self","area1":"Diary","desc":"подготовил трек к старту нового тг-канала","prio":"nice"},{"area":"Self","area1":"Diary","desc":"фотки за год собираются в разные доски","prio":"nice"},{"area":"Self","area1":"Diary","desc":"обновленный подход к летописи","prio":"nice"},{"area":"GTD","area1":"","desc":"цели 50, выполнены > 67%","prio":"must"},{"area":"GTD","area1":"","desc":"цели 30, выполнены > 67%","prio":"nice"},{"area":"Education","area1":"","desc":"стартовать стрим, с обучением, где AI выступает и методологом и преподавателем","prio":"nice"},{"area":"Network","area1":"","desc":"начать заводить новый круг знакомств в новом амплуа","prio":"nice"},{"area":"Aesthetics","area1":"","desc":"поисследовать направление архитектуры конструктивизма (как дом наркомфина, только пошире)","prio":"nice"},{"area":"Aesthetics","area1":"","desc":"прочитать пару-тройку хорошей художественной лит-ры","prio":"nice"},{"area":"Music","area1":"","desc":"пересобрать трек с гитарой на Аватаре и продолжить","prio":"nice"},{"area":"Music","area1":"","desc":"поисследовать возможности для Льва Штыка","prio":"nice"},{"area":"English","area1":"","desc":"восстановить стрим на подходящем контенте (музыка, AI, wcs)","prio":"nice"}];
     const defaultSprints1Q2026 = { byArea: [{"area":"Ironman","area1":"General","desc":"средний объем активности не меньше 7:30","prio":"must","formul":"средний объем активности в феврале не меньше 7:30"},{"area":"Ironman","area1":"Ski","desc":"поучаствовал в лыжном забеге","prio":"nice","formul":"пробежал SkiGrom 28 февраля"},{"area":"Ironman","area1":"Ski","desc":"несколько раз погонял в парке с утра","prio":"must","formul":"2 раза сгонял на тренировку в парк"},{"area":"Ironman","area1":"Yoga","desc":"пройти курс Animal Flow в Fitstars","prio":"must","formul":"сделал 3 подхода (повторил старые) из курса"},{"area":"Dance","area1":"WCS","desc":"внедрить практику кирпичики","prio":"must","formul":"сделал 3 подхода с кирпичиками"},{"area":"Dance","area1":"WCS","desc":"пересобрать работу с рекапами","prio":"nice","formul":"залил несколько настоящих рекапов и отсортировал их в ЛК"},{"area":"Family","area1":"Katya","desc":"вернулись к треку 23-24 (свидания, психолог, планы)","prio":"must","formul":"2 подхода свидания"},{"area":"Family","area1":"Darina","desc":"внес осмысленный вклад в выздоровление","prio":"must","formul":"подумал, как лучше поучаствовать"},{"area":"Family","area1":"Miron","desc":"продолжить (может и развить) вечерние истории","prio":"must","formul":"продолжил ежедневные истории, внедрил небольшое разнообразие"},{"area":"Finance","area1":"","desc":"суммарная ЗП покрывает расходы, кредит и нефинансовые инвестиции","prio":"must","formul":"по итогам 1Q ЗП покрывает все расходы"},{"area":"Business","area1":"Family Business","desc":"появились устойцивые треки по бизнесам ","prio":"must","formul":"есть 1 трек по Главе, есть 2 подхода по FD и по TI-Online"},{"area":"GTD","area1":"","desc":"цели 30, выполнены > 67%","prio":"must","formul":"в среднем по 3м спринтам выполняется цели=30, выполнение >67%"}], byProject: [{"proj":"Glava","proj1":"","area":"Business","area1":"Family Business","desc":"сервис запустился в коммерческую эксплуатацию","prio":"must","formul":"довели до MVP в составе 3х фаундеров"},{"proj":"Avatar","proj1":"GTD","area":"GTD","area1":"","desc":"работает связка годовые цели-спринт","prio":"must","formul":"обкатка связки на 3х спринтах"},{"proj":"FrameDance","proj1":"startup","area":"Business","area1":"General","desc":"сделан подход как к стартапу (кофаундер, инвестор)","prio":"nice","formul":"есть лендинг, часть MVP сделал сам, постучался к 2-3 кофаундерам"},{"proj":"PM-RU_ОМК","proj1":"","area":"Profession","area1":"CMO","desc":"портал работает полноценно, тиражируем","prio":"must","formul":"есть разделы-константы, заработал mail/PA, сотрудники пользуются этим флоу"}] };
@@ -1225,7 +1231,19 @@
               <tbody><tr><td>задач</td><td id="m-q-tasks">-</td></tr><tr><td>% выполнения</td><td id="m-q-pct">-</td></tr></tbody>
             </table>
           </div>
-          <h3>Спринты_среднее</h3>
+          <h3>Спринты по кварталам</h3>
+          <div class="gtd-chart-wrap"><canvas id="gtd-chart-quarterly"></canvas></div>
+          <div class="gtd-table-wrap">
+            <table class="gtd-table gtd-metrics-table">
+              <thead><tr><th></th><th>1кв 2025</th><th>2кв 2025</th><th>3кв 2025</th><th>4кв 2025</th><th>1кв 2026</th><th>2кв 2026</th><th>3кв 2026</th><th>4кв 2026</th></tr></thead>
+              <tbody>
+                <tr><td>задачи</td><td>23</td><td>7</td><td>9.5</td><td>3</td><td id="m-q26-1-tasks">-</td><td>-</td><td>-</td><td>-</td></tr>
+                <tr><td>выполнено</td><td>11</td><td>6</td><td>5.5</td><td>1</td><td id="m-q26-1-done">-</td><td>-</td><td>-</td><td>-</td></tr>
+                <tr><td>выполнение</td><td>49%</td><td>75%</td><td>58%</td><td>33%</td><td id="m-q26-1-pct">-</td><td>-</td><td>-</td><td>-</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <h3>Спринты_среднее (среднее на спринт)</h3>
           <div class="gtd-chart-wrap"><canvas id="gtd-chart-sprints-avg"></canvas></div>
           <div class="gtd-table-wrap">
             <table class="gtd-table gtd-metrics-table" id="gtd-metrics-sprints-avg">
@@ -1741,8 +1759,27 @@
       const s6 = computeSprintTasksTotals(gtd1QState.sprint6Tasks);
       const q = computeQuarterTotals();
       const s1 = METRICS_SPRINTS_2026_HIST.s1, s2 = METRICS_SPRINTS_2026_HIST.s2, s3 = METRICS_SPRINTS_2026_HIST.s3;
-      const totTasks = s1.tasks + s2.tasks + s3.tasks + s4.taskCount + s5.taskCount + s6.taskCount;
-      const weightedPct = totTasks > 0 ? Math.round((s1.tasks*s1.pct + s2.tasks*s2.pct + s3.tasks*s3.pct + s4.taskCount*s4.avgProg + s5.taskCount*s5.avgProg + s6.taskCount*s6.avgProg) / totTasks) : 0;
+      const sprints2026 = [
+        { label: 'Спринт 1', tasks: s1.tasks, pct: s1.pct },
+        { label: 'Спринт 2', tasks: s2.tasks, pct: s2.pct },
+        { label: 'Спринт 3', tasks: s3.tasks, pct: s3.pct },
+        { label: `Спринт 4 (${getSprintDates(4)})`, tasks: s4.taskCount, pct: s4.avgProg },
+        { label: `Спринт 5 (${getSprintDates(5)})`, tasks: s5.taskCount, pct: s5.avgProg },
+        { label: `Спринт 6 (${getSprintDates(6)})`, tasks: s6.taskCount, pct: s6.avgProg }
+      ];
+      const activeSprints = sprints2026.filter(s => s.tasks > 0);
+      const totTasks2026 = sprints2026.reduce((a, s) => a + s.tasks, 0);
+      const totalDone2026 = sprints2026.reduce((a, s) => a + Math.round(s.tasks * s.pct / 100), 0);
+      const weightedPct2026 = totTasks2026 > 0 ? Math.round(totalDone2026 / totTasks2026 * 100) : 0;
+      const numSprints2026 = activeSprints.length || 1;
+      const avgTasks2026 = Math.round(totTasks2026 / numSprints2026 * 10) / 10;
+      const avgDone2026 = Math.round(totalDone2026 / numSprints2026 * 10) / 10;
+
+      // 1Q 2026 quarterly
+      const q1_2026_tasks = totTasks2026;
+      const q1_2026_done = totalDone2026;
+      const q1_2026_pct = weightedPct2026;
+
       const goalsArea = defaultGoalsByArea, goalsProj = defaultGoalsByProject;
       let gSum = 0;
       goalsArea.forEach(g => { const n = parseFloat(String(g.progress||'').replace(/%/g,'')); gSum += isNaN(n) ? 0 : n; });
@@ -1750,30 +1787,27 @@
       const gCount = goalsArea.length + goalsProj.length;
       const gAvg = gCount > 0 ? Math.round(gSum / gCount) : 0;
 
-      const sprintLabels = [
-        'Спринт 1', 'Спринт 2', 'Спринт 3',
-        `Спринт 4\n(${getSprintDates(4)})`,
-        `Спринт 5\n(${getSprintDates(5)})`,
-        `Спринт 6\n(${getSprintDates(6)})`
-      ];
       const chartGridOff = { x: { grid: { display: false } }, y: { grid: { display: false }, beginAtZero: true }, y1: { grid: { display: false }, position: 'right', min: 0, max: 100 } };
       const chartDatalabels = { datalabels: { display: true, anchor: 'end', align: 'top', formatter: (v) => v } };
+
+      // Chart: Спринты 2026
       destroyChart('gtd-chart-sprints-2026');
       const c1 = document.getElementById('gtd-chart-sprints-2026');
       if (c1) {
         gtdCharts['gtd-chart-sprints-2026'] = new Chart(c1, {
           type: 'bar',
           data: {
-            labels: sprintLabels,
+            labels: sprints2026.map(s => s.label),
             datasets: [
-              { label: 'задач', data: [s1.tasks, s2.tasks, s3.tasks, s4.taskCount, s5.taskCount, s6.taskCount], backgroundColor: 'rgba(35,131,226,0.6)', datalabels: { formatter: (v) => v } },
-              { label: '% выполнения', data: [s1.pct, s2.pct, s3.pct, s4.avgProg, s5.avgProg, s6.avgProg], type: 'line', borderColor: '#2383e2', backgroundColor: 'transparent', yAxisID: 'y1', tension: 0.2, datalabels: { formatter: (v) => v + '%', anchor: 'end' } }
+              { label: 'задач', data: sprints2026.map(s => s.tasks), backgroundColor: 'rgba(35,131,226,0.6)', datalabels: { formatter: (v) => v } },
+              { label: '% выполнения', data: sprints2026.map(s => s.pct), type: 'line', borderColor: '#2383e2', backgroundColor: 'transparent', yAxisID: 'y1', tension: 0.2, datalabels: { formatter: (v) => v + '%', anchor: 'end' } }
             ]
           },
           options: { responsive: true, maintainAspectRatio: false, scales: chartGridOff, plugins: chartDatalabels }
         });
       }
 
+      // Chart: Квартал doughnut
       destroyChart('gtd-chart-quarter');
       const c2 = document.getElementById('gtd-chart-quarter');
       if (c2) {
@@ -1787,10 +1821,33 @@
         });
       }
 
+      // Chart: Спринты по кварталам
+      const qLabels = ['1кв 2025','2кв 2025','3кв 2025','4кв 2025','1кв 2026','2кв 2026','3кв 2026','4кв 2026'];
+      const qTasks = [23, 7, 9.5, 3, q1_2026_tasks, null, null, null];
+      const qDone  = [11, 6, 5.5, 1, q1_2026_done,  null, null, null];
+      const qPct   = [49, 75, 58, 33, q1_2026_pct,  null, null, null];
+      destroyChart('gtd-chart-quarterly');
+      const cQ = document.getElementById('gtd-chart-quarterly');
+      if (cQ) {
+        gtdCharts['gtd-chart-quarterly'] = new Chart(cQ, {
+          type: 'bar',
+          data: {
+            labels: qLabels,
+            datasets: [
+              { label: 'задачи', data: qTasks, backgroundColor: 'rgba(35,131,226,0.6)', datalabels: { formatter: (v) => v != null ? v : '' } },
+              { label: 'выполнено', data: qDone, backgroundColor: 'rgba(35,131,226,0.3)', datalabels: { formatter: (v) => v != null ? v : '' } },
+              { label: '%', data: qPct, type: 'line', borderColor: '#2383e2', backgroundColor: 'transparent', yAxisID: 'y1', tension: 0.2, spanGaps: false, datalabels: { formatter: (v) => v != null ? v + '%' : '', anchor: 'end' } }
+            ]
+          },
+          options: { responsive: true, maintainAspectRatio: false, scales: chartGridOff, plugins: chartDatalabels }
+        });
+      }
+
+      // Chart: Спринты_среднее по годам
       const years = [2019,2020,2021,2022,2023,2024,2025,2026];
-      const avgTasks = years.map(y => y === 2026 ? totTasks : (METRICS_SPRINTS_AVG_HIST[y]?.tasks ?? 0));
-      const avgDone = years.map(y => y === 2026 ? Math.round(totTasks * weightedPct / 100) : (METRICS_SPRINTS_AVG_HIST[y]?.done ?? 0));
-      const avgPct = years.map(y => y === 2026 ? weightedPct : (METRICS_SPRINTS_AVG_HIST[y]?.pct ?? 0));
+      const avgTasks = years.map(y => y === 2026 ? avgTasks2026 : (METRICS_SPRINTS_AVG_HIST[y]?.tasks ?? 0));
+      const avgDone  = years.map(y => y === 2026 ? avgDone2026  : (METRICS_SPRINTS_AVG_HIST[y]?.done  ?? 0));
+      const avgPct   = years.map(y => y === 2026 ? weightedPct2026 : (METRICS_SPRINTS_AVG_HIST[y]?.pct ?? 0));
       destroyChart('gtd-chart-sprints-avg');
       const c3 = document.getElementById('gtd-chart-sprints-avg');
       if (c3) {
@@ -1808,9 +1865,10 @@
         });
       }
 
+      // Chart: Годовые цели
       const goalsTasks = years.map(y => y === 2026 ? gCount : (METRICS_GOALS_YEAR_HIST[y]?.tasks ?? 0));
-      const goalsDone = years.map(y => y === 2026 ? Math.round(gCount * gAvg / 100) : (METRICS_GOALS_YEAR_HIST[y]?.done ?? 0));
-      const goalsPct = years.map(y => y === 2026 ? gAvg : (METRICS_GOALS_YEAR_HIST[y]?.pct ?? 0));
+      const goalsDone  = years.map(y => y === 2026 ? Math.round(gCount * gAvg / 100) : (METRICS_GOALS_YEAR_HIST[y]?.done ?? 0));
+      const goalsPct   = years.map(y => y === 2026 ? gAvg : (METRICS_GOALS_YEAR_HIST[y]?.pct ?? 0));
       destroyChart('gtd-chart-goals-year');
       const c4 = document.getElementById('gtd-chart-goals-year');
       if (c4) {
@@ -1845,13 +1903,33 @@
       if (el('m-s6-pct')) el('m-s6-pct').textContent = s6.avgProg + '%';
       if (el('m-q-tasks')) el('m-q-tasks').textContent = q.taskCount;
       if (el('m-q-pct')) el('m-q-pct').textContent = q.avgProg + '%';
+
+      // Спринты по кварталам — 1Q 2026
       const s1 = METRICS_SPRINTS_2026_HIST.s1, s2 = METRICS_SPRINTS_2026_HIST.s2, s3 = METRICS_SPRINTS_2026_HIST.s3;
-      const totTasks = s1.tasks + s2.tasks + s3.tasks + s4.taskCount + s5.taskCount + s6.taskCount;
-      const weightedPct = totTasks > 0 ? Math.round((s1.tasks*s1.pct + s2.tasks*s2.pct + s3.tasks*s3.pct + s4.taskCount*s4.avgProg + s5.taskCount*s5.avgProg + s6.taskCount*s6.avgProg) / totTasks) : 0;
-      const done2026 = Math.round(totTasks * weightedPct / 100);
-      if (el('m-avg-2026-tasks')) el('m-avg-2026-tasks').textContent = totTasks;
-      if (el('m-avg-2026-done')) el('m-avg-2026-done').textContent = done2026;
-      if (el('m-avg-2026-pct')) el('m-avg-2026-pct').textContent = weightedPct + '%';
+      const allSprints = [
+        { tasks: s1.tasks, pct: s1.pct },
+        { tasks: s2.tasks, pct: s2.pct },
+        { tasks: s3.tasks, pct: s3.pct },
+        { tasks: s4.taskCount, pct: s4.avgProg },
+        { tasks: s5.taskCount, pct: s5.avgProg },
+        { tasks: s6.taskCount, pct: s6.avgProg }
+      ];
+      const totTasks2026 = allSprints.reduce((a, s) => a + s.tasks, 0);
+      const totalDone2026 = allSprints.reduce((a, s) => a + Math.round(s.tasks * s.pct / 100), 0);
+      const weightedPct2026 = totTasks2026 > 0 ? Math.round(totalDone2026 / totTasks2026 * 100) : 0;
+      const activeSprints2026 = allSprints.filter(s => s.tasks > 0).length || 1;
+      const avgTasks2026 = Math.round(totTasks2026 / activeSprints2026 * 10) / 10;
+      const avgDone2026 = Math.round(totalDone2026 / activeSprints2026 * 10) / 10;
+
+      if (el('m-q26-1-tasks')) el('m-q26-1-tasks').textContent = totTasks2026;
+      if (el('m-q26-1-done')) el('m-q26-1-done').textContent = totalDone2026;
+      if (el('m-q26-1-pct')) el('m-q26-1-pct').textContent = weightedPct2026 + '%';
+
+      // Спринты_среднее — среднее на спринт
+      if (el('m-avg-2026-tasks')) el('m-avg-2026-tasks').textContent = avgTasks2026;
+      if (el('m-avg-2026-done')) el('m-avg-2026-done').textContent = avgDone2026;
+      if (el('m-avg-2026-pct')) el('m-avg-2026-pct').textContent = weightedPct2026 + '%';
+
       const goalsArea = defaultGoalsByArea, goalsProj = defaultGoalsByProject;
       let gSum = 0;
       goalsArea.forEach(g => { const n = parseFloat(String(g.progress||'').replace(/%/g,'')); gSum += isNaN(n) ? 0 : n; });
