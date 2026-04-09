@@ -2267,6 +2267,43 @@
       { id: 'other', name: 'Другое', unit: '' }
     ];
     const DEFAULT_HEALTH_ANALYSES = [
+      // ── 2015 ──
+      { date: '2015-12-06', type: 'blood', description: 'ОАК расшир.: WBC 10.38 (↑); Hb 157 г/л; PLT 293; MPV 10.9 (↑); NEU 63%; LYM 28%; ретикулоциты 0.7%', notes: '201512_ОАК' },
+      // ── 2016 ──
+      { date: '2016-08-23', type: 'blood', description: 'Биохимия: Холестерин 3.5; КФК 285 МЕ/л (↑ перетренир.); Общий белок 59 г/л (↓); Железо 9.6 мкмоль/л (↓); Тестостерон 7.85 нг/мл; ГСПГ 56.9; Кортизол 13.2; Инсулин 3.2 (↓); Глюкоза 4.7; Кальций ионизир. 1.10 (↓); АЛТ 20; Креатинин 85', notes: '201608_биохимия_KDL' },
+      { date: '2016-08-23', type: 'blood', description: 'ОАК: WBC 6.65; Hb 147 г/л; PLT 221; СОЭ 2', notes: '201608_ОАК_KDL' },
+      { date: '2016-08-23', type: 'echo', description: 'ЭхоКГ: ФВ 65%; КДР ЛЖ 48 мм; аорта 30 мм; митральная и трикуспидальная регургитация I ст. Гипертрофии ЛЖ нет', notes: '201608_ЭХО' },
+      { date: '2016-08-23', type: 'other', description: 'Кардиореспираторный тест (тредмил): VO2max 58.1 мл/кг/мин (99-й перцентиль!); ПАНО 47.4; ЧСС макс 193; Вес 69.3 кг; ИМТ 20.2; Жир 8.5%; ЧСС покоя 72', notes: '201608_тредмил' },
+      // ── 2017 ──
+      { date: '2017-12-28', type: 'urine', description: 'ОАМ: все показатели в норме. pH 5.5, плотность 1025', notes: '201712_ОАМ' },
+      // ── 2019 ──
+      { date: '2019-02-02', type: 'blood', description: 'ОАК Медси: WBC 9.42; Hb 150 г/л; PLT 231; СОЭ 4; NEU 61.3%; LYM 30.4%', notes: '201902_ОАК_медси' },
+      { date: '2019-02-14', type: 'blood', description: 'ОАК+биохимия Медси: WBC 7.58; Hb 155 г/л; PLT 258; СОЭ 3; Холестерин 4.8; Триглицериды 0.6; ЛПВП 1.3; ЛПНП 3.23; Глюкоза 4.3; АЛТ 22.4; АСТ 24.7; Креатинин 101.8; Мочевина 5.8', notes: '201902_биохимия_медси' },
+      // ── 2021 ──
+      { date: '2021-06-08', type: 'blood', description: 'ОАК CMD: WBC 8.30; Hb 158 г/л; PLT 301; СОЭ 2; LYM 40% (↑); RDW 11.9% (↓)', notes: '202106_ОАК' },
+      { date: '2021-06-08', type: 'urine', description: 'ОАМ CMD: норма. Слизь и оксалаты незначительно', notes: '202106_ОАМ' },
+      { date: '2021-06-08', type: 'blood', description: 'COVID антитела: Anti-SARS-CoV-2 IgG (S-белок) 13.194 КП (↑ POSITIVE); IgM (нуклеокапсид) 1.31 КП (POSITIVE) — перенесённый COVID', notes: '202106_антитела' },
+      { date: '2021-06-12', type: 'sperm', description: 'Спермограмма CMD: объём 1.5 мл; концентрация 161 млн/мл; подвижность PR 73.5%; морфология норм. 21%; жизнеспособность 71%. Заключение: НОРМОЗООСПЕРМИЯ', notes: '202106_спермограмма' },
+      { date: '2021-07-19', type: 'blood', description: 'ОАК CMD: WBC 8.04; Hb 159 г/л; PLT 288; СОЭ 2; все показатели в норме', notes: '202107_ОАК' },
+      { date: '2021-07-19', type: 'urine', description: 'ОАМ CMD: норма. Аскорбиновая кислота положит. (приём вит.С)', notes: '202107_ОАМ' },
+      // ── 2022 ──
+      { date: '2022-02-24', type: 'blood', description: 'ОАК+Витамин D CMD: WBC 7.38; Hb 156 г/л; PLT 282; СОЭ 2; LYM 38% (↑); Витамин D 16.9 нг/мл (⚠ дефицит)', notes: '202202_ОАК+D' },
+      { date: '2022-02-24', type: 'other', description: 'Фолатный цикл: MTHFR A222V CC (норма); MTHFR E429A CC (норма); MTR D919G AA (норма); MTRR I22M GG; SLC19A1 H27R GG — патол. вариантов нет', notes: '202202_MTHFR' },
+      { date: '2022-02-04', type: 'antibody', description: 'COVID антитела IgG нейтрализующие (RBD S1): 535.5 BAU/мл (высокий уровень — поствакц./постинфекц.)', notes: '202202_антитела_COVID' },
+      { date: '2022-09-29', type: 'blood', description: 'ОАК+D+фолат CMD: WBC 7.13; Hb 159 г/л; СОЭ 2; LYM 39% (↑); Витамин D 29.8 нг/мл (недостаточность); COVID IgG 61.1 BAU/мл (↓ снижается)', notes: '202209_ОАК+D' },
+      // ── 2023 ──
+      { date: '2022-12-31', type: 'blood', description: 'ОАК СД: WBC 5.91; Hb 163 г/л; PLT 241; СОЭ 5; LYM 46.2% (↑); NEU 46.9% (↓); HCT 0.497 (↑)', notes: '202301_ОАК' },
+      { date: '2023-01-02', type: 'blood', description: 'Ферритин: 84.8 нг/мл (норма 21.8–274.7)', notes: '202301_ферритин' },
+      { date: '2023-01-02', type: 'urine', description: 'ОАМ СД: все показатели в норме', notes: '202301_ОАМ' },
+      { date: '2023-01-07', type: 'blood', description: 'Вирус герпеса 6 типа (HHV-6, ПЦР): НЕ ОБНАРУЖЕНО', notes: '202301_HHV6' },
+      { date: '2023-01-02', type: 'antibody', description: 'ВЭБ (Эпштейн-Барр): Anti-VCA IgG 64.95 (⚠ HIGH, норма <16) — перенесённый мононуклеоз/хрон.ВЭБ; Anti-EBNA IgG 7.94 (норма)', notes: '202301_ВЭБ' },
+      { date: '2023-02-17', type: 'blood', description: 'ОАК+D+фолат CMD: WBC 6.93; Hb 156 г/л; PLT 240; СОЭ 5; Витамин D 23.2 нг/мл (недостаточность); COVID IgG 38.7 BAU/мл', notes: '202302_ОАК+D' },
+      // ── 2024 ──
+      { date: '2024-09-14', type: 'blood', description: 'ОАК+коагулограмма+СРБ Гемотест: WBC 7.24; Hb 154 г/л; PLT 243; СОЭ 5; СРБ 13.77 мг/л (⚠ ОСТРОЕ ВОСПАЛЕНИЕ!); АЧТВ 31.0; Фибриноген 3.40; COVID-19 ПЦР отриц.', notes: '202409_ОАК+коагул+СРБ' },
+      { date: '2024-09-15', type: 'blood', description: 'Ферритин: 112 нг/мл (норма 21.8–274.7, вырос с 84.8 в 2023)', notes: '202409_ферритин' },
+      { date: '2024-09-18', type: 'blood', description: 'ОАК+СРБ СД (2-й подход): WBC 9.69; Hb 156 г/л; PLT 267; СОЭ 2; СРБ 0.31 mg/dl — воспаление ПРОШЛО за 4 дня', notes: '202409_ОАК+СРБ_2подход' },
+      { date: '2024-09-01', type: 'other', description: 'КТ лёгких 2024: заключение в файле', notes: '202409_КТ_легких' },
+      // ── 2025 ──
       { date: '2025-08-01', type: 'blood', description: 'Витамин D: 58.9 ng/ml', notes: 'Файл: 202508_витаминD.pdf' },
       { date: '2025-08-01', type: 'blood', description: 'Холестерол: 5.03 mmol/l; Триглицериды: 1.48 mmol/l; Холестерол - ЛПВП: 1.47 mmol/l; Холестерол - ЛПНП: 2.89 mmol/l; Гомоцистеин: 12.62 mkmol/l; Аполипопротеин А: 1.64 g/l; Аполипопротеин В: 0.90 g/l; Холестерин-ЛПОНП: 0.67 mmol/l; Холестерин-неЛПВП: 3.56 mmol/l', notes: 'Файл: 202508_профили.pdf' },
       { date: '2025-08-01', type: 'blood', description: 'ПСА - общий: 1.687 ng/ml; ПСА - свободный: 0.363 ng/ml; РЭА: 2.99 ng/ml; АФП: 7.14 ng/ml; Общий бетта-ХГЧ: 1.00 mIU/ml', notes: 'Файл: 202508_профили2.pdf' },
@@ -2287,7 +2324,12 @@
       { id: 'plt', name: 'Тромбоциты', unit: 'тыс/мкл', refMin: 150, refMax: 450, group: 'ОАК', note: '' },
       { id: 'soe', name: 'СОЭ', unit: 'мм/ч', refMin: 0, refMax: 15, group: 'ОАК', note: '' },
       { id: 'vitd', name: 'Витамин D (25-OH)', unit: 'нг/мл', refMin: 30, refMax: 100, optMin: 40, group: 'Витамины', note: 'Оптимум 40–80 нг/мл' },
-      { id: 'psa', name: 'ПСА общий', unit: 'нг/мл', refMin: 0, refMax: 4.0, group: 'Онкомаркеры', note: 'Скрининг рака простаты; с 45 лет — раз в год' }
+      { id: 'psa', name: 'ПСА общий', unit: 'нг/мл', refMin: 0, refMax: 4.0, group: 'Онкомаркеры', note: 'Скрининг рака простаты; с 45 лет — раз в год' },
+      { id: 'ferritin', name: 'Ферритин', unit: 'нг/мл', refMin: 21.8, refMax: 274.7, optMin: 50, group: 'Железо', note: 'Запас железа; оптимум >50 нг/мл для мужчин' },
+      { id: 'glucose', name: 'Глюкоза натощак', unit: 'ммоль/л', refMin: 4.1, refMax: 5.9, optMax: 5.6, group: 'Углеводный обмен', note: 'Преддиабет 6.0–6.9; диабет ≥7.0' },
+      { id: 'testosterone', name: 'Тестостерон общий', unit: 'нг/мл', refMin: 1.66, refMax: 8.11, optMin: 5.0, group: 'Гормоны', note: 'Оптимум >5.0 нг/мл; снижается ~1% в год после 40' },
+      { id: 'alt', name: 'АЛТ', unit: 'Е/л', refMin: 0, refMax: 41, group: 'Печень', note: 'Маркер печени; норма для мужчин <41' },
+      { id: 'creatinine', name: 'Креатинин', unit: 'мкмоль/л', refMin: 62, refMax: 115, group: 'Почки', note: 'Функция почек; норма мужчины 62–115' }
     ];
     const DEFAULT_HEALTH_MARKERS_DATA = [
       { markerId: 'vitd', date: '2025-08-01', value: 58.9 },
@@ -2303,7 +2345,80 @@
       { markerId: 'rbc', date: '2026-03-18', value: 5.24 },
       { markerId: 'hgb', date: '2026-03-18', value: 152 },
       { markerId: 'plt', date: '2026-03-18', value: 223 },
-      { markerId: 'soe', date: '2026-03-18', value: 4 }
+      { markerId: 'soe', date: '2026-03-18', value: 4 },
+      // Исторические данные — ОАК
+      { markerId: 'hgb', date: '2015-12-06', value: 157 },
+      { markerId: 'wbc', date: '2015-12-06', value: 10.38 },
+      { markerId: 'plt', date: '2015-12-06', value: 293 },
+      { markerId: 'hgb', date: '2016-08-23', value: 147 },
+      { markerId: 'wbc', date: '2016-08-23', value: 6.65 },
+      { markerId: 'plt', date: '2016-08-23', value: 221 },
+      { markerId: 'soe', date: '2016-08-23', value: 2 },
+      { markerId: 'hgb', date: '2019-02-02', value: 150 },
+      { markerId: 'wbc', date: '2019-02-02', value: 9.42 },
+      { markerId: 'plt', date: '2019-02-02', value: 231 },
+      { markerId: 'soe', date: '2019-02-02', value: 4 },
+      { markerId: 'hgb', date: '2019-02-14', value: 155 },
+      { markerId: 'wbc', date: '2019-02-14', value: 7.58 },
+      { markerId: 'plt', date: '2019-02-14', value: 258 },
+      { markerId: 'soe', date: '2019-02-14', value: 3 },
+      { markerId: 'hgb', date: '2021-06-08', value: 158 },
+      { markerId: 'wbc', date: '2021-06-08', value: 8.30 },
+      { markerId: 'plt', date: '2021-06-08', value: 301 },
+      { markerId: 'soe', date: '2021-06-08', value: 2 },
+      { markerId: 'hgb', date: '2021-07-19', value: 159 },
+      { markerId: 'wbc', date: '2021-07-19', value: 8.04 },
+      { markerId: 'plt', date: '2021-07-19', value: 288 },
+      { markerId: 'soe', date: '2021-07-19', value: 2 },
+      { markerId: 'hgb', date: '2022-02-24', value: 156 },
+      { markerId: 'wbc', date: '2022-02-24', value: 7.38 },
+      { markerId: 'plt', date: '2022-02-24', value: 282 },
+      { markerId: 'soe', date: '2022-02-24', value: 2 },
+      { markerId: 'hgb', date: '2022-09-29', value: 159 },
+      { markerId: 'wbc', date: '2022-09-29', value: 7.13 },
+      { markerId: 'soe', date: '2022-09-29', value: 2 },
+      { markerId: 'hgb', date: '2022-12-31', value: 163 },
+      { markerId: 'wbc', date: '2022-12-31', value: 5.91 },
+      { markerId: 'plt', date: '2022-12-31', value: 241 },
+      { markerId: 'soe', date: '2022-12-31', value: 5 },
+      { markerId: 'hgb', date: '2023-02-17', value: 156 },
+      { markerId: 'wbc', date: '2023-02-17', value: 6.93 },
+      { markerId: 'plt', date: '2023-02-17', value: 240 },
+      { markerId: 'soe', date: '2023-02-17', value: 5 },
+      { markerId: 'hgb', date: '2024-09-14', value: 154 },
+      { markerId: 'wbc', date: '2024-09-14', value: 7.24 },
+      { markerId: 'plt', date: '2024-09-14', value: 243 },
+      { markerId: 'soe', date: '2024-09-14', value: 5 },
+      { markerId: 'hgb', date: '2024-09-18', value: 156 },
+      { markerId: 'wbc', date: '2024-09-18', value: 9.69 },
+      { markerId: 'plt', date: '2024-09-18', value: 267 },
+      { markerId: 'soe', date: '2024-09-18', value: 2 },
+      // Витамин D
+      { markerId: 'vitd', date: '2022-02-24', value: 16.9 },
+      { markerId: 'vitd', date: '2022-09-29', value: 29.8 },
+      { markerId: 'vitd', date: '2023-02-17', value: 23.2 },
+      // СРБ
+      { markerId: 'crp', date: '2024-09-14', value: 1.377 },
+      { markerId: 'crp', date: '2024-09-18', value: 0.31 },
+      // Липиды — 2016 и 2019
+      { markerId: 'cholesterol', date: '2016-08-23', value: 3.5 },
+      { markerId: 'cholesterol', date: '2019-02-14', value: 4.8 },
+      { markerId: 'triglycerides', date: '2019-02-14', value: 0.6 },
+      { markerId: 'hdl', date: '2019-02-14', value: 1.3 },
+      { markerId: 'ldl', date: '2019-02-14', value: 3.23 },
+      // Ферритин
+      { markerId: 'ferritin', date: '2023-01-02', value: 84.8 },
+      { markerId: 'ferritin', date: '2024-09-15', value: 112 },
+      // Тестостерон
+      { markerId: 'testosterone', date: '2016-08-23', value: 7.85 },
+      // Глюкоза
+      { markerId: 'glucose', date: '2016-08-23', value: 4.7 },
+      { markerId: 'glucose', date: '2019-02-14', value: 4.3 },
+      // Печень / почки
+      { markerId: 'alt', date: '2016-08-23', value: 20 },
+      { markerId: 'alt', date: '2019-02-14', value: 22.4 },
+      { markerId: 'creatinine', date: '2016-08-23', value: 85 },
+      { markerId: 'creatinine', date: '2019-02-14', value: 101.8 }
     ];
     function loadHealthData() {
       try {
@@ -2311,11 +2426,10 @@
         if (raw) {
           const data = JSON.parse(raw);
           const existing = data.analyses || [];
-          const defaultNotes = DEFAULT_HEALTH_ANALYSES.map(a => a.notes);
+          const defaultNotes = new Set(DEFAULT_HEALTH_ANALYSES.map(a => a.notes));
           const merged = [...DEFAULT_HEALTH_ANALYSES];
           for (const r of existing) {
-            const isDefault = defaultNotes.some(n => (r.notes || '').indexOf('202508') >= 0 || (r.notes || '').indexOf('202603') >= 0);
-            if (!isDefault) merged.push(r);
+            if (!defaultNotes.has(r.notes || '')) merged.push(r);
           }
           data.analyses = merged;
           const existingMarkers = data.markers || [];
@@ -2475,22 +2589,23 @@
     function renderHealthCheckup() {
       const today = new Date();
       const checkups = [
-        { name: 'Глюкоза натощак + HbA1c', last: null, interval: 12, reason: 'Скрининг диабета 2 типа — часто бессимптомный у мужчин 40+', p: 1 },
+        { name: 'HbA1c (гликированный гемоглобин)', last: null, interval: 12, reason: 'Глюкоза была в норме в 2019, но HbA1c никогда не сдавался — скрытый преддиабет', p: 1 },
         { name: 'ТТГ (щитовидная железа)', last: null, interval: 24, reason: 'Гипотиреоз влияет на вес, энергию, холестерин — часто скрытый', p: 1 },
-        { name: 'Ферритин + сывороточное железо', last: null, interval: 12, reason: 'Скрытый дефицит железа — усталость, снижение концентрации', p: 1 },
-        { name: 'Тестостерон общий + ГСПГ', last: null, interval: 12, reason: 'После 40 лет снижается — влияет на энергию, мышцы, настроение', p: 1 },
-        { name: 'Инсулин натощак (HOMA-IR)', last: null, interval: 12, reason: 'Инсулинорезистентность — предшественник диабета, виден заранее', p: 1 },
+        { name: 'Тестостерон общий + ГСПГ', last: '2016-08-23', interval: 12, reason: 'Последний раз в 2016 — 7.85 нг/мл (отлично для 36 лет); с 45 лет падает активнее', p: 1 },
+        { name: 'Инсулин натощак (HOMA-IR)', last: '2016-08-23', interval: 12, reason: 'В 2016 был 3.2 (↓ низкий); HbA1c никогда не сдавался — нужно пересдать', p: 1 },
         { name: 'Колоноскопия', last: null, interval: 60, reason: 'Скрининг рака кишечника с 45 лет — раз в 5 лет', p: 1 },
-        { name: 'Витамин B12 + фолиевая кислота', last: null, interval: 12, reason: 'Связаны с гомоцистеином; дефицит бьёт по нервной системе', p: 2 },
+        { name: 'Витамин B12 + фолиевая кислота', last: null, interval: 12, reason: 'Не сдавался; фолатный цикл (MTHFR) в норме, но уровни B12/фолата не известны', p: 2 },
         { name: 'Магний в сыворотке', last: null, interval: 12, reason: 'Дефицит магния — судороги, нарушения сна, усталость', p: 2 },
         { name: 'УЗИ органов брюшной полости', last: null, interval: 36, reason: 'Печень, почки, поджелудочная — профилактический скрининг', p: 2 },
-        { name: 'ЭКГ + осмотр кардиолога', last: null, interval: 24, reason: 'Сердечно-сосудистая система после 40', p: 2 },
-        { name: 'Липидный профиль', last: '2025-08-01', interval: 12, reason: 'Сердечно-сосудистый риск; последний: холестерол 5.03, ЛПНП 2.89', p: 2 },
+        { name: 'ЭКГ + осмотр кардиолога', last: null, interval: 24, reason: 'ЭхоКГ в 2016 (норма); стресс-тест в 2016 — нужно обновить', p: 2 },
+        { name: 'Глюкоза натощак', last: '2019-02-14', interval: 12, reason: 'Была 4.3 в 2019 — норма; но с возраста 40+ нужно сдавать ежегодно', p: 2 },
+        { name: 'Ферритин + железо', last: '2024-09-15', interval: 12, reason: 'Ферритин 112 нг/мл (2024) — вырос с 84.8; следующий: сент. 2025', p: 2 },
+        { name: 'Липидный профиль', last: '2025-08-01', interval: 12, reason: 'Холестерол 5.03; ЛПНП 2.89; неЛПВП 3.56 (↑ слегка)', p: 2 },
         { name: 'ПСА (простата)', last: '2025-08-01', interval: 12, reason: 'Скрининг рака простаты с 45 лет; последний: 1.687 нг/мл', p: 2 },
-        { name: 'Витамин D (25-OH)', last: '2025-08-01', interval: 12, reason: 'Последний: 58.9 нг/мл (норма); пересдать осенью', p: 3 },
+        { name: 'Витамин D (25-OH)', last: '2025-08-01', interval: 12, reason: '58.9 нг/мл — норма (был дефицит 16.9 в 2022, удалось поднять)', p: 3 },
         { name: 'Общий анализ крови', last: '2026-03-18', interval: 12, reason: 'Всё в норме; следующий: март 2027', p: 3 },
-        { name: 'С-реактивный белок', last: '2026-03-18', interval: 12, reason: '0.20 — отлично; следующий: март 2027', p: 3 },
-        { name: 'Гомоцистеин', last: '2026-03-18', interval: 12, reason: '9.62 — снизился с 12.62; следующий: март 2027', p: 3 }
+        { name: 'С-реактивный белок', last: '2026-03-18', interval: 12, reason: '0.20 — отлично (был 13.77 в сент.2024, нормализовался)', p: 3 },
+        { name: 'Гомоцистеин', last: '2026-03-18', interval: 12, reason: '9.62 — снизился с 12.62 в 2025; следующий: март 2027', p: 3 }
       ];
       const withDue = checkups.map(c => {
         let dueDate = null, status = 'never';
