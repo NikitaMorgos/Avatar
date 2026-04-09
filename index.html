@@ -2269,7 +2269,41 @@
     const DEFAULT_HEALTH_ANALYSES = [
       { date: '2025-08-01', type: 'blood', description: 'Витамин D: 58.9 ng/ml', notes: 'Файл: 202508_витаминD.pdf' },
       { date: '2025-08-01', type: 'blood', description: 'Холестерол: 5.03 mmol/l; Триглицериды: 1.48 mmol/l; Холестерол - ЛПВП: 1.47 mmol/l; Холестерол - ЛПНП: 2.89 mmol/l; Гомоцистеин: 12.62 mkmol/l; Аполипопротеин А: 1.64 g/l; Аполипопротеин В: 0.90 g/l; Холестерин-ЛПОНП: 0.67 mmol/l; Холестерин-неЛПВП: 3.56 mmol/l', notes: 'Файл: 202508_профили.pdf' },
-      { date: '2025-08-01', type: 'blood', description: 'ПСА - общий: 1.687 ng/ml; ПСА - свободный: 0.363 ng/ml; РЭА: 2.99 ng/ml; АФП: 7.14 ng/ml; Общий бетта-ХГЧ: 1.00 mIU/ml', notes: 'Файл: 202508_профили2.pdf' }
+      { date: '2025-08-01', type: 'blood', description: 'ПСА - общий: 1.687 ng/ml; ПСА - свободный: 0.363 ng/ml; РЭА: 2.99 ng/ml; АФП: 7.14 ng/ml; Общий бетта-ХГЧ: 1.00 mIU/ml', notes: 'Файл: 202508_профили2.pdf' },
+      { date: '2026-03-18', type: 'blood', description: 'ОАК: WBC 7.75 тыс/мкл; RBC 5.24 млн/мкл; HGB 152 г/л; PLT 223 тыс/мкл; СОЭ 4 мм/ч; NEU 67.6%; LYM 28.0%; MON 3.0%; EOS 1.3%', notes: '202603_ОАК' },
+      { date: '2026-03-18', type: 'blood', description: 'С-реактивный белок (ультрачувствительный): 0.20 mg/dl (норма 0.00–0.50) — норма, воспаления нет', notes: '202603_СРБ' },
+      { date: '2026-03-18', type: 'blood', description: 'Гомоцистеин: 9.62 мкмоль/л (норма 5.90–16.00) — снизился с 12.62 в авг.2025, почти оптимум (<10)', notes: '202603_гомоцистеин' }
+    ];
+    const HEALTH_MARKERS = [
+      { id: 'crp', name: 'С-реактивный белок', unit: 'mg/dl', refMin: 0, refMax: 0.5, optMax: 0.3, group: 'Воспаление', note: 'Маркер системного воспаления; оптимум <0.3' },
+      { id: 'homocysteine', name: 'Гомоцистеин', unit: 'мкмоль/л', refMin: 5.9, refMax: 16.0, optMax: 10, group: 'Кардиориск', note: 'Риск ИБС растёт при >10; цель <10' },
+      { id: 'cholesterol', name: 'Холестерол общий', unit: 'ммоль/л', refMin: 0, refMax: 5.2, group: 'Липиды', note: 'Цель <5.0' },
+      { id: 'ldl', name: 'ЛПНП (плохой холестерин)', unit: 'ммоль/л', refMin: 0, refMax: 3.0, group: 'Липиды', note: 'Цель <3.0, при риске <2.6' },
+      { id: 'hdl', name: 'ЛПВП (хороший холестерин)', unit: 'ммоль/л', refMin: 1.0, refMax: 99, group: 'Липиды', note: 'Цель >1.0' },
+      { id: 'triglycerides', name: 'Триглицериды', unit: 'ммоль/л', refMin: 0, refMax: 1.7, group: 'Липиды', note: 'Цель <1.7' },
+      { id: 'wbc', name: 'Лейкоциты', unit: 'тыс/мкл', refMin: 4.5, refMax: 11.0, group: 'ОАК', note: '' },
+      { id: 'rbc', name: 'Эритроциты', unit: 'млн/мкл', refMin: 4.3, refMax: 5.7, group: 'ОАК', note: '' },
+      { id: 'hgb', name: 'Гемоглобин', unit: 'г/л', refMin: 132, refMax: 173, group: 'ОАК', note: '' },
+      { id: 'plt', name: 'Тромбоциты', unit: 'тыс/мкл', refMin: 150, refMax: 450, group: 'ОАК', note: '' },
+      { id: 'soe', name: 'СОЭ', unit: 'мм/ч', refMin: 0, refMax: 15, group: 'ОАК', note: '' },
+      { id: 'vitd', name: 'Витамин D (25-OH)', unit: 'нг/мл', refMin: 30, refMax: 100, optMin: 40, group: 'Витамины', note: 'Оптимум 40–80 нг/мл' },
+      { id: 'psa', name: 'ПСА общий', unit: 'нг/мл', refMin: 0, refMax: 4.0, group: 'Онкомаркеры', note: 'Скрининг рака простаты; с 45 лет — раз в год' }
+    ];
+    const DEFAULT_HEALTH_MARKERS_DATA = [
+      { markerId: 'vitd', date: '2025-08-01', value: 58.9 },
+      { markerId: 'cholesterol', date: '2025-08-01', value: 5.03 },
+      { markerId: 'triglycerides', date: '2025-08-01', value: 1.48 },
+      { markerId: 'hdl', date: '2025-08-01', value: 1.47 },
+      { markerId: 'ldl', date: '2025-08-01', value: 2.89 },
+      { markerId: 'homocysteine', date: '2025-08-01', value: 12.62 },
+      { markerId: 'psa', date: '2025-08-01', value: 1.687 },
+      { markerId: 'crp', date: '2026-03-18', value: 0.20 },
+      { markerId: 'homocysteine', date: '2026-03-18', value: 9.62 },
+      { markerId: 'wbc', date: '2026-03-18', value: 7.75 },
+      { markerId: 'rbc', date: '2026-03-18', value: 5.24 },
+      { markerId: 'hgb', date: '2026-03-18', value: 152 },
+      { markerId: 'plt', date: '2026-03-18', value: 223 },
+      { markerId: 'soe', date: '2026-03-18', value: 4 }
     ];
     function loadHealthData() {
       try {
@@ -2280,14 +2314,21 @@
           const defaultNotes = DEFAULT_HEALTH_ANALYSES.map(a => a.notes);
           const merged = [...DEFAULT_HEALTH_ANALYSES];
           for (const r of existing) {
-            const isDefault = defaultNotes.some(n => (r.notes || '').indexOf('202508') >= 0);
+            const isDefault = defaultNotes.some(n => (r.notes || '').indexOf('202508') >= 0 || (r.notes || '').indexOf('202603') >= 0);
             if (!isDefault) merged.push(r);
           }
           data.analyses = merged;
+          const existingMarkers = data.markers || [];
+          const defaultMarkerKeys = DEFAULT_HEALTH_MARKERS_DATA.map(m => m.markerId + '|' + m.date);
+          const mergedMarkers = [...DEFAULT_HEALTH_MARKERS_DATA];
+          for (const m of existingMarkers) {
+            if (!defaultMarkerKeys.includes(m.markerId + '|' + m.date)) mergedMarkers.push(m);
+          }
+          data.markers = mergedMarkers;
           return data;
         }
       } catch (e) {}
-      return { weight: [], pulse: [], analyses: DEFAULT_HEALTH_ANALYSES.slice() };
+      return { weight: [], pulse: [], analyses: DEFAULT_HEALTH_ANALYSES.slice(), markers: DEFAULT_HEALTH_MARKERS_DATA.slice() };
     }
     function saveHealthData(data) {
       try { localStorage.setItem(HEALTH_DATA_KEY, JSON.stringify(data)); } catch (e) {}
@@ -2314,9 +2355,13 @@
         return `<tr><td>${escapeHtml(fmtDate(r.date))}</td><td>${escapeHtml(typeName)}</td><td class="gtd-cell-text"${descTitle ? ` title="${descTitle}"` : ''}>${escapeHtml(descShort)}${desc.length > 200 ? '…' : ''}</td><td>${fileCell}</td><td>${escapeHtml(r.notes||'')}</td></tr>`;
       }).join('') || '<tr><td colspan="5" class="empty">Нет данных. Добавь в разделе «Добавить».</td></tr>';
 
+      const markersHtml = renderHealthMarkers(data.markers || []);
+      const checkupHtml = renderHealthCheckup();
       return `
         <div class="gtd-tabs">
           <button type="button" class="gtd-tab active" data-tab="metrics">Показатели</button>
+          <button type="button" class="gtd-tab" data-tab="markers">Маркеры</button>
+          <button type="button" class="gtd-tab" data-tab="checkup">Чекап</button>
           <button type="button" class="gtd-tab" data-tab="analyses">Анализы</button>
           <button type="button" class="gtd-tab" data-tab="add">Добавить</button>
         </div>
@@ -2345,6 +2390,8 @@
             </table>
           </div>
         </div>
+        <div id="health-panel-markers" class="gtd-panel">${markersHtml}</div>
+        <div id="health-panel-checkup" class="gtd-panel">${checkupHtml}</div>
         <div id="health-panel-add" class="gtd-panel">
           <p class="gtd-overview">Добавить запись вручную или загрузить PDF — данные распознаются и попадают в показатели. <strong>Дата обязательна</strong> (формат ГГГГ-ММ-ДД).</p>
           <div class="health-pdf-upload" style="margin-bottom:24px;padding:20px;border:2px dashed var(--border);border-radius:8px;background:var(--locked-bg);">
@@ -2382,6 +2429,95 @@
           </form>
         </div>
       `;
+    }
+    function renderHealthMarkers(markersData) {
+      const fmtDate = d => { if (!d) return '—'; const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(d); return m ? `${m[3]}.${m[2]}.${m[1].slice(2)}` : d; };
+      const groups = [...new Set(HEALTH_MARKERS.map(m => m.group))];
+      let html = '';
+      for (const group of groups) {
+        const markers = HEALTH_MARKERS.filter(m => m.group === group);
+        html += `<h3 style="margin:20px 0 6px;font-size:0.8rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;font-weight:600">${escapeHtml(group)}</h3>`;
+        html += `<div class="gtd-table-wrap"><table class="gtd-table"><thead><tr><th>Показатель</th><th>Значение</th><th>Дата</th><th>Норма</th><th>Статус</th><th>Динамика</th></tr></thead><tbody>`;
+        for (const marker of markers) {
+          const readings = (markersData || []).filter(r => r.markerId === marker.id).sort((a,b) => (b.date||'').localeCompare(a.date||''));
+          const latest = readings[0];
+          const prev = readings[1];
+          if (!latest) {
+            html += `<tr><td${marker.note ? ` title="${escapeHtml(marker.note)}"` : ''}>${escapeHtml(marker.name)}</td><td colspan="4" style="color:var(--text-muted)">нет данных</td><td>—</td></tr>`;
+            continue;
+          }
+          const v = parseFloat(latest.value);
+          let status, sc;
+          if (v < marker.refMin || (marker.refMax < 90 && v > marker.refMax)) { status = '⚠ Вне нормы'; sc = '#e53e3e'; }
+          else if ((marker.optMax && v > marker.optMax) || (marker.optMin && v < marker.optMin)) { status = '○ Норма'; sc = '#d69e2e'; }
+          else { status = '✓ Отлично'; sc = '#38a169'; }
+          let trend = '—';
+          if (prev) {
+            const diff = v - parseFloat(prev.value);
+            const pct = Math.abs(diff) / (Math.abs(parseFloat(prev.value)) || 1) * 100;
+            if (pct < 3) trend = '→';
+            else trend = (diff > 0 ? '↑' : '↓') + ' ' + (diff > 0 ? '+' : '−') + Math.abs(diff).toFixed(2);
+          }
+          const refStr = marker.refMin > 0 ? `${marker.refMin}–${marker.refMax < 90 ? marker.refMax : '...'}` : (marker.refMax < 90 ? `<${marker.refMax}` : `>${marker.refMin}`);
+          html += `<tr>
+            <td${marker.note ? ` title="${escapeHtml(marker.note)}"` : ''}>${escapeHtml(marker.name)}${marker.note ? ' <span style="color:var(--text-muted);font-size:0.7rem">ℹ</span>' : ''}</td>
+            <td><strong>${v}</strong> <span style="color:var(--text-muted);font-size:0.8em">${escapeHtml(marker.unit)}</span></td>
+            <td style="color:var(--text-muted)">${fmtDate(latest.date)}</td>
+            <td style="color:var(--text-muted)">${refStr}</td>
+            <td style="color:${sc};font-weight:500">${status}</td>
+            <td style="color:var(--text-muted)">${trend}</td>
+          </tr>`;
+        }
+        html += `</tbody></table></div>`;
+      }
+      return html;
+    }
+    function renderHealthCheckup() {
+      const today = new Date();
+      const checkups = [
+        { name: 'Глюкоза натощак + HbA1c', last: null, interval: 12, reason: 'Скрининг диабета 2 типа — часто бессимптомный у мужчин 40+', p: 1 },
+        { name: 'ТТГ (щитовидная железа)', last: null, interval: 24, reason: 'Гипотиреоз влияет на вес, энергию, холестерин — часто скрытый', p: 1 },
+        { name: 'Ферритин + сывороточное железо', last: null, interval: 12, reason: 'Скрытый дефицит железа — усталость, снижение концентрации', p: 1 },
+        { name: 'Тестостерон общий + ГСПГ', last: null, interval: 12, reason: 'После 40 лет снижается — влияет на энергию, мышцы, настроение', p: 1 },
+        { name: 'Инсулин натощак (HOMA-IR)', last: null, interval: 12, reason: 'Инсулинорезистентность — предшественник диабета, виден заранее', p: 1 },
+        { name: 'Колоноскопия', last: null, interval: 60, reason: 'Скрининг рака кишечника с 45 лет — раз в 5 лет', p: 1 },
+        { name: 'Витамин B12 + фолиевая кислота', last: null, interval: 12, reason: 'Связаны с гомоцистеином; дефицит бьёт по нервной системе', p: 2 },
+        { name: 'Магний в сыворотке', last: null, interval: 12, reason: 'Дефицит магния — судороги, нарушения сна, усталость', p: 2 },
+        { name: 'УЗИ органов брюшной полости', last: null, interval: 36, reason: 'Печень, почки, поджелудочная — профилактический скрининг', p: 2 },
+        { name: 'ЭКГ + осмотр кардиолога', last: null, interval: 24, reason: 'Сердечно-сосудистая система после 40', p: 2 },
+        { name: 'Липидный профиль', last: '2025-08-01', interval: 12, reason: 'Сердечно-сосудистый риск; последний: холестерол 5.03, ЛПНП 2.89', p: 2 },
+        { name: 'ПСА (простата)', last: '2025-08-01', interval: 12, reason: 'Скрининг рака простаты с 45 лет; последний: 1.687 нг/мл', p: 2 },
+        { name: 'Витамин D (25-OH)', last: '2025-08-01', interval: 12, reason: 'Последний: 58.9 нг/мл (норма); пересдать осенью', p: 3 },
+        { name: 'Общий анализ крови', last: '2026-03-18', interval: 12, reason: 'Всё в норме; следующий: март 2027', p: 3 },
+        { name: 'С-реактивный белок', last: '2026-03-18', interval: 12, reason: '0.20 — отлично; следующий: март 2027', p: 3 },
+        { name: 'Гомоцистеин', last: '2026-03-18', interval: 12, reason: '9.62 — снизился с 12.62; следующий: март 2027', p: 3 }
+      ];
+      const withDue = checkups.map(c => {
+        let dueDate = null, status = 'never';
+        if (c.last) {
+          const due = new Date(c.last);
+          due.setMonth(due.getMonth() + c.interval);
+          dueDate = due.toISOString().slice(0,10);
+          const months = (due - today) / (1000*60*60*24*30);
+          status = months < 0 ? 'overdue' : months < 3 ? 'soon' : 'ok';
+        }
+        return { ...c, dueDate, status };
+      });
+      withDue.sort((a,b) => { const o = { never:0, overdue:1, soon:2, ok:3 }; return o[a.status] !== o[b.status] ? o[a.status]-o[b.status] : a.p-b.p; });
+      const fmtDate = d => { if (!d) return '—'; const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(d); return m ? `${m[3]}.${m[2]}.${m[1]}` : d; };
+      const sl = { never: ['🔴 Не сдавалось','#e53e3e'], overdue: ['🔴 Просрочено','#e53e3e'], soon: ['🟡 Скоро','#d69e2e'], ok: ['🟢 Актуально','#38a169'] };
+      const rows = withDue.map(c => `<tr>
+        <td>${escapeHtml(c.name)}</td>
+        <td>${fmtDate(c.last)}</td>
+        <td>${fmtDate(c.dueDate) || `~${c.interval} мес`}</td>
+        <td><span style="color:${sl[c.status][1]}">${sl[c.status][0]}</span></td>
+        <td style="color:var(--text-muted);font-size:0.8125rem">${escapeHtml(c.reason)}</td>
+      </tr>`).join('');
+      return `<p class="gtd-overview">Персональный план чекапа — мужчина 45 лет. Обновляется по мере добавления анализов.</p>
+        <div class="gtd-table-wrap"><table class="gtd-table">
+          <thead><tr><th>Анализ / обследование</th><th>Последний раз</th><th>Следующий</th><th>Статус</th><th>Зачем</th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table></div>`;
     }
     async function extractTextFromPdf(file) {
       const pdfjsLib = window['pdfjsLib'];
