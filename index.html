@@ -1822,11 +1822,24 @@
       }
 
       // Chart: Спринты по кварталам
+      const qAllSprints = [
+        { tasks: s1.tasks, pct: s1.pct },
+        { tasks: s2.tasks, pct: s2.pct },
+        { tasks: s3.tasks, pct: s3.pct },
+        { tasks: s4.taskCount, pct: s4.avgProg },
+        { tasks: s5.taskCount, pct: s5.avgProg },
+        { tasks: s6.taskCount, pct: s6.avgProg }
+      ];
+      const qTotTasks = qAllSprints.reduce((a, s) => a + s.tasks, 0);
+      const qTotDone  = qAllSprints.reduce((a, s) => a + Math.round(s.tasks * s.pct / 100), 0);
+      const qActiveSpr = qAllSprints.filter(s => s.tasks > 0).length || 1;
+      const q1_2026_tasks = Math.round(qTotTasks / qActiveSpr * 10) / 10;
+      const q1_2026_done  = Math.round(qTotDone  / qActiveSpr * 10) / 10;
+      const q1_2026_pct   = qTotTasks > 0 ? Math.round(qTotDone / qTotTasks * 100) : 0;
       const qLabels = ['1кв 2025','2кв 2025','3кв 2025','4кв 2025','1кв 2026','2кв 2026','3кв 2026','4кв 2026'];
       const qTasks = [23, 7, 9.5, 3, q1_2026_tasks, null, null, null];
       const qDone  = [11, 6, 5.5, 1, q1_2026_done,  null, null, null];
       const qPct   = [49, 75, 58, 33, q1_2026_pct,  null, null, null];
-      destroyChart('gtd-chart-quarterly');
       const cQ = document.getElementById('gtd-chart-quarterly');
       if (cQ) {
         gtdCharts['gtd-chart-quarterly'] = new Chart(cQ, {
@@ -1904,7 +1917,7 @@
       if (el('m-q-tasks')) el('m-q-tasks').textContent = q.taskCount;
       if (el('m-q-pct')) el('m-q-pct').textContent = q.avgProg + '%';
 
-      // Спринты по кварталам — 1Q 2026
+      // Спринты по кварталам — 1Q 2026 (среднее на спринт)
       const s1 = METRICS_SPRINTS_2026_HIST.s1, s2 = METRICS_SPRINTS_2026_HIST.s2, s3 = METRICS_SPRINTS_2026_HIST.s3;
       const allSprints = [
         { tasks: s1.tasks, pct: s1.pct },
@@ -1921,8 +1934,8 @@
       const avgTasks2026 = Math.round(totTasks2026 / activeSprints2026 * 10) / 10;
       const avgDone2026 = Math.round(totalDone2026 / activeSprints2026 * 10) / 10;
 
-      if (el('m-q26-1-tasks')) el('m-q26-1-tasks').textContent = totTasks2026;
-      if (el('m-q26-1-done')) el('m-q26-1-done').textContent = totalDone2026;
+      if (el('m-q26-1-tasks')) el('m-q26-1-tasks').textContent = avgTasks2026;
+      if (el('m-q26-1-done')) el('m-q26-1-done').textContent = avgDone2026;
       if (el('m-q26-1-pct')) el('m-q26-1-pct').textContent = weightedPct2026 + '%';
 
       // Спринты_среднее — среднее на спринт
