@@ -1917,6 +1917,7 @@
       const qDone  = [11, 6, 5.5, 1, q1_2026_done,  null, null, null];
       const qPct   = [49, 75, 58, 33, q1_2026_pct,  null, null, null];
       const cQ = document.getElementById('gtd-chart-quarterly');
+      destroyChart('gtd-chart-quarterly');
       if (cQ) {
         gtdCharts['gtd-chart-quarterly'] = new Chart(cQ, {
           type: 'bar',
