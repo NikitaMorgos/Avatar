@@ -1375,8 +1375,12 @@
       const areaAvg = areaCnt > 0 ? Math.round(areaSum / areaCnt) : 0;
       const projAvg = projCnt > 0 ? Math.round(projSum / projCnt) : 0;
       const q1Avg = (areaCnt + projCnt) > 0 ? Math.round((areaAvg + projAvg) / ((areaCnt > 0 ? 1 : 0) + (projCnt > 0 ? 1 : 0))) : 0;
+      const areaTb = document.getElementById('gtd-sprints-area-tbody');
+      if (areaTb) { const tr = areaTb.querySelector('tr.gtd-sprint-total'); if (tr && tr.cells[5]) { tr.cells[5].textContent = areaAvg + '% (' + areaCnt + ' целей)'; tr.cells[5].className = progClass(areaAvg).trim(); } }
+      const projTb = document.getElementById('gtd-sprints-project-tbody');
+      if (projTb) { const tr = projTb.querySelector('tr.gtd-sprint-total'); if (tr && tr.cells[5]) { tr.cells[5].textContent = projAvg + '% (' + projCnt + ' целей)'; tr.cells[5].className = progClass(projAvg).trim(); } }
       const el = document.getElementById('gtd-q1-total');
-      if (el) el.innerHTML = `<p style="margin:12px 0 4px;font-weight:600">Итого 1Q2026: <span class="${progClass(q1Avg)}" style="display:inline-block;padding:2px 10px;border-radius:4px">${q1Avg}%</span> <span style="font-size:0.85rem;color:var(--text-muted)">(среднее по area ${areaAvg}% и project ${projAvg}%)</span></p>`;
+      if (el) el.innerHTML = `<p style="margin:12px 0 4px;font-weight:600">Итого 1Q2026: <span class="${progClass(q1Avg).trim()}" style="display:inline-block;padding:2px 10px;border-radius:4px">${q1Avg}%</span> <span style="font-size:0.85rem;color:var(--text-muted)">(среднее по area ${areaAvg}% и project ${projAvg}%)</span></p>`;
     }
     function bindGtd1Q() {
       const refreshBtn = document.getElementById('gtd-refresh-btn');
@@ -2050,6 +2054,8 @@
       if (addTask6Btn) addTask6Btn.onclick = addSprint6Task;
       const submitBtn = document.getElementById('gtd-sprint4-submit-btn');
       if (submitBtn) submitBtn.onclick = submitSprintReport;
+      bindGtdEditableFormuls();
+      updateQ1TotalDisplay();
       const submit5Btn = document.getElementById('gtd-sprint5-submit-btn');
       if (submit5Btn) submit5Btn.onclick = submitSprint5Report;
       const submit6Btn = document.getElementById('gtd-sprint6-submit-btn');
