@@ -1211,10 +1211,10 @@
           <div class="gtd-chart-wrap"><canvas id="gtd-chart-sprints-2026"></canvas></div>
           <div class="gtd-table-wrap">
             <table class="gtd-table gtd-metrics-table">
-              <thead><tr><th></th><th>Спринт 1</th><th>Спринт 2</th><th>Спринт 3</th><th>Спринт 4</th></tr></thead>
+              <thead><tr><th></th><th>Спринт 1</th><th>Спринт 2</th><th>Спринт 3</th><th id="m-s4-label">Спринт 4</th><th id="m-s5-label">Спринт 5</th><th id="m-s6-label">Спринт 6</th></tr></thead>
               <tbody>
-                <tr><td>задач</td><td id="m-s1-tasks">14</td><td id="m-s2-tasks">5</td><td id="m-s3-tasks">22</td><td id="m-s4-tasks">-</td></tr>
-                <tr><td>% выполнения</td><td id="m-s1-pct">100%</td><td id="m-s2-pct">100%</td><td id="m-s3-pct">59%</td><td id="m-s4-pct">-</td></tr>
+                <tr><td>задач</td><td id="m-s1-tasks">14</td><td id="m-s2-tasks">5</td><td id="m-s3-tasks">22</td><td id="m-s4-tasks">-</td><td id="m-s5-tasks">-</td><td id="m-s6-tasks">-</td></tr>
+                <tr><td>% выполнения</td><td id="m-s1-pct">100%</td><td id="m-s2-pct">100%</td><td id="m-s3-pct">59%</td><td id="m-s4-pct">-</td><td id="m-s5-pct">-</td><td id="m-s6-pct">-</td></tr>
               </tbody>
             </table>
           </div>
@@ -1712,6 +1712,12 @@
       const avgProg = taskCount > 0 ? Math.round(sumProg / taskCount) : 0;
       return { taskCount, avgProg };
     }
+    function computeSprintTasksTotals(tasks) {
+      if (!tasks || !tasks.length) return { taskCount: 0, avgProg: 0 };
+      const parseProg = v => { const n = parseFloat(String(v||'').replace(/%/g,'')); return isNaN(n) ? 0 : n; };
+      let sum = 0; tasks.forEach(m => { sum += parseProg(m.progress); });
+      return { taskCount: tasks.length, avgProg: Math.round(sum / tasks.length) };
+    }
     function computeQuarterTotals() {
       const area1Q = defaultGoalsByArea.filter(g => gtd1QState.areaKeys.has(goalKeyArea(g)));
       const proj1Q = defaultGoalsByProject.filter(g => gtd1QState.projectKeys.has(goalKeyProject(g)));
@@ -1731,10 +1737,12 @@
     function renderMetricsCharts() {
       if (typeof Chart === 'undefined') return;
       const s4 = computeSprint4Totals();
+      const s5 = computeSprintTasksTotals(gtd1QState.sprint5Tasks);
+      const s6 = computeSprintTasksTotals(gtd1QState.sprint6Tasks);
       const q = computeQuarterTotals();
       const s1 = METRICS_SPRINTS_2026_HIST.s1, s2 = METRICS_SPRINTS_2026_HIST.s2, s3 = METRICS_SPRINTS_2026_HIST.s3;
-      const totTasks = s1.tasks + s2.tasks + s3.tasks + s4.taskCount;
-      const weightedPct = totTasks > 0 ? Math.round((s1.tasks*s1.pct + s2.tasks*s2.pct + s3.tasks*s3.pct + s4.taskCount*s4.avgProg) / totTasks) : 0;
+      const totTasks = s1.tasks + s2.tasks + s3.tasks + s4.taskCount + s5.taskCount + s6.taskCount;
+      const weightedPct = totTasks > 0 ? Math.round((s1.tasks*s1.pct + s2.tasks*s2.pct + s3.tasks*s3.pct + s4.taskCount*s4.avgProg + s5.taskCount*s5.avgProg + s6.taskCount*s6.avgProg) / totTasks) : 0;
       const goalsArea = defaultGoalsByArea, goalsProj = defaultGoalsByProject;
       let gSum = 0;
       goalsArea.forEach(g => { const n = parseFloat(String(g.progress||'').replace(/%/g,'')); gSum += isNaN(n) ? 0 : n; });
@@ -1742,6 +1750,12 @@
       const gCount = goalsArea.length + goalsProj.length;
       const gAvg = gCount > 0 ? Math.round(gSum / gCount) : 0;
 
+      const sprintLabels = [
+        'Спринт 1', 'Спринт 2', 'Спринт 3',
+        `Спринт 4\n(${getSprintDates(4)})`,
+        `Спринт 5\n(${getSprintDates(5)})`,
+        `Спринт 6\n(${getSprintDates(6)})`
+      ];
       const chartGridOff = { x: { grid: { display: false } }, y: { grid: { display: false }, beginAtZero: true }, y1: { grid: { display: false }, position: 'right', min: 0, max: 100 } };
       const chartDatalabels = { datalabels: { display: true, anchor: 'end', align: 'top', formatter: (v) => v } };
       destroyChart('gtd-chart-sprints-2026');
@@ -1750,10 +1764,10 @@
         gtdCharts['gtd-chart-sprints-2026'] = new Chart(c1, {
           type: 'bar',
           data: {
-            labels: ['Спринт 1','Спринт 2','Спринт 3','Спринт 4'],
+            labels: sprintLabels,
             datasets: [
-              { label: 'задач', data: [s1.tasks,s2.tasks,s3.tasks,s4.taskCount], backgroundColor: 'rgba(35,131,226,0.6)', datalabels: { formatter: (v) => v } },
-              { label: '% выполнения', data: [s1.pct,s2.pct,s3.pct,s4.avgProg], type: 'line', borderColor: '#2383e2', backgroundColor: 'transparent', yAxisID: 'y1', tension: 0.2, datalabels: { formatter: (v) => v + '%', anchor: 'end' } }
+              { label: 'задач', data: [s1.tasks, s2.tasks, s3.tasks, s4.taskCount, s5.taskCount, s6.taskCount], backgroundColor: 'rgba(35,131,226,0.6)', datalabels: { formatter: (v) => v } },
+              { label: '% выполнения', data: [s1.pct, s2.pct, s3.pct, s4.avgProg, s5.avgProg, s6.avgProg], type: 'line', borderColor: '#2383e2', backgroundColor: 'transparent', yAxisID: 'y1', tension: 0.2, datalabels: { formatter: (v) => v + '%', anchor: 'end' } }
             ]
           },
           options: { responsive: true, maintainAspectRatio: false, scales: chartGridOff, plugins: chartDatalabels }
@@ -1816,15 +1830,24 @@
     }
     function updateMetrics() {
       const s4 = computeSprint4Totals();
+      const s5 = computeSprintTasksTotals(gtd1QState.sprint5Tasks);
+      const s6 = computeSprintTasksTotals(gtd1QState.sprint6Tasks);
       const q = computeQuarterTotals();
       const el = id => document.getElementById(id);
+      if (el('m-s4-label')) el('m-s4-label').textContent = `Спринт 4 (${getSprintDates(4)})`;
+      if (el('m-s5-label')) el('m-s5-label').textContent = `Спринт 5 (${getSprintDates(5)})`;
+      if (el('m-s6-label')) el('m-s6-label').textContent = `Спринт 6 (${getSprintDates(6)})`;
       if (el('m-s4-tasks')) el('m-s4-tasks').textContent = s4.taskCount;
       if (el('m-s4-pct')) el('m-s4-pct').textContent = s4.avgProg + '%';
+      if (el('m-s5-tasks')) el('m-s5-tasks').textContent = s5.taskCount;
+      if (el('m-s5-pct')) el('m-s5-pct').textContent = s5.avgProg + '%';
+      if (el('m-s6-tasks')) el('m-s6-tasks').textContent = s6.taskCount;
+      if (el('m-s6-pct')) el('m-s6-pct').textContent = s6.avgProg + '%';
       if (el('m-q-tasks')) el('m-q-tasks').textContent = q.taskCount;
       if (el('m-q-pct')) el('m-q-pct').textContent = q.avgProg + '%';
       const s1 = METRICS_SPRINTS_2026_HIST.s1, s2 = METRICS_SPRINTS_2026_HIST.s2, s3 = METRICS_SPRINTS_2026_HIST.s3;
-      const totTasks = s1.tasks + s2.tasks + s3.tasks + s4.taskCount;
-      const weightedPct = totTasks > 0 ? Math.round((s1.tasks*s1.pct + s2.tasks*s2.pct + s3.tasks*s3.pct + s4.taskCount*s4.avgProg) / totTasks) : 0;
+      const totTasks = s1.tasks + s2.tasks + s3.tasks + s4.taskCount + s5.taskCount + s6.taskCount;
+      const weightedPct = totTasks > 0 ? Math.round((s1.tasks*s1.pct + s2.tasks*s2.pct + s3.tasks*s3.pct + s4.taskCount*s4.avgProg + s5.taskCount*s5.avgProg + s6.taskCount*s6.avgProg) / totTasks) : 0;
       const done2026 = Math.round(totTasks * weightedPct / 100);
       if (el('m-avg-2026-tasks')) el('m-avg-2026-tasks').textContent = totTasks;
       if (el('m-avg-2026-done')) el('m-avg-2026-done').textContent = done2026;
