@@ -1008,25 +1008,19 @@
       const goalsByAreaRows = goalsByArea.map(g => {
         const key = goalKeyArea(g);
         const checked = gtd1QState.areaKeys.has(key) ? ' checked' : '';
-        const savedProg = (gtd1QState.goalsProgress && gtd1QState.goalsProgress[key] != null) ? gtd1QState.goalsProgress[key] : (g.progress != null ? g.progress : '');
-        const savedSt = (gtd1QState.goalsStatus && gtd1QState.goalsStatus[key]) || (g.status && statusLabels[g.status] ? g.status : '');
+        const savedProg = (gtd1QState.goalsProgress && gtd1QState.goalsProgress[key] != null) ? gtd1QState.goalsProgress[key] : '';
+        const savedSt = (gtd1QState.goalsStatus && gtd1QState.goalsStatus[key]) || '';
         const name = goalName(key, 'area');
-        const q1Active = gtd1QState.areaKeys.has(key);
-        const qProg = q1Active && gtd1QState.q1Progress && gtd1QState.q1Progress['area|' + key] != null ? gtd1QState.q1Progress['area|' + key] : null;
-        const q1Badge = q1Active ? `<span class="gtd-q1-badge${qProg != null ? progClass(qProg) : ''}" title="Цель в 1Q${qProg != null ? ', прогресс ' + qProg + '%' : ''}">${qProg != null ? qProg + '%' : '1Q'}</span>` : '';
         const progDisp = savedProg !== '' ? savedProg + (String(savedProg).match(/%$/) ? '' : '%') : '0%';
-        return `<tr><td><input type="checkbox" class="gtd-1q-cb" data-type="area" data-key="${escapeHtml(key)}"${checked}></td><td class="gtd-cell-oneline" title="${escapeHtml(name)}">${escapeHtml(name)}${q1Badge}</td><td>${escapeHtml(g.area)}</td><td>${escapeHtml(g.area1 || '-')}</td><td title="${escapeHtml(g.desc || '')}"><span class="gtd-cell-text">${escapeHtml(g.desc || '-')}</span></td><td>${escapeHtml(g.prio || '-')}</td><td class="gtd-cell-editable gtd-cell-oneline${progClass(savedProg)}" contenteditable="true" data-gcol="progress" data-gkey="${escapeHtml(key)}" data-gtype="area">${escapeHtml(progDisp)}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-gcol="status" data-gkey="${escapeHtml(key)}" data-gtype="area">${escapeHtml(savedSt || 'не начинал')}</td></tr>`;
+        return `<tr><td><input type="checkbox" class="gtd-1q-cb" data-type="area" data-key="${escapeHtml(key)}"${checked}></td><td class="gtd-cell-oneline" title="${escapeHtml(name)}">${escapeHtml(name)}</td><td>${escapeHtml(g.area)}</td><td>${escapeHtml(g.area1 || '-')}</td><td title="${escapeHtml(g.desc || '')}"><span class="gtd-cell-text">${escapeHtml(g.desc || '-')}</span></td><td>${escapeHtml(g.prio || '-')}</td><td class="gtd-cell-editable gtd-cell-oneline${progClass(savedProg)}" contenteditable="true" data-gcol="progress" data-gkey="${escapeHtml(key)}" data-gtype="area">${escapeHtml(progDisp)}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-gcol="status" data-gkey="${escapeHtml(key)}" data-gtype="area">${escapeHtml(savedSt || 'не начинал')}</td></tr>`;
       }).join('');
       const goalsByProjectRows = goalsByProject.map(g => {
         const key = goalKeyProject(g);
         const checked = gtd1QState.projectKeys.has(key) ? ' checked' : '';
-        const savedProg = (gtd1QState.goalsProgress && gtd1QState.goalsProgress[key] != null) ? gtd1QState.goalsProgress[key] : (g.progress != null ? g.progress : '');
-        const savedSt = (gtd1QState.goalsStatus && gtd1QState.goalsStatus[key]) || (g.status && statusLabels[g.status] ? g.status : '');
+        const savedProg = (gtd1QState.goalsProgress && gtd1QState.goalsProgress[key] != null) ? gtd1QState.goalsProgress[key] : '';
+        const savedSt = (gtd1QState.goalsStatus && gtd1QState.goalsStatus[key]) || '';
         const mvp = (g.mvp === 'Y' || g.mvp === 'y') ? 'Y' : 'N';
         const name = goalName(key, 'project');
-        const q1Active = gtd1QState.projectKeys.has(key);
-        const qProg = q1Active && gtd1QState.q1Progress && gtd1QState.q1Progress['project|' + key] != null ? gtd1QState.q1Progress['project|' + key] : null;
-        const q1Badge = q1Active ? `<span class="gtd-q1-badge${qProg != null ? progClass(qProg) : ''}" title="Цель в 1Q${qProg != null ? ', прогресс ' + qProg + '%' : ''}">${qProg != null ? qProg + '%' : '1Q'}</span>` : '';
         const progDisp = savedProg !== '' ? savedProg + (String(savedProg).match(/%$/) ? '' : '%') : '0%';
         return `<tr><td><input type="checkbox" class="gtd-1q-cb" data-type="project" data-key="${escapeHtml(key)}"${checked}></td><td class="gtd-cell-oneline" title="${escapeHtml(name)}">${escapeHtml(name)}${q1Badge}</td><td>${escapeHtml(g.proj)}</td><td>${escapeHtml(g.proj1 || '-')}</td><td class="gtd-col-desc" title="${escapeHtml(g.desc || '')}"><span class="gtd-cell-text">${escapeHtml(g.desc || '-')}</span></td><td>${escapeHtml(g.prio || '-')}</td><td class="gtd-cell-editable gtd-cell-oneline${progClass(savedProg)}" contenteditable="true" data-gcol="progress" data-gkey="${escapeHtml(key)}" data-gtype="project">${escapeHtml(progDisp)}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-gcol="status" data-gkey="${escapeHtml(key)}" data-gtype="project">${escapeHtml(savedSt || 'не начинал')}</td><td>${escapeHtml(g.area + (g.area1 ? ' / ' + g.area1 : ''))}</td><td>${mvp}</td></tr>`;
       }).join('');
@@ -1073,35 +1067,26 @@
         const qKey = 'area|' + key;
         const src = defaultSprints1Q2026.byArea.find(a => goalKeyArea(a) === key);
         const formul = sprintFormul(g, src, key, 'area');
-        const srcProg = (src && src.progress != null) ? src.progress : (g.progress != null ? g.progress : '');
-        const prog = (gtd1QState.q1Progress && gtd1QState.q1Progress[qKey] != null) ? gtd1QState.q1Progress[qKey] : srcProg;
-        const srcSt = (src && src.status && statusLabels[src.status]) ? src.status : ((g.status && statusLabels[g.status]) ? g.status : 'не начинал');
-        const st = (gtd1QState.q1Status && gtd1QState.q1Status[qKey]) || srcSt;
         const name = goalName(key, 'area');
-        const progDisp = prog !== '' ? prog + (String(prog).match(/%$/) ? '' : '%') : '-';
-        return `<tr data-qkey="${escapeHtml(qKey)}"><td class="gtd-cell-oneline" title="${escapeHtml(name)}">${escapeHtml(name)}</td><td>${escapeHtml(g.area)}</td><td>${escapeHtml(g.area1 || '-')}</td><td class="gtd-cell-editable gtd-cell-text" contenteditable="true" data-key="${escapeHtml(key)}" data-type="area" title="Редактируемая ячейка">${escapeHtml(formul)}</td><td>${escapeHtml(g.prio || '-')}</td><td class="gtd-cell-editable gtd-cell-oneline${progClass(prog)}" contenteditable="true" data-qcol="progress" data-qkey="${escapeHtml(qKey)}">${escapeHtml(progDisp)}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-qcol="status" data-qkey="${escapeHtml(qKey)}">${escapeHtml(st)}</td></tr>`;
+        return `<tr data-qkey="${escapeHtml(qKey)}"><td class="gtd-cell-oneline" title="${escapeHtml(name)}">${escapeHtml(name)}</td><td>${escapeHtml(g.area)}</td><td>${escapeHtml(g.area1 || '-')}</td><td class="gtd-cell-editable gtd-cell-text" contenteditable="true" data-key="${escapeHtml(key)}" data-type="area" title="Редактируемая ячейка">${escapeHtml(formul)}</td><td>${escapeHtml(g.prio || '-')}</td></tr>`;
       }).join('');
       const sprintsByProjectRows = proj1Q.map(g => {
         const key = goalKeyProject(g);
         const qKey = 'project|' + key;
         const src = defaultSprints1Q2026.byProject.find(a => goalKeyProject(a) === key);
         const formul = sprintFormul(g, src, key, 'project');
-        const srcProg = (src && src.progress != null) ? src.progress : (g.progress != null ? g.progress : '');
-        const prog = (gtd1QState.q1Progress && gtd1QState.q1Progress[qKey] != null) ? gtd1QState.q1Progress[qKey] : srcProg;
-        const srcSt = (src && src.status && statusLabels[src.status]) ? src.status : ((g.status && statusLabels[g.status]) ? g.status : 'не начинал');
-        const st = (gtd1QState.q1Status && gtd1QState.q1Status[qKey]) || srcSt;
         const name = goalName(key, 'project');
-        const progDisp = prog !== '' ? prog + (String(prog).match(/%$/) ? '' : '%') : '-';
-        return `<tr data-qkey="${escapeHtml(qKey)}"><td class="gtd-cell-oneline" title="${escapeHtml(name)}">${escapeHtml(name)}</td><td>${escapeHtml(g.proj)}</td><td>${escapeHtml(g.proj1 || '-')}</td><td class="gtd-cell-editable gtd-cell-text" contenteditable="true" data-key="${escapeHtml(key)}" data-type="project" title="Редактируемая ячейка">${escapeHtml(formul)}</td><td>${escapeHtml(g.prio || '-')}</td><td class="gtd-cell-editable gtd-cell-oneline${progClass(prog)}" contenteditable="true" data-qcol="progress" data-qkey="${escapeHtml(qKey)}">${escapeHtml(progDisp)}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-qcol="status" data-qkey="${escapeHtml(qKey)}">${escapeHtml(st)}</td></tr>`;
+        return `<tr data-qkey="${escapeHtml(qKey)}"><td class="gtd-cell-oneline" title="${escapeHtml(name)}">${escapeHtml(name)}</td><td>${escapeHtml(g.proj)}</td><td>${escapeHtml(g.proj1 || '-')}</td><td class="gtd-cell-editable gtd-cell-text" contenteditable="true" data-key="${escapeHtml(key)}" data-type="project" title="Редактируемая ячейка">${escapeHtml(formul)}</td><td>${escapeHtml(g.prio || '-')}</td></tr>`;
       }).join('');
+      const sprintsAreaTotalRow = `<tr class="gtd-sprint-total"><td colspan="5">Total: ${area1Q.length} целей</td></tr>`;
+      const sprintsProjTotalRow = `<tr class="gtd-sprint-total"><td colspan="5">Total: ${proj1Q.length} целей</td></tr>`;
+      const gp1Q = gtd1QState.goalsProgress || {};
       const parseProg1Q = v => { const n = parseFloat(String(v||'').replace(/%/g,'')); return isNaN(n) ? 0 : n; };
-      let areaSum1Q = 0; area1Q.forEach(g => { const qKey = 'area|' + goalKeyArea(g); const src = defaultSprints1Q2026.byArea.find(a => goalKeyArea(a) === goalKeyArea(g)); const base = (src && src.progress != null ? src.progress : g.progress) || ''; const v = (gtd1QState.q1Progress && gtd1QState.q1Progress[qKey] != null) ? gtd1QState.q1Progress[qKey] : base; areaSum1Q += parseProg1Q(v); });
-      let projSum1Q = 0; proj1Q.forEach(g => { const qKey = 'project|' + goalKeyProject(g); const src = defaultSprints1Q2026.byProject.find(a => goalKeyProject(a) === goalKeyProject(g)); const base = (src && src.progress != null ? src.progress : g.progress) || ''; const v = (gtd1QState.q1Progress && gtd1QState.q1Progress[qKey] != null) ? gtd1QState.q1Progress[qKey] : base; projSum1Q += parseProg1Q(v); });
+      let areaSum1Q = 0; area1Q.forEach(g => { const k=goalKeyArea(g); areaSum1Q += parseProg1Q(gp1Q[k]); });
+      let projSum1Q = 0; proj1Q.forEach(g => { const k=goalKeyProject(g); projSum1Q += parseProg1Q(gp1Q[k]); });
       const areaCnt1Q = area1Q.length, projCnt1Q = proj1Q.length;
       const areaAvg1Q = areaCnt1Q > 0 ? Math.round(areaSum1Q / areaCnt1Q) : 0, projAvg1Q = projCnt1Q > 0 ? Math.round(projSum1Q / projCnt1Q) : 0;
-      const q1Avg = (areaCnt1Q + projCnt1Q) > 0 ? Math.round((areaAvg1Q + projAvg1Q) / ((areaCnt1Q > 0 ? 1 : 0) + (projCnt1Q > 0 ? 1 : 0))) : 0;
-      const sprintsAreaTotalRow = `<tr class="gtd-sprint-total"><td colspan="4">Total</td><td></td><td class="${progClass(areaAvg1Q)}">${areaAvg1Q}% (${areaCnt1Q} целей)</td><td></td></tr>`;
-      const sprintsProjTotalRow = `<tr class="gtd-sprint-total"><td colspan="4">Total</td><td></td><td class="${progClass(projAvg1Q)}">${projAvg1Q}% (${projCnt1Q} целей)</td><td></td></tr>`;
+      const q1Avg = (areaCnt1Q + projCnt1Q) > 0 ? Math.round((areaSum1Q + projSum1Q) / (areaCnt1Q + projCnt1Q)) : 0;
       const sprintsQ1TotalHtml = `<p style="margin:12px 0 4px;font-weight:600">Итого 1Q2026: <span class="${progClass(q1Avg)}" style="display:inline-block;padding:2px 10px;border-radius:4px">${q1Avg}%</span> <span style="font-size:0.85rem;color:var(--text-muted)">(среднее по area ${areaAvg1Q}% и project ${projAvg1Q}%)</span></p>`;
 
       const getSprint4Prog = (rowId) => (gtd1QState.sprint4Progress && gtd1QState.sprint4Progress[rowId]) != null ? String(gtd1QState.sprint4Progress[rowId]) : '';
@@ -1281,14 +1266,14 @@
           <h2>Goals 1Q2026 по AREA</h2>
           <div class="gtd-table-wrap">
             <table class="gtd-table">
-              <thead><tr><th>Name</th><th>Area</th><th>Sub</th><th>Формулировка 1Q</th><th>Priority</th><th>Progress %</th><th>Status</th></tr></thead>
+              <thead><tr><th>Name</th><th>Area</th><th>Sub</th><th>Формулировка 1Q</th><th>Priority</th></tr></thead>
               <tbody id="gtd-sprints-area-tbody">${sprintsByAreaRows}${sprintsAreaTotalRow}</tbody>
             </table>
           </div>
           <h2>Goals 1Q2026 по Project</h2>
           <div class="gtd-table-wrap">
             <table class="gtd-table">
-              <thead><tr><th>Name</th><th>Project</th><th>Sub</th><th>Формулировка 1Q</th><th>Priority</th><th>Progress %</th><th>Status</th></tr></thead>
+              <thead><tr><th>Name</th><th>Project</th><th>Sub</th><th>Формулировка 1Q</th><th>Priority</th></tr></thead>
               <tbody id="gtd-sprints-project-tbody">${sprintsByProjectRows}${sprintsProjTotalRow}</tbody>
             </table>
           </div>
@@ -1425,7 +1410,6 @@
 
     function goalName(key, type) { return (goalNames[type] && goalNames[type][key]) || '-'; }
     function updateSprintsTbodies() {
-      const statusLabels = { 'не начинал': 'не начинал', 'в процессе': 'в процессе', 'почти done': 'почти done', 'done': 'done' };
       const sprintFormul = (g, src, key, type) => (gtd1QState.customFormuls && gtd1QState.customFormuls[type + '|' + key]) || (src && src.formul) || g.formul || g.desc || '-';
       const area1Q = defaultGoalsByArea.filter(g => gtd1QState.areaKeys.has(goalKeyArea(g)));
       const proj1Q = defaultGoalsByProject.filter(g => gtd1QState.projectKeys.has(goalKeyProject(g)));
@@ -1434,39 +1418,31 @@
         const qKey = 'area|' + key;
         const src = defaultSprints1Q2026.byArea.find(a => goalKeyArea(a) === key);
         const formul = sprintFormul(g, src, key, 'area');
-        const srcProg = (src && src.progress != null) ? src.progress : (g.progress != null ? g.progress : '');
-        const prog = (gtd1QState.q1Progress && gtd1QState.q1Progress[qKey] != null) ? gtd1QState.q1Progress[qKey] : srcProg;
-        const srcSt = (src && src.status && statusLabels[src.status]) ? src.status : ((g.status && statusLabels[g.status]) ? g.status : 'не начинал');
-        const st = (gtd1QState.q1Status && gtd1QState.q1Status[qKey]) || srcSt;
         const name = goalName(key, 'area');
-        const progDisp = prog !== '' ? prog + (String(prog).match(/%$/) ? '' : '%') : '-';
-        return `<tr data-qkey="${escapeHtml(qKey)}"><td class="gtd-cell-oneline" title="${escapeHtml(name)}">${escapeHtml(name)}</td><td>${escapeHtml(g.area)}</td><td>${escapeHtml(g.area1 || '-')}</td><td class="gtd-cell-editable gtd-cell-text" contenteditable="true" data-key="${escapeHtml(key)}" data-type="area" title="Редактируемая ячейка">${escapeHtml(formul)}</td><td>${escapeHtml(g.prio || '-')}</td><td class="gtd-cell-editable gtd-cell-oneline${progClass(prog)}" contenteditable="true" data-qcol="progress" data-qkey="${escapeHtml(qKey)}">${escapeHtml(progDisp)}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-qcol="status" data-qkey="${escapeHtml(qKey)}">${escapeHtml(st)}</td></tr>`;
+        return `<tr data-qkey="${escapeHtml(qKey)}"><td class="gtd-cell-oneline" title="${escapeHtml(name)}">${escapeHtml(name)}</td><td>${escapeHtml(g.area)}</td><td>${escapeHtml(g.area1 || '-')}</td><td class="gtd-cell-editable gtd-cell-text" contenteditable="true" data-key="${escapeHtml(key)}" data-type="area" title="Редактируемая ячейка">${escapeHtml(formul)}</td><td>${escapeHtml(g.prio || '-')}</td></tr>`;
       }).join('');
       const projRows = proj1Q.map(g => {
         const key = goalKeyProject(g);
         const qKey = 'project|' + key;
         const src = defaultSprints1Q2026.byProject.find(a => goalKeyProject(a) === key);
         const formul = sprintFormul(g, src, key, 'project');
-        const srcProg = (src && src.progress != null) ? src.progress : (g.progress != null ? g.progress : '');
-        const prog = (gtd1QState.q1Progress && gtd1QState.q1Progress[qKey] != null) ? gtd1QState.q1Progress[qKey] : srcProg;
-        const srcSt = (src && src.status && statusLabels[src.status]) ? src.status : ((g.status && statusLabels[g.status]) ? g.status : 'не начинал');
-        const st = (gtd1QState.q1Status && gtd1QState.q1Status[qKey]) || srcSt;
         const name = goalName(key, 'project');
-        const progDisp = prog !== '' ? prog + (String(prog).match(/%$/) ? '' : '%') : '-';
-        return `<tr data-qkey="${escapeHtml(qKey)}"><td class="gtd-cell-oneline" title="${escapeHtml(name)}">${escapeHtml(name)}</td><td>${escapeHtml(g.proj)}</td><td>${escapeHtml(g.proj1 || '-')}</td><td class="gtd-cell-editable gtd-cell-text" contenteditable="true" data-key="${escapeHtml(key)}" data-type="project" title="Редактируемая ячейка">${escapeHtml(formul)}</td><td>${escapeHtml(g.prio || '-')}</td><td class="gtd-cell-editable gtd-cell-oneline${progClass(prog)}" contenteditable="true" data-qcol="progress" data-qkey="${escapeHtml(qKey)}">${escapeHtml(progDisp)}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-qcol="status" data-qkey="${escapeHtml(qKey)}">${escapeHtml(st)}</td></tr>`;
+        return `<tr data-qkey="${escapeHtml(qKey)}"><td class="gtd-cell-oneline" title="${escapeHtml(name)}">${escapeHtml(name)}</td><td>${escapeHtml(g.proj)}</td><td>${escapeHtml(g.proj1 || '-')}</td><td class="gtd-cell-editable gtd-cell-text" contenteditable="true" data-key="${escapeHtml(key)}" data-type="project" title="Редактируемая ячейка">${escapeHtml(formul)}</td><td>${escapeHtml(g.prio || '-')}</td></tr>`;
       }).join('');
-      const parseProg = v => { const n = parseFloat(String(v||'').replace(/%/g,'')); return isNaN(n) ? 0 : n; };
-      let areaSum = 0; area1Q.forEach(g => { const qKey = 'area|' + goalKeyArea(g); const src = defaultSprints1Q2026.byArea.find(a => goalKeyArea(a) === goalKeyArea(g)); const base = (src && src.progress != null ? src.progress : g.progress) || ''; const v = (gtd1QState.q1Progress && gtd1QState.q1Progress[qKey] != null) ? gtd1QState.q1Progress[qKey] : base; areaSum += parseProg(v); });
-      let projSum = 0; proj1Q.forEach(g => { const qKey = 'project|' + goalKeyProject(g); const src = defaultSprints1Q2026.byProject.find(a => goalKeyProject(a) === goalKeyProject(g)); const base = (src && src.progress != null ? src.progress : g.progress) || ''; const v = (gtd1QState.q1Progress && gtd1QState.q1Progress[qKey] != null) ? gtd1QState.q1Progress[qKey] : base; projSum += parseProg(v); });
-      const areaCnt = area1Q.length, projCnt = proj1Q.length;
-      const areaAvg = areaCnt > 0 ? Math.round(areaSum / areaCnt) : 0, projAvg = projCnt > 0 ? Math.round(projSum / projCnt) : 0;
-      const q1Avg = (areaCnt + projCnt) > 0 ? Math.round((areaAvg + projAvg) / ((areaCnt > 0 ? 1 : 0) + (projCnt > 0 ? 1 : 0))) : 0;
-      const areaTotalRow = `<tr class="gtd-sprint-total"><td colspan="4">Total</td><td></td><td class="${progClass(areaAvg)}">${areaAvg}% (${areaCnt} целей)</td><td></td></tr>`;
-      const projTotalRow = `<tr class="gtd-sprint-total"><td colspan="4">Total</td><td></td><td class="${progClass(projAvg)}">${projAvg}% (${projCnt} целей)</td><td></td></tr>`;
+      const areaTotalRow = `<tr class="gtd-sprint-total"><td colspan="5">Total: ${area1Q.length} целей</td></tr>`;
+      const projTotalRow = `<tr class="gtd-sprint-total"><td colspan="5">Total: ${proj1Q.length} целей</td></tr>`;
       const areaTb = document.getElementById('gtd-sprints-area-tbody');
       const projTb = document.getElementById('gtd-sprints-project-tbody');
       if (areaTb) areaTb.innerHTML = areaRows + areaTotalRow;
       if (projTb) projTb.innerHTML = projRows + projTotalRow;
+      const gp = gtd1QState.goalsProgress || {};
+      const parseProg = v => { const n = parseFloat(String(v||'').replace(/%/g,'')); return isNaN(n) ? 0 : n; };
+      let areaSum = 0; area1Q.forEach(g => { areaSum += parseProg(gp[goalKeyArea(g)]); });
+      let projSum = 0; proj1Q.forEach(g => { projSum += parseProg(gp[goalKeyProject(g)]); });
+      const areaCnt = area1Q.length, projCnt = proj1Q.length;
+      const areaAvg = areaCnt > 0 ? Math.round(areaSum / areaCnt) : 0;
+      const projAvg = projCnt > 0 ? Math.round(projSum / projCnt) : 0;
+      const q1Avg = (areaCnt + projCnt) > 0 ? Math.round((areaSum + projSum) / (areaCnt + projCnt)) : 0;
       const q1TotalEl = document.getElementById('gtd-q1-total');
       if (q1TotalEl) q1TotalEl.innerHTML = `<p style="margin:12px 0 4px;font-weight:600">Итого 1Q2026: <span class="${progClass(q1Avg)}" style="display:inline-block;padding:2px 10px;border-radius:4px">${q1Avg}%</span> <span style="font-size:0.85rem;color:var(--text-muted)">(среднее по area ${areaAvg}% и project ${projAvg}%)</span></p>`;
       bindGtdEditableFormuls();
@@ -1495,39 +1471,20 @@
         };
       });
       document.querySelectorAll('.gtd-cell-editable[contenteditable="true"][data-qcol]').forEach(cell => {
-        cell.onblur = function() {
-          const qcol = this.dataset.qcol, qkey = this.dataset.qkey;
-          if (!qcol || !qkey) return;
-          const text = (this.textContent || '').trim();
-          if (qcol === 'progress') {
-            const num = parseFloat(text.replace(/%/g, ''));
-            gtd1QState.q1Progress = gtd1QState.q1Progress || {};
-            gtd1QState.q1Progress[qkey] = isNaN(num) ? 0 : num;
-            const disp = isNaN(num) ? '0%' : num + '%';
-            this.textContent = disp;
-            const cls = ' gtd-prog-red gtd-prog-yellow gtd-prog-green'.split(' ').filter(Boolean);
-            this.classList.remove(...cls);
-            const pc = progClass(isNaN(num) ? 0 : num).trim();
-            if (pc) this.classList.add(pc);
-            updateQ1TotalDisplay();
-          } else if (qcol === 'status') {
-            gtd1QState.q1Status = gtd1QState.q1Status || {};
-            gtd1QState.q1Status[qkey] = text;
-          }
-          saveGtd1QState(gtd1QState);
-        };
+        cell.onblur = null; // q1Progress no longer used — annual progress only via goalsProgress
       });
     }
     function updateQ1TotalDisplay() {
       const area1Q = defaultGoalsByArea.filter(g => gtd1QState.areaKeys.has(goalKeyArea(g)));
       const proj1Q = defaultGoalsByProject.filter(g => gtd1QState.projectKeys.has(goalKeyProject(g)));
       const parseProg = v => { const n = parseFloat(String(v||'').replace(/%/g,'')); return isNaN(n) ? 0 : n; };
-      let areaSum = 0; area1Q.forEach(g => { const qKey = 'area|' + goalKeyArea(g); const src = defaultSprints1Q2026.byArea.find(a => goalKeyArea(a) === goalKeyArea(g)); const base = (src && src.progress != null ? src.progress : g.progress) || ''; const v = (gtd1QState.q1Progress && gtd1QState.q1Progress[qKey] != null) ? gtd1QState.q1Progress[qKey] : base; areaSum += parseProg(v); });
-      let projSum = 0; proj1Q.forEach(g => { const qKey = 'project|' + goalKeyProject(g); const src = defaultSprints1Q2026.byProject.find(a => goalKeyProject(a) === goalKeyProject(g)); const base = (src && src.progress != null ? src.progress : g.progress) || ''; const v = (gtd1QState.q1Progress && gtd1QState.q1Progress[qKey] != null) ? gtd1QState.q1Progress[qKey] : base; projSum += parseProg(v); });
+      const gp = gtd1QState.goalsProgress || {};
+      let areaSum = 0; area1Q.forEach(g => { areaSum += parseProg(gp[goalKeyArea(g)]); });
+      let projSum = 0; proj1Q.forEach(g => { projSum += parseProg(gp[goalKeyProject(g)]); });
       const areaCnt = area1Q.length, projCnt = proj1Q.length;
       const areaAvg = areaCnt > 0 ? Math.round(areaSum / areaCnt) : 0;
       const projAvg = projCnt > 0 ? Math.round(projSum / projCnt) : 0;
-      const q1Avg = (areaCnt + projCnt) > 0 ? Math.round((areaAvg + projAvg) / ((areaCnt > 0 ? 1 : 0) + (projCnt > 0 ? 1 : 0))) : 0;
+      const q1Avg = (areaCnt + projCnt) > 0 ? Math.round((areaSum + projSum) / (areaCnt + projCnt)) : 0;
       const areaTb = document.getElementById('gtd-sprints-area-tbody');
       if (areaTb) { const tr = areaTb.querySelector('tr.gtd-sprint-total'); if (tr && tr.cells[2]) { tr.cells[2].textContent = areaAvg + '% (' + areaCnt + ' целей)'; tr.cells[2].className = progClass(areaAvg).trim(); } }
       const projTb = document.getElementById('gtd-sprints-project-tbody');
@@ -1943,11 +1900,10 @@
     function computeQuarterTotals() {
       const area1Q = defaultGoalsByArea.filter(g => gtd1QState.areaKeys.has(goalKeyArea(g)));
       const proj1Q = defaultGoalsByProject.filter(g => gtd1QState.projectKeys.has(goalKeyProject(g)));
-      const parseProg = v => { const n = parseFloat(String(v||'').replace(/%/g,'')); return isNaN(n) ? null : n; };
-      const q1p = gtd1QState.q1Progress || {};
+      const gp = gtd1QState.goalsProgress || {};
       let sumProg = 0;
-      area1Q.forEach(g => { const key = 'area|' + goalKeyArea(g); const v = q1p[key] != null ? q1p[key] : 0; sumProg += v; });
-      proj1Q.forEach(g => { const key = 'project|' + goalKeyProject(g); const v = q1p[key] != null ? q1p[key] : 0; sumProg += v; });
+      area1Q.forEach(g => { const v = parseFloat(gp[goalKeyArea(g)]); sumProg += isNaN(v) ? 0 : v; });
+      proj1Q.forEach(g => { const v = parseFloat(gp[goalKeyProject(g)]); sumProg += isNaN(v) ? 0 : v; });
       const taskCount = area1Q.length + proj1Q.length;
       const avgProg = taskCount > 0 ? Math.round(sumProg / taskCount) : 0;
       return { taskCount, avgProg };
