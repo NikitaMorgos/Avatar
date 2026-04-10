@@ -387,6 +387,16 @@
     .health-card-name { font-size: 0.72rem; color: var(--text-muted); margin-bottom: 4px; line-height: 1.3; }
     .health-card-val { font-size: 1.05rem; margin-bottom: 2px; }
     .health-card-date { font-size: 0.68rem; color: var(--text-muted); }
+    /* Chronic conditions block */
+    .health-chronic-list { display: flex; flex-direction: column; gap: 12px; margin-top: 20px; }
+    .health-chronic-card { border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; background: var(--card-bg); border-left-width: 4px; }
+    .health-chronic-header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+    .health-chronic-name { font-weight: 600; font-size: 0.9375rem; }
+    .health-chronic-badge { font-size: 0.7rem; font-weight: 600; padding: 2px 8px; border-radius: 4px; background: #fffff0; color: #975a16; }
+    .health-chronic-meta { font-size: 0.78rem; color: var(--text-muted); margin-bottom: 10px; }
+    .health-chronic-rows { display: flex; flex-direction: column; gap: 5px; }
+    .health-chronic-row { font-size: 0.8125rem; display: flex; gap: 6px; }
+    .health-chronic-label { color: var(--text-muted); flex-shrink: 0; min-width: 110px; }
     .gtd-login-form input { width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 6px; margin-bottom: 12px; font-size: 0.9375rem; box-sizing: border-box; }
     .gtd-login-form input:focus { outline: none; border-color: var(--accent); }
     .gtd-tabs { display: flex; gap: 4px; margin-bottom: 20px; border-bottom: 1px solid var(--border); }
@@ -2632,7 +2642,9 @@
       { id: 'alt', name: 'АЛТ', unit: 'Е/л', refMin: 0, refMax: 41, group: 'Печень', note: 'Маркер печени; норма для мужчин <41' },
       { id: 'creatinine', name: 'Креатинин', unit: 'мкмоль/л', refMin: 62, refMax: 115, group: 'Почки', note: 'Функция почек; норма мужчины 62–115' },
       { id: 'tsh', name: 'ТТГ (щитовидная железа)', unit: 'мкМЕ/мл', refMin: 0.27, refMax: 4.2, optMax: 2.5, group: 'Гормоны', note: 'Оптимум 0.5–2.5; при >2.5 стоит пересдать с Т3/Т4' },
-      { id: 'vo2max', name: 'VO2max', unit: 'мл/кг/мин', refMin: 35, refMax: 99, optMin: 50, group: 'Физическая форма', note: 'Аэробная мощность; норма муж.45 лет >35; отлично >50' }
+      { id: 'vo2max', name: 'VO2max', unit: 'мл/кг/мин', refMin: 35, refMax: 99, optMin: 50, group: 'Физическая форма', note: 'Аэробная мощность; норма муж.45 лет >35; отлично >50' },
+      { id: 'ebv_vca', name: 'ВЭБ Anti-VCA IgG', unit: 'ед/мл', refMin: 0, refMax: 16, group: 'Иммунитет/Вирусы', note: 'Эпштейн-Барр; >16 = перенесённый/реактивация; 64.95 — высокий фон (иммуносупрессия → герпес)' },
+      { id: 'zinc', name: 'Цинк', unit: 'мкмоль/л', refMin: 11.5, refMax: 23.0, optMin: 14, group: 'Иммунитет/Вирусы', note: 'Дефицит → частые герпес-рецидивы; оптимум 14–20 мкмоль/л' }
     ];
     const DEFAULT_HEALTH_MARKERS_DATA = [
       { markerId: 'vitd', date: '2025-08-01', value: 58.9 },
@@ -2730,6 +2742,8 @@
       { markerId: 'rbc', date: '2022-12-31', value: 5.63 },
       { markerId: 'rbc', date: '2024-09-14', value: 5.34 },
       { markerId: 'rbc', date: '2024-09-18', value: 5.33 },
+      // Иммунитет / вирусы
+      { markerId: 'ebv_vca', date: '2022-12-31', value: 64.95 },
       // ТТГ
       { markerId: 'tsh', date: '2022-08-30', value: 1.85 },
       // VO2max
@@ -2923,7 +2937,26 @@
       { name: 'Витамин D (25-OH)', last: '2025-08-01', interval: 12, reason: '58.9 нг/мл — норма (был дефицит 16.9 в 2022); следующий: авг.2026', p: 3 },
       { name: 'Общий анализ крови', last: '2026-03-18', interval: 12, reason: 'Всё в норме; следующий: март 2027', p: 3 },
       { name: 'С-реактивный белок', last: '2026-03-18', interval: 12, reason: '0.20 — отлично (был 13.77 в сент.2024, нормализовался)', p: 3 },
-      { name: 'Гомоцистеин', last: '2026-03-18', interval: 12, reason: '9.62 — снизился с 12.62 в 2025; следующий: март 2027', p: 3 }
+      { name: 'Гомоцистеин', last: '2026-03-18', interval: 12, reason: '9.62 — снизился с 12.62 в 2025; следующий: март 2027', p: 3 },
+      // Герпес / иммунитет
+      { name: 'Цинк в сыворотке', last: null, interval: 12, reason: 'Дефицит цинка → частые герпес-рецидивы; никогда не сдавался', p: 1 },
+      { name: 'Иммунограмма (CD3/CD4/CD8/NK)', last: null, interval: 24, reason: 'Рецидивы герпеса ~1/мес + высокий ВЭБ-фон — нужна оценка клеточного иммунитета', p: 1 },
+      { name: 'HSV-1/2 IgG (типирование)', last: null, interval: 999, reason: 'Серологическое подтверждение типа вируса; однократно', p: 2 },
+      { name: 'Дерматолог — супрессивная терапия', last: null, interval: 12, reason: 'Валацикловир 500 мг/день снижает рецидивы на 70–80%; нужен рецепт', p: 1 }
+    ];
+    const HEALTH_CHRONIC = [
+      {
+        id: 'hsv',
+        name: 'Рецидивирующий герпес (HSV-1)',
+        icon: '🦠',
+        status: 'active',
+        statusLabel: 'Активный контроль',
+        statusColor: '#d69e2e',
+        meta: '~1 раз/месяц · Anti-VCA IgG 64.95 ↑ (ВЭБ-фон)',
+        onFlare: 'При первых признаках (жжение/покалывание): ацикловир 5% крем каждые 4 ч + L-лизин 3 г/день',
+        triggers: 'Стресс · УФ без SPF-бальзама · недосып · ОРВИ · обезвоживание',
+        nextStep: 'Дерматолог → валацикловир 500 мг/день (супрессия). Сдать: цинк, иммунограмма'
+      }
     ];
     function computeCheckupStatuses() {
       const today = new Date();
@@ -3011,6 +3044,23 @@
         <div class="health-dash-section">
           <div class="health-dash-heading" style="margin-bottom:12px">📊 Ключевые показатели</div>
           <div class="health-marker-cards">${markerCards}</div>
+        </div>
+        <div class="health-dash-section" style="margin-top:24px">
+          <div class="health-dash-heading">⚠️ На контроле — хронические состояния</div>
+          <div class="health-chronic-list">${HEALTH_CHRONIC.map(c => `
+            <div class="health-chronic-card" style="border-left-color:${c.statusColor}">
+              <div class="health-chronic-header">
+                <span style="font-size:1.2rem">${c.icon}</span>
+                <span class="health-chronic-name">${escapeHtml(c.name)}</span>
+                <span class="health-chronic-badge" style="background:${c.statusColor}22;color:${c.statusColor}">${escapeHtml(c.statusLabel)}</span>
+              </div>
+              <div class="health-chronic-meta">${escapeHtml(c.meta)}</div>
+              <div class="health-chronic-rows">
+                <div class="health-chronic-row"><span class="health-chronic-label">При обострении:</span><span>${escapeHtml(c.onFlare)}</span></div>
+                <div class="health-chronic-row"><span class="health-chronic-label">Триггеры:</span><span style="color:var(--text-muted)">${escapeHtml(c.triggers)}</span></div>
+                <div class="health-chronic-row"><span class="health-chronic-label">Следующий шаг:</span><span style="color:#2383e2;font-weight:500">${escapeHtml(c.nextStep)}</span></div>
+              </div>
+            </div>`).join('')}</div>
         </div>`;
     }
     function renderHealthCheckup() {
