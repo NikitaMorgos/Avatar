@@ -364,6 +364,29 @@
     .health-add-form .health-form-row { margin-bottom: 12px; }
     .health-add-form label { display: block; font-size: 0.875rem; margin-bottom: 4px; color: var(--text-muted); }
     .health-add-form input, .health-add-form select { width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.9375rem; box-sizing: border-box; }
+    /* Health dashboard */
+    .health-dash-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; margin-bottom: 28px; }
+    @media (max-width: 680px) { .health-dash-grid { grid-template-columns: 1fr; } }
+    .health-dash-section { }
+    .health-dash-heading { font-size: 0.9375rem; font-weight: 600; margin: 0 0 12px; }
+    .health-check-group { margin-bottom: 14px; }
+    .health-check-grouplabel { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted); margin-bottom: 8px; }
+    .health-checklist { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 7px; }
+    .health-checklist-item { font-size: 0.8125rem; line-height: 1.45; }
+    .health-check-badge { display: inline-block; padding: 1px 7px; border-radius: 4px; font-size: 0.68rem; font-weight: 700; margin-right: 5px; vertical-align: middle; }
+    .badge-never { background: #fff5f5; color: #c53030; }
+    .badge-overdue { background: #fff5f5; color: #c53030; }
+    .badge-soon { background: #fffff0; color: #975a16; }
+    .health-lifestyle-list { display: flex; flex-direction: column; gap: 11px; }
+    .health-lifestyle-item { display: flex; gap: 10px; align-items: flex-start; }
+    .health-lifestyle-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: 1px; }
+    .health-lifestyle-title { font-size: 0.875rem; font-weight: 600; margin-bottom: 1px; }
+    .health-lifestyle-desc { font-size: 0.78rem; color: var(--text-muted); line-height: 1.4; }
+    .health-marker-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(155px, 1fr)); gap: 10px; }
+    .health-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 11px 13px; border-left-width: 3px; }
+    .health-card-name { font-size: 0.72rem; color: var(--text-muted); margin-bottom: 4px; line-height: 1.3; }
+    .health-card-val { font-size: 1.05rem; margin-bottom: 2px; }
+    .health-card-date { font-size: 0.68rem; color: var(--text-muted); }
     .gtd-login-form input { width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 6px; margin-bottom: 12px; font-size: 0.9375rem; box-sizing: border-box; }
     .gtd-login-form input:focus { outline: none; border-color: var(--accent); }
     .gtd-tabs { display: flex; gap: 4px; margin-bottom: 20px; border-bottom: 1px solid var(--border); }
@@ -2764,15 +2787,18 @@
 
       const markersHtml = renderHealthMarkers(data.markers || []);
       const checkupHtml = renderHealthCheckup();
+      const dashboardHtml = renderHealthDashboard(data.markers || []);
       return `
         <div class="gtd-tabs">
-          <button type="button" class="gtd-tab active" data-tab="metrics">Показатели</button>
+          <button type="button" class="gtd-tab active" data-tab="dashboard">Сводка</button>
           <button type="button" class="gtd-tab" data-tab="markers">Маркеры</button>
           <button type="button" class="gtd-tab" data-tab="checkup">Чекап</button>
           <button type="button" class="gtd-tab" data-tab="analyses">Анализы</button>
+          <button type="button" class="gtd-tab" data-tab="metrics">Трекинг</button>
           <button type="button" class="gtd-tab" data-tab="add">Добавить</button>
         </div>
-        <div id="health-panel-metrics" class="gtd-panel active">
+        <div id="health-panel-dashboard" class="gtd-panel active">${dashboardHtml}</div>
+        <div id="health-panel-metrics" class="gtd-panel">
           <h2>Вес (кг)</h2>
           <div class="gtd-table-wrap">
             <table class="gtd-table">
@@ -2879,29 +2905,29 @@
       }
       return html;
     }
-    function renderHealthCheckup() {
+    const HEALTH_CHECKUP_PLAN = [
+      { name: 'HbA1c (гликированный гемоглобин)', last: null, interval: 12, reason: 'Глюкоза была в норме в 2019, но HbA1c никогда не сдавался — скрытый преддиабет', p: 1 },
+      { name: 'ТТГ (щитовидная железа)', last: '2022-08-30', interval: 24, reason: 'Последний авг.2022 — 1.85 (норма). Следующий: авг.2024 (просрочено!)', p: 1 },
+      { name: 'VO2max (кардиореспираторный тест)', last: '2022-08-30', interval: 24, reason: 'Упал с 58.1 (2016) до 49.0 (2022) — ниже оптимума >50. Повторить для оценки динамики', p: 1 },
+      { name: 'Тестостерон общий + ГСПГ', last: '2016-08-23', interval: 12, reason: 'Последний в 2016 — 7.85 нг/мл (для 36 лет отлично); с 45 лет падает активнее', p: 1 },
+      { name: 'Инсулин натощак (HOMA-IR)', last: '2016-08-23', interval: 12, reason: 'В 2016 был 3.2 (↓ низкий); HbA1c никогда не сдавался — нужно пересдать', p: 1 },
+      { name: 'Колоноскопия', last: null, interval: 60, reason: 'Скрининг рака кишечника с 45 лет — раз в 5 лет', p: 1 },
+      { name: 'Витамин B12 + фолиевая кислота', last: null, interval: 12, reason: 'Не сдавался; фолатный цикл (MTHFR) в норме, но уровни B12/фолата неизвестны', p: 2 },
+      { name: 'Магний в сыворотке', last: null, interval: 12, reason: 'Дефицит магния — судороги, нарушения сна, усталость', p: 2 },
+      { name: 'УЗИ органов брюшной полости', last: null, interval: 36, reason: 'Печень, почки, поджелудочная — профилактический скрининг', p: 2 },
+      { name: 'ЭКГ + осмотр кардиолога', last: null, interval: 24, reason: 'ЭхоКГ в 2016 (норма); стресс-тест в 2016 — нужно обновить', p: 2 },
+      { name: 'Глюкоза натощак', last: '2019-02-14', interval: 12, reason: 'Была 4.3 в 2019 — норма; с 40+ нужно сдавать ежегодно', p: 2 },
+      { name: 'Ферритин + железо', last: '2024-09-15', interval: 12, reason: 'Ферритин 112 нг/мл (2024) — вырос с 84.8; следующий: сент.2025', p: 2 },
+      { name: 'Липидный профиль', last: '2025-08-01', interval: 12, reason: 'Холестерол 5.03; ЛПНП 2.89; следующий: авг.2026', p: 2 },
+      { name: 'ПСА (простата)', last: '2025-08-01', interval: 12, reason: 'Скрининг рака простаты с 45 лет; последний: 1.687 нг/мл', p: 2 },
+      { name: 'Витамин D (25-OH)', last: '2025-08-01', interval: 12, reason: '58.9 нг/мл — норма (был дефицит 16.9 в 2022); следующий: авг.2026', p: 3 },
+      { name: 'Общий анализ крови', last: '2026-03-18', interval: 12, reason: 'Всё в норме; следующий: март 2027', p: 3 },
+      { name: 'С-реактивный белок', last: '2026-03-18', interval: 12, reason: '0.20 — отлично (был 13.77 в сент.2024, нормализовался)', p: 3 },
+      { name: 'Гомоцистеин', last: '2026-03-18', interval: 12, reason: '9.62 — снизился с 12.62 в 2025; следующий: март 2027', p: 3 }
+    ];
+    function computeCheckupStatuses() {
       const today = new Date();
-      const checkups = [
-        { name: 'HbA1c (гликированный гемоглобин)', last: null, interval: 12, reason: 'Глюкоза была в норме в 2019, но HbA1c никогда не сдавался — скрытый преддиабет', p: 1 },
-        { name: 'ТТГ (щитовидная железа)', last: '2022-08-30', interval: 24, reason: 'Последний в авг.2022 — 1.85 (норма). Следующий: авг.2024 (просрочено!)', p: 1 },
-        { name: 'VO2max (кардиореспираторный тест)', last: '2022-08-30', interval: 24, reason: 'Упал с 58.1 (2016) до 49.0 (2022) — ниже оптимума >50. Повторить для оценки динамики', p: 1 },
-        { name: 'Тестостерон общий + ГСПГ', last: '2016-08-23', interval: 12, reason: 'Последний раз в 2016 — 7.85 нг/мл (отлично для 36 лет); с 45 лет падает активнее', p: 1 },
-        { name: 'Инсулин натощак (HOMA-IR)', last: '2016-08-23', interval: 12, reason: 'В 2016 был 3.2 (↓ низкий); HbA1c никогда не сдавался — нужно пересдать', p: 1 },
-        { name: 'Колоноскопия', last: null, interval: 60, reason: 'Скрининг рака кишечника с 45 лет — раз в 5 лет', p: 1 },
-        { name: 'Витамин B12 + фолиевая кислота', last: null, interval: 12, reason: 'Не сдавался; фолатный цикл (MTHFR) в норме, но уровни B12/фолата не известны', p: 2 },
-        { name: 'Магний в сыворотке', last: null, interval: 12, reason: 'Дефицит магния — судороги, нарушения сна, усталость', p: 2 },
-        { name: 'УЗИ органов брюшной полости', last: null, interval: 36, reason: 'Печень, почки, поджелудочная — профилактический скрининг', p: 2 },
-        { name: 'ЭКГ + осмотр кардиолога', last: null, interval: 24, reason: 'ЭхоКГ в 2016 (норма); стресс-тест в 2016 — нужно обновить', p: 2 },
-        { name: 'Глюкоза натощак', last: '2019-02-14', interval: 12, reason: 'Была 4.3 в 2019 — норма; но с возраста 40+ нужно сдавать ежегодно', p: 2 },
-        { name: 'Ферритин + железо', last: '2024-09-15', interval: 12, reason: 'Ферритин 112 нг/мл (2024) — вырос с 84.8; следующий: сент. 2025', p: 2 },
-        { name: 'Липидный профиль', last: '2025-08-01', interval: 12, reason: 'Холестерол 5.03; ЛПНП 2.89; неЛПВП 3.56 (↑ слегка)', p: 2 },
-        { name: 'ПСА (простата)', last: '2025-08-01', interval: 12, reason: 'Скрининг рака простаты с 45 лет; последний: 1.687 нг/мл', p: 2 },
-        { name: 'Витамин D (25-OH)', last: '2025-08-01', interval: 12, reason: '58.9 нг/мл — норма (был дефицит 16.9 в 2022, удалось поднять)', p: 3 },
-        { name: 'Общий анализ крови', last: '2026-03-18', interval: 12, reason: 'Всё в норме; следующий: март 2027', p: 3 },
-        { name: 'С-реактивный белок', last: '2026-03-18', interval: 12, reason: '0.20 — отлично (был 13.77 в сент.2024, нормализовался)', p: 3 },
-        { name: 'Гомоцистеин', last: '2026-03-18', interval: 12, reason: '9.62 — снизился с 12.62 в 2025; следующий: март 2027', p: 3 }
-      ];
-      const withDue = checkups.map(c => {
+      return HEALTH_CHECKUP_PLAN.map(c => {
         let dueDate = null, status = 'never';
         if (c.last) {
           const due = new Date(c.last);
@@ -2912,6 +2938,83 @@
         }
         return { ...c, dueDate, status };
       });
+    }
+    function renderHealthDashboard(markersData) {
+      const today = new Date();
+      const monthName = today.toLocaleString('ru-RU', { month: 'long', year: 'numeric' });
+      const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
+
+      // Checkup items by status
+      const withDue = computeCheckupStatuses();
+      const urgent = withDue.filter(c => c.status === 'never' || c.status === 'overdue').sort((a,b) => a.p-b.p);
+      const soon = withDue.filter(c => c.status === 'soon').sort((a,b) => a.p-b.p);
+
+      const badge = s => s === 'never'
+        ? '<span class="health-check-badge badge-never">Не сдавалось</span>'
+        : '<span class="health-check-badge badge-overdue">Просрочено</span>';
+      const urgentHtml = urgent.map(c =>
+        `<li class="health-checklist-item">${badge(c.status)} <strong>${escapeHtml(c.name)}</strong> — <span style="color:var(--text-muted)">${escapeHtml(c.reason)}</span></li>`).join('');
+      const soonHtml = soon.map(c =>
+        `<li class="health-checklist-item"><span class="health-check-badge badge-soon">Скоро</span> <strong>${escapeHtml(c.name)}</strong> — <span style="color:var(--text-muted)">${escapeHtml(c.reason)}</span></li>`).join('');
+
+      // Key marker cards
+      const KEY_MARKERS = ['crp', 'homocysteine', 'vitd', 'ldl', 'cholesterol', 'vo2max', 'tsh', 'ferritin'];
+      const fmtMon = d => { const m = /^(\d{4})-(\d{2})/.exec(d); return m ? `${m[2]}.${m[1].slice(2)}` : d; };
+      const markerCards = KEY_MARKERS.map(mid => {
+        const def = HEALTH_MARKERS.find(m => m.id === mid);
+        if (!def) return '';
+        const readings = (markersData || []).filter(r => r.markerId === mid).sort((a,b) => (b.date||'').localeCompare(a.date||''));
+        const latest = readings[0];
+        if (!latest) return `<div class="health-card" style="border-left-color:var(--border)"><div class="health-card-name">${escapeHtml(def.name)}</div><div class="health-card-val" style="color:var(--text-muted)">нет данных</div></div>`;
+        const v = parseFloat(latest.value);
+        let sc, si;
+        if (v < def.refMin || (def.refMax < 90 && v > def.refMax)) { sc = '#e53e3e'; si = '⚠'; }
+        else if ((def.optMax && v > def.optMax) || (def.optMin && v < def.optMin)) { sc = '#d69e2e'; si = '~'; }
+        else { sc = '#38a169'; si = '✓'; }
+        return `<div class="health-card" style="border-left-color:${sc}">
+          <div class="health-card-name">${escapeHtml(def.name)}</div>
+          <div class="health-card-val" style="color:${sc}">${si} <strong>${v}</strong> <span style="font-size:0.72rem;color:var(--text-muted)">${escapeHtml(def.unit)}</span></div>
+          <div class="health-card-date">${fmtMon(latest.date)}</div>
+        </div>`;
+      }).join('');
+
+      // Lifestyle items (data-driven, profile-specific)
+      const lifestyle = [
+        { icon: '🏃', title: 'Кардио 3× в неделю', desc: 'VO2max 49 — ниже оптимума 50. Бег, велосипед или плавание 30–45 мин' },
+        { icon: '💊', title: 'B12 + фолат (продолжать)', desc: 'Гомоцистеин 9.62 снижается — хороший тренд. Поддерживай приём' },
+        { icon: '😴', title: 'Сон 7–8 часов', desc: 'Напрямую влияет на тестостерон, VO2max и восстановление' },
+        { icon: '💧', title: 'Гидратация 2–2.5 л/день', desc: 'В 2022 фиксировалась обезвоженность (плотность мочи 1031)' },
+        { icon: '🥗', title: 'Белок ≥130 г/день', desc: 'Общий белок в 2016 был ↓59 г/л. Мясо, рыба, яйца, бобовые' },
+        { icon: '☀️', title: 'Вит. D — контроль в августе', desc: 'Сейчас 58.9 нг/мл (норма). Проверь снова авг.2026 после лета' }
+      ];
+      const lifestyleHtml = lifestyle.map(l => `
+        <div class="health-lifestyle-item">
+          <span class="health-lifestyle-icon">${l.icon}</span>
+          <div><div class="health-lifestyle-title">${escapeHtml(l.title)}</div><div class="health-lifestyle-desc">${escapeHtml(l.desc)}</div></div>
+        </div>`).join('');
+
+      return `
+        <h2 style="margin:0 0 4px;font-size:1.4rem;font-weight:600">${cap(monthName)} — план здоровья</h2>
+        <p class="gtd-overview" style="margin-bottom:24px">Персональный чеклист на месяц. Формируется автоматически по данным анализов.</p>
+        <div class="health-dash-grid">
+          <div class="health-dash-section">
+            <div class="health-dash-heading">🧪 Анализы и обследования</div>
+            ${urgent.length ? `<div class="health-check-group"><div class="health-check-grouplabel">Нужно сдать (${urgent.length})</div><ul class="health-checklist">${urgentHtml}</ul></div>` : ''}
+            ${soon.length ? `<div class="health-check-group"><div class="health-check-grouplabel" style="margin-top:10px">Запланировать</div><ul class="health-checklist">${soonHtml}</ul></div>` : ''}
+            ${!urgent.length && !soon.length ? '<p style="color:var(--text-muted);font-size:0.875rem">Всё актуально 🎉</p>' : ''}
+          </div>
+          <div class="health-dash-section">
+            <div class="health-dash-heading">💡 Образ жизни</div>
+            <div class="health-lifestyle-list">${lifestyleHtml}</div>
+          </div>
+        </div>
+        <div class="health-dash-section">
+          <div class="health-dash-heading" style="margin-bottom:12px">📊 Ключевые показатели</div>
+          <div class="health-marker-cards">${markerCards}</div>
+        </div>`;
+    }
+    function renderHealthCheckup() {
+      const withDue = computeCheckupStatuses();
       withDue.sort((a,b) => { const o = { never:0, overdue:1, soon:2, ok:3 }; return o[a.status] !== o[b.status] ? o[a.status]-o[b.status] : a.p-b.p; });
       const fmtDate = d => { if (!d) return '—'; const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(d); return m ? `${m[3]}.${m[2]}.${m[1]}` : d; };
       const sl = { never: ['🔴 Не сдавалось','#e53e3e'], overdue: ['🔴 Просрочено','#e53e3e'], soon: ['🟡 Скоро','#d69e2e'], ok: ['🟢 Актуально','#38a169'] };
