@@ -891,7 +891,7 @@
     };
     function getSprintDates(sprintNum) { return SPRINT_DATES_MAP[sprintNum] || `Спринт ${sprintNum}`; }
     /* Quarter helpers: Q1=S4-S7, Q2=S8-S12 */
-    const QUARTER_SPRINTS = { 1:[4,5,6,7], 2:[8,9,10,11,12], 3:[13,14,15,16,17,18], 4:[19,20,21,22,23,24] };
+    const QUARTER_SPRINTS = { 1:[4,5,6], 2:[7,8,9,10,11,12], 3:[13,14,15,16,17,18], 4:[19,20,21,22,23,24] };
     function getActiveQuarter() { try { const v=localStorage.getItem(GTD_ACTIVE_Q_KEY); if(v) return parseInt(v); } catch(e){} return 2; }
     function setActiveQuarter(q) { try { localStorage.setItem(GTD_ACTIVE_Q_KEY, String(q)); } catch(e){} activeGtdQuarter=q; }
     const defaultManualLife = [{ name: 'Пример Life', ap: 'Self', sub: 'Diary', desc: 'жизненная цель вне квартальных', progress: '', status: '' }];
@@ -911,12 +911,12 @@
     function loadGtd2QState() {
       try {
         const s = localStorage.getItem(GTD_2Q_KEY);
-        if (s) { const j = JSON.parse(s); return { areaKeys: new Set(j.areaKeys||[]), projectKeys: new Set(j.projectKeys||[]), customFormuls: j.customFormuls||{}, sprint8Tasks: j.sprint8Tasks||[], sprint9Tasks: j.sprint9Tasks||[], sprint10Tasks: j.sprint10Tasks||[], sprint11Tasks: j.sprint11Tasks||[], sprint12Tasks: j.sprint12Tasks||[], q2Progress: j.q2Progress||{}, q2Status: j.q2Status||{} }; }
+        if (s) { const j = JSON.parse(s); return { areaKeys: new Set(j.areaKeys||[]), projectKeys: new Set(j.projectKeys||[]), customFormuls: j.customFormuls||{}, sprint7Tasks: j.sprint7Tasks||[], sprint8Tasks: j.sprint8Tasks||[], sprint9Tasks: j.sprint9Tasks||[], sprint10Tasks: j.sprint10Tasks||[], sprint11Tasks: j.sprint11Tasks||[], sprint12Tasks: j.sprint12Tasks||[], q2Progress: j.q2Progress||{}, q2Status: j.q2Status||{} }; }
       } catch(e) {}
-      return { areaKeys: new Set(), projectKeys: new Set(), customFormuls: {}, sprint8Tasks: [], sprint9Tasks: [], sprint10Tasks: [], sprint11Tasks: [], sprint12Tasks: [], q2Progress: {}, q2Status: {} };
+      return { areaKeys: new Set(), projectKeys: new Set(), customFormuls: {}, sprint7Tasks: [], sprint8Tasks: [], sprint9Tasks: [], sprint10Tasks: [], sprint11Tasks: [], sprint12Tasks: [], q2Progress: {}, q2Status: {} };
     }
     function saveGtd2QState(st) {
-      try { localStorage.setItem(GTD_2Q_KEY, JSON.stringify({ areaKeys: [...st.areaKeys], projectKeys: [...st.projectKeys], customFormuls: st.customFormuls||{}, sprint8Tasks: st.sprint8Tasks||[], sprint9Tasks: st.sprint9Tasks||[], sprint10Tasks: st.sprint10Tasks||[], sprint11Tasks: st.sprint11Tasks||[], sprint12Tasks: st.sprint12Tasks||[], q2Progress: st.q2Progress||{}, q2Status: st.q2Status||{} })); } catch(e) {}
+      try { localStorage.setItem(GTD_2Q_KEY, JSON.stringify({ areaKeys: [...st.areaKeys], projectKeys: [...st.projectKeys], customFormuls: st.customFormuls||{}, sprint7Tasks: st.sprint7Tasks||[], sprint8Tasks: st.sprint8Tasks||[], sprint9Tasks: st.sprint9Tasks||[], sprint10Tasks: st.sprint10Tasks||[], sprint11Tasks: st.sprint11Tasks||[], sprint12Tasks: st.sprint12Tasks||[], q2Progress: st.q2Progress||{}, q2Status: st.q2Status||{} })); } catch(e) {}
     }
     const GTD_TODO_KEY = 'gtd_todo_2026';
     function loadTodoState() {
@@ -946,6 +946,11 @@
     async function loadGtdContent() {
       if (!gtd1QState) gtd1QState = loadGtd1QState(defaultSprints1Q2026);
       if (!gtd2QState) gtd2QState = loadGtd2QState();
+      // migrate sprint7 from Q1 state to Q2 state if needed
+      if ((!gtd2QState.sprint7Tasks || !gtd2QState.sprint7Tasks.length) && gtd1QState.sprint7Tasks && gtd1QState.sprint7Tasks.length) {
+        gtd2QState.sprint7Tasks = [...gtd1QState.sprint7Tasks];
+        saveGtd2QState(gtd2QState);
+      }
       if (!activeGtdQuarter) activeGtdQuarter = getActiveQuarter();
       const apiUrl = getCollectApiUrl();
       let projects = [], areas = [], goalsByArea = defaultGoalsByArea, goalsByProject = defaultGoalsByProject;
@@ -1288,32 +1293,18 @@
             </table>
           </div>
           <div id="gtd-q1-total">${sprintsQ1TotalHtml}</div>
-          <h2 style="margin-top:24px">Спринты</h2>
-          <h2 id="gtd-sprint7-heading">Спринт 7 (${getSprintDates(7)})</h2>
-          <p style="margin:0 0 8px"><button type="button" class="gtd-login-btn" id="gtd-sprint7-add-task" style="padding:6px 12px;font-size:0.8rem">+ задача</button> <button type="button" class="gtd-login-btn" id="gtd-sprint7-submit-btn" style="padding:6px 12px;font-size:0.8rem">Сдать отчёт</button></p>
+          <h2 style="margin-top:24px">Спринты 1Q2026</h2>
+          <h2 id="gtd-sprint6-heading">Спринт 6 (${getSprintDates(6)})</h2>
           <div class="gtd-table-wrap">
             <table class="gtd-table gtd-sprint4-table">
               <thead><tr><th>type</th><th>Name</th><th>A/P</th><th>Sub</th><th>Description</th><th>Progress %</th><th>Status</th><th></th></tr></thead>
-              <tbody id="gtd-sprint7-tbody">
-                ${sprint7Rows}${sprint7TotalRow}
+              <tbody id="gtd-sprint6-tbody">
+                ${sprint6Rows}${sprint6TotalRow}
               </tbody>
             </table>
           </div>
-          <details class="gtd-sprint-details" id="gtd-sprint6-details">
-            <summary style="cursor:pointer;font-weight:600;margin-bottom:6px" id="gtd-sprint6-summary">Спринт 6 (${getSprintDates(6)}) ▼</summary>
-            <p style="margin:0 0 8px"><button type="button" class="gtd-login-btn" id="gtd-sprint6-add-task" style="padding:6px 12px;font-size:0.8rem">+ задача</button> <button type="button" class="gtd-login-btn" id="gtd-sprint6-submit-btn" style="padding:6px 12px;font-size:0.8rem">Сдать отчёт</button></p>
-            <div class="gtd-table-wrap">
-              <table class="gtd-table gtd-sprint4-table">
-                <thead><tr><th>type</th><th>Name</th><th>A/P</th><th>Sub</th><th>Description</th><th>Progress %</th><th>Status</th><th></th></tr></thead>
-                <tbody id="gtd-sprint6-tbody">
-                  ${sprint6Rows}${sprint6TotalRow}
-                </tbody>
-              </table>
-            </div>
-          </details>
           <details class="gtd-sprint-details" id="gtd-sprint5-details">
             <summary style="cursor:pointer;font-weight:600;margin-bottom:6px" id="gtd-sprint5-summary">Спринт 5 (${getSprintDates(5)}) ▼</summary>
-            <p style="margin:0 0 8px"><button type="button" class="gtd-login-btn" id="gtd-sprint5-add-task" style="padding:6px 12px;font-size:0.8rem">+ задача</button> <button type="button" class="gtd-login-btn" id="gtd-sprint5-submit-btn" style="padding:6px 12px;font-size:0.8rem">Сдать отчёт</button></p>
             <div class="gtd-table-wrap">
               <table class="gtd-table gtd-sprint4-table">
                 <thead><tr><th>type</th><th>Name</th><th>A/P</th><th>Sub</th><th>Description</th><th>Progress %</th><th>Status</th><th></th></tr></thead>
@@ -1325,7 +1316,6 @@
           </details>
           <details class="gtd-sprint-details" id="gtd-sprint4-details">
             <summary style="cursor:pointer;font-weight:600;margin-bottom:6px" id="gtd-sprint4-summary">Спринт 4 (${getSprintDates(4)}) ▼</summary>
-            <p style="margin:0 0 8px"><button type="button" class="gtd-login-btn" id="gtd-sprint4-add-life" style="padding:6px 12px;font-size:0.8rem">+ life</button> <button type="button" class="gtd-login-btn" id="gtd-sprint4-add-date" style="padding:6px 12px;font-size:0.8rem">+ date</button> <button type="button" class="gtd-login-btn" id="gtd-sprint4-add-task" style="padding:6px 12px;font-size:0.8rem">+ задача</button> <button type="button" class="gtd-login-btn" id="gtd-sprint4-submit-btn" style="padding:6px 12px;font-size:0.8rem">Сдать отчёт</button></p>
             <div class="gtd-table-wrap">
               <table class="gtd-table gtd-sprint4-table">
                 <thead><tr><th>type</th><th>Name</th><th>A/P</th><th>Sub</th><th>Description</th><th>Progress %</th><th>Status</th><th></th></tr></thead>
@@ -2187,15 +2177,15 @@
       const goalsStat = goalsDone + '/' + allGoals.length;
 
       if (aq === 1) {
-        const CURRENT_SPRINT = 7;
-        const sprintEndDate = new Date('2026-04-15');
+        const CURRENT_SPRINT = 6;
+        const sprintEndDate = new Date('2026-03-31');
         const daysLeft = Math.max(0, Math.ceil((sprintEndDate - today) / 86400000));
-        const s = computeSprintTasksTotals(gtd1QState ? gtd1QState.sprint7Tasks : []);
+        const s = computeSprintTasksTotals(gtd1QState ? gtd1QState.sprint6Tasks : []);
         const q = computeQuarterTotals();
         bar.innerHTML = barHtml('Спринт ' + CURRENT_SPRINT, getSprintDates(CURRENT_SPRINT), s, q.avgProg, '1Q', goalsStat, daysLeft);
       } else if (aq === 2) {
-        const q2SprintEnds = {8:'2026-04-30',9:'2026-05-15',10:'2026-05-31',11:'2026-06-15',12:'2026-06-30'};
-        let curSprint = 8;
+        const q2SprintEnds = {7:'2026-04-15',8:'2026-04-30',9:'2026-05-15',10:'2026-05-31',11:'2026-06-15',12:'2026-06-30'};
+        let curSprint = 7;
         for (const [n, end] of Object.entries(q2SprintEnds)) {
           if (today <= new Date(end)) { curSprint = parseInt(n); break; }
           curSprint = parseInt(n);
@@ -2212,7 +2202,7 @@
 
     function computeQ2Totals() {
       if (!gtd2QState) return { taskCount: 0, avgProg: 0 };
-      const keys = ['sprint8Tasks','sprint9Tasks','sprint10Tasks','sprint11Tasks','sprint12Tasks'];
+      const keys = ['sprint7Tasks','sprint8Tasks','sprint9Tasks','sprint10Tasks','sprint11Tasks','sprint12Tasks'];
       let cnt = 0, sum = 0;
       keys.forEach(k => { (gtd2QState[k]||[]).forEach(t => { const n=parseFloat(String(t.progress||'').replace(/%/g,'')); sum+=isNaN(n)?0:n; cnt++; }); });
       return { taskCount: cnt, avgProg: cnt>0?Math.round(sum/cnt):0 };
@@ -2289,14 +2279,14 @@
         return `<div class="gtd-q2-goal-row"><input type="checkbox" data-gtype="project" data-gkey="${escapeHtml(key)}" ${checked}><div><span style="font-weight:500;font-size:0.85rem">${escapeHtml(name)}</span><span style="font-size:0.72rem;color:var(--text-muted);margin-left:6px">${escapeHtml(g.proj+(g.proj1?'/'+ g.proj1:''))}</span><span style="display:inline-block;margin-left:5px;padding:1px 5px;border-radius:8px;font-size:0.62rem;font-weight:600;${prioStyle}">${g.prio}</span><div style="font-size:0.72rem;color:var(--text-muted)">${escapeHtml(g.desc)}</div></div></div>`;
       }).join('');
 
-      const sprintsHtml = [8,9,10,11,12].map((n,i) => buildQ2SprintSection(n,(gtd2QState[`sprint${n}Tasks`]||[]),i>0)).join('');
+      const sprintsHtml = [7,8,9,10,11,12].map((n,i) => buildQ2SprintSection(n,(gtd2QState[`sprint${n}Tasks`]||[]),i>0)).join('');
 
       container.innerHTML = `
         <div style="margin-bottom:24px">
           <h2 style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
             Goals 2Q2026
             <span id="gtd-q2-count" style="font-size:0.78rem;font-weight:400;color:var(--text-muted)">${selectedCount} выбрано</span>
-            <button type="button" class="gtd-login-btn" id="gtd-q2-generate-btn" style="font-size:0.8rem;padding:5px 12px">Сгенерировать Спринт 8 из выбранных</button>
+            <button type="button" class="gtd-login-btn" id="gtd-q2-generate-btn" style="font-size:0.8rem;padding:5px 12px">Сгенерировать Спринт 7 из выбранных</button>
           </h2>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
             <div>
@@ -2328,8 +2318,8 @@
         defaultGoalsByArea.filter(g=>gtd2QState.areaKeys.has(goalKeyArea(g))).forEach(g=>{const k=goalKeyArea(g);list.push({type:'area',name:goalName(k,'area'),ap:g.area,sub:g.area1||'',desc:g.desc||'',progress:0,status:''});});
         defaultGoalsByProject.filter(g=>gtd2QState.projectKeys.has(goalKeyProject(g))).forEach(g=>{const k=goalKeyProject(g);list.push({type:'project',name:goalName(k,'project'),ap:g.proj,sub:g.proj1||'',desc:g.desc||'',progress:0,status:''});});
         if (!list.length) { alert('Выбери хотя бы одну цель для 2Q'); return; }
-        if ((gtd2QState.sprint8Tasks||[]).length && !confirm('Спринт 8 уже имеет задачи. Перезаписать?')) return;
-        gtd2QState.sprint8Tasks = list;
+        if ((gtd2QState.sprint7Tasks||[]).length && !confirm('Спринт 7 уже имеет задачи. Перезаписать?')) return;
+        gtd2QState.sprint7Tasks = list;
         saveGtd2QState(gtd2QState);
         buildQ2Panel();
         updateGtdSummary();
