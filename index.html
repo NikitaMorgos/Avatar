@@ -399,10 +399,14 @@
     .health-chronic-label { color: var(--text-muted); flex-shrink: 0; min-width: 110px; }
     .gtd-login-form input { width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 6px; margin-bottom: 12px; font-size: 0.9375rem; box-sizing: border-box; }
     .gtd-login-form input:focus { outline: none; border-color: var(--accent); }
-    .gtd-tabs { display: flex; gap: 4px; margin-bottom: 20px; border-bottom: 1px solid var(--border); }
+    .gtd-tabs { display: flex; gap: 4px; margin-bottom: 20px; border-bottom: 1px solid var(--border); align-items: center; }
     .gtd-tab { padding: 10px 16px; font-size: 0.9375rem; background: none; border: none; border-bottom: 2px solid transparent; cursor: pointer; color: var(--text-muted); }
     .gtd-tab:hover { color: var(--text); }
     .gtd-tab.active { color: var(--accent); font-weight: 500; border-bottom-color: var(--accent); }
+    .gtd-q1-badge { display:inline-block; margin-left:5px; padding:1px 6px; border-radius:10px; font-size:0.65rem; font-weight:600; background:rgba(35,131,226,0.12); color:#2383e2; vertical-align:middle; }
+    .gtd-q1-badge.gtd-prog-green { background:#dcfce7; color:#15803d; }
+    .gtd-q1-badge.gtd-prog-yellow { background:#fef9c3; color:#a16207; }
+    .gtd-q1-badge.gtd-prog-red { background:#fee2e2; color:#b91c1c; }
     .gtd-panel { display: none; }
     .gtd-panel.active { display: block; }
 
@@ -818,13 +822,17 @@
           `;
           const pdfBtn = document.getElementById('gtd-pdf-btn');
           if (pdfBtn) pdfBtn.onclick = exportGtdToPdfActiveTab;
+          const exportJsonBtn = document.getElementById('gtd-export-json-btn');
+          if (exportJsonBtn) exportJsonBtn.onclick = exportGtdJson;
           bindGtdTabs();
           bindGtd1Q();
           bindSprintsPanel();
           bindTodoPanel();
+          bindGoalEditable();
           const metricsBtn = document.getElementById('gtd-metrics-refresh-btn');
-          if (metricsBtn) metricsBtn.onclick = () => { saveSprint4FromDom(); updateSprint4Total(); updateSprintsTbodies(); updateMetrics(); };
+          if (metricsBtn) metricsBtn.onclick = () => { saveSprint4FromDom(); updateSprint4Total(); updateSprintsTbodies(); updateMetrics(); updateGtdSummary(); };
           updateMetrics();
+          updateGtdSummary();
         }
         return;
       }
@@ -872,14 +880,14 @@
     function loadGtd1QState(sprints1Q) {
       try {
         const s = localStorage.getItem(GTD_1Q_KEY);
-        if (s) { const j = JSON.parse(s); return { areaKeys: new Set(j.areaKeys||[]), projectKeys: new Set(j.projectKeys||[]), customFormuls: j.customFormuls||{}, manualLife: (j.manualLife&&j.manualLife.length)?j.manualLife:defaultManualLife, manualDate: (j.manualDate&&j.manualDate.length)?j.manualDate:defaultManualDate, sprint4Progress: j.sprint4Progress||{}, sprint4Status: j.sprint4Status||{}, sprint4Hidden: new Set(j.sprint4Hidden||[]), sprint4Manual: j.sprint4Manual||[], sprint5Tasks: j.sprint5Tasks||[], sprint6Tasks: j.sprint6Tasks||[], sprint7Tasks: j.sprint7Tasks||[], q1Progress: j.q1Progress||{}, q1Status: j.q1Status||{} }; }
+        if (s) { const j = JSON.parse(s); return { areaKeys: new Set(j.areaKeys||[]), projectKeys: new Set(j.projectKeys||[]), customFormuls: j.customFormuls||{}, manualLife: (j.manualLife&&j.manualLife.length)?j.manualLife:defaultManualLife, manualDate: (j.manualDate&&j.manualDate.length)?j.manualDate:defaultManualDate, sprint4Progress: j.sprint4Progress||{}, sprint4Status: j.sprint4Status||{}, sprint4Hidden: new Set(j.sprint4Hidden||[]), sprint4Manual: j.sprint4Manual||[], sprint5Tasks: j.sprint5Tasks||[], sprint6Tasks: j.sprint6Tasks||[], sprint7Tasks: j.sprint7Tasks||[], q1Progress: j.q1Progress||{}, q1Status: j.q1Status||{}, goalsProgress: j.goalsProgress||{}, goalsStatus: j.goalsStatus||{} }; }
       } catch(e) {}
       const areaKeys = new Set(), projectKeys = new Set();
       if (sprints1Q) { sprints1Q.byArea.forEach(g => areaKeys.add(goalKeyArea(g))); sprints1Q.byProject.forEach(g => projectKeys.add(goalKeyProject(g))); }
-      return { areaKeys, projectKeys, customFormuls: {}, manualLife: defaultManualLife, manualDate: defaultManualDate, sprint4Progress: {}, sprint4Status: {}, sprint4Hidden: new Set(), sprint4Manual: [], sprint5Tasks: [], sprint6Tasks: [], sprint7Tasks: [], q1Progress: {}, q1Status: {} };
+      return { areaKeys, projectKeys, customFormuls: {}, manualLife: defaultManualLife, manualDate: defaultManualDate, sprint4Progress: {}, sprint4Status: {}, sprint4Hidden: new Set(), sprint4Manual: [], sprint5Tasks: [], sprint6Tasks: [], sprint7Tasks: [], q1Progress: {}, q1Status: {}, goalsProgress: {}, goalsStatus: {} };
     }
     function saveGtd1QState(st) {
-      try { localStorage.setItem(GTD_1Q_KEY, JSON.stringify({ areaKeys: [...st.areaKeys], projectKeys: [...st.projectKeys], customFormuls: st.customFormuls||{}, manualLife: st.manualLife||[], manualDate: st.manualDate||[], sprint4Progress: st.sprint4Progress||{}, sprint4Status: st.sprint4Status||{}, sprint4Hidden: [...(st.sprint4Hidden||[])], sprint4Manual: st.sprint4Manual||[], sprint5Tasks: st.sprint5Tasks||[], sprint6Tasks: st.sprint6Tasks||[], sprint7Tasks: st.sprint7Tasks||[], q1Progress: st.q1Progress||{}, q1Status: st.q1Status||{} })); } catch(e) {}
+      try { localStorage.setItem(GTD_1Q_KEY, JSON.stringify({ areaKeys: [...st.areaKeys], projectKeys: [...st.projectKeys], customFormuls: st.customFormuls||{}, manualLife: st.manualLife||[], manualDate: st.manualDate||[], sprint4Progress: st.sprint4Progress||{}, sprint4Status: st.sprint4Status||{}, sprint4Hidden: [...(st.sprint4Hidden||[])], sprint4Manual: st.sprint4Manual||[], sprint5Tasks: st.sprint5Tasks||[], sprint6Tasks: st.sprint6Tasks||[], sprint7Tasks: st.sprint7Tasks||[], q1Progress: st.q1Progress||{}, q1Status: st.q1Status||{}, goalsProgress: st.goalsProgress||{}, goalsStatus: st.goalsStatus||{} })); } catch(e) {}
     }
     const GTD_TODO_KEY = 'gtd_todo_2026';
     function loadTodoState() {
@@ -963,19 +971,27 @@
       const goalsByAreaRows = goalsByArea.map(g => {
         const key = goalKeyArea(g);
         const checked = gtd1QState.areaKeys.has(key) ? ' checked' : '';
-        const prog = g.progress != null ? g.progress : '';
-        const st = (g.status && statusLabels[g.status]) ? g.status : 'не начинал';
+        const savedProg = (gtd1QState.goalsProgress && gtd1QState.goalsProgress[key] != null) ? gtd1QState.goalsProgress[key] : (g.progress != null ? g.progress : '');
+        const savedSt = (gtd1QState.goalsStatus && gtd1QState.goalsStatus[key]) || (g.status && statusLabels[g.status] ? g.status : '');
         const name = goalName(key, 'area');
-        return `<tr><td><input type="checkbox" class="gtd-1q-cb" data-type="area" data-key="${escapeHtml(key)}"${checked}></td><td class="gtd-cell-oneline" title="${escapeHtml(name)}">${escapeHtml(name)}</td><td>${escapeHtml(g.area)}</td><td>${escapeHtml(g.area1 || '-')}</td><td title="${escapeHtml(g.desc || '')}"><span class="gtd-cell-text">${escapeHtml(g.desc || '-')}</span></td><td>${escapeHtml(g.prio || '-')}</td><td class="${progClass(prog)}">${prog !== '' ? prog + '%' : '-'}</td><td class="gtd-cell-oneline" title="${escapeHtml(st)}">${escapeHtml(st)}</td></tr>`;
+        const q1Active = gtd1QState.areaKeys.has(key);
+        const qProg = q1Active && gtd1QState.q1Progress && gtd1QState.q1Progress['area|' + key] != null ? gtd1QState.q1Progress['area|' + key] : null;
+        const q1Badge = q1Active ? `<span class="gtd-q1-badge${qProg != null ? progClass(qProg) : ''}" title="Цель в 1Q${qProg != null ? ', прогресс ' + qProg + '%' : ''}">${qProg != null ? qProg + '%' : '1Q'}</span>` : '';
+        const progDisp = savedProg !== '' ? savedProg + (String(savedProg).match(/%$/) ? '' : '%') : '0%';
+        return `<tr><td><input type="checkbox" class="gtd-1q-cb" data-type="area" data-key="${escapeHtml(key)}"${checked}></td><td class="gtd-cell-oneline" title="${escapeHtml(name)}">${escapeHtml(name)}${q1Badge}</td><td>${escapeHtml(g.area)}</td><td>${escapeHtml(g.area1 || '-')}</td><td title="${escapeHtml(g.desc || '')}"><span class="gtd-cell-text">${escapeHtml(g.desc || '-')}</span></td><td>${escapeHtml(g.prio || '-')}</td><td class="gtd-cell-editable gtd-cell-oneline${progClass(savedProg)}" contenteditable="true" data-gcol="progress" data-gkey="${escapeHtml(key)}" data-gtype="area">${escapeHtml(progDisp)}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-gcol="status" data-gkey="${escapeHtml(key)}" data-gtype="area">${escapeHtml(savedSt || 'не начинал')}</td></tr>`;
       }).join('');
       const goalsByProjectRows = goalsByProject.map(g => {
         const key = goalKeyProject(g);
         const checked = gtd1QState.projectKeys.has(key) ? ' checked' : '';
-        const prog = g.progress != null ? g.progress : '';
-        const st = (g.status && statusLabels[g.status]) ? g.status : 'не начинал';
+        const savedProg = (gtd1QState.goalsProgress && gtd1QState.goalsProgress[key] != null) ? gtd1QState.goalsProgress[key] : (g.progress != null ? g.progress : '');
+        const savedSt = (gtd1QState.goalsStatus && gtd1QState.goalsStatus[key]) || (g.status && statusLabels[g.status] ? g.status : '');
         const mvp = (g.mvp === 'Y' || g.mvp === 'y') ? 'Y' : 'N';
         const name = goalName(key, 'project');
-        return `<tr><td><input type="checkbox" class="gtd-1q-cb" data-type="project" data-key="${escapeHtml(key)}"${checked}></td><td class="gtd-cell-oneline" title="${escapeHtml(name)}">${escapeHtml(name)}</td><td>${escapeHtml(g.proj)}</td><td>${escapeHtml(g.proj1 || '-')}</td><td class="gtd-col-desc" title="${escapeHtml(g.desc || '')}"><span class="gtd-cell-text">${escapeHtml(g.desc || '-')}</span></td><td>${escapeHtml(g.prio || '-')}</td><td class="${progClass(prog)}">${prog !== '' ? prog + '%' : '-'}</td><td class="gtd-cell-oneline" title="${escapeHtml(st)}">${escapeHtml(st)}</td><td>${escapeHtml(g.area + (g.area1 ? ' / ' + g.area1 : ''))}</td><td>${mvp}</td></tr>`;
+        const q1Active = gtd1QState.projectKeys.has(key);
+        const qProg = q1Active && gtd1QState.q1Progress && gtd1QState.q1Progress['project|' + key] != null ? gtd1QState.q1Progress['project|' + key] : null;
+        const q1Badge = q1Active ? `<span class="gtd-q1-badge${qProg != null ? progClass(qProg) : ''}" title="Цель в 1Q${qProg != null ? ', прогресс ' + qProg + '%' : ''}">${qProg != null ? qProg + '%' : '1Q'}</span>` : '';
+        const progDisp = savedProg !== '' ? savedProg + (String(savedProg).match(/%$/) ? '' : '%') : '0%';
+        return `<tr><td><input type="checkbox" class="gtd-1q-cb" data-type="project" data-key="${escapeHtml(key)}"${checked}></td><td class="gtd-cell-oneline" title="${escapeHtml(name)}">${escapeHtml(name)}${q1Badge}</td><td>${escapeHtml(g.proj)}</td><td>${escapeHtml(g.proj1 || '-')}</td><td class="gtd-col-desc" title="${escapeHtml(g.desc || '')}"><span class="gtd-cell-text">${escapeHtml(g.desc || '-')}</span></td><td>${escapeHtml(g.prio || '-')}</td><td class="gtd-cell-editable gtd-cell-oneline${progClass(savedProg)}" contenteditable="true" data-gcol="progress" data-gkey="${escapeHtml(key)}" data-gtype="project">${escapeHtml(progDisp)}</td><td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-gcol="status" data-gkey="${escapeHtml(key)}" data-gtype="project">${escapeHtml(savedSt || 'не начинал')}</td><td>${escapeHtml(g.area + (g.area1 ? ' / ' + g.area1 : ''))}</td><td>${mvp}</td></tr>`;
       }).join('');
 
       let rawItems = [];
@@ -1163,12 +1179,15 @@
       const sprint7TotalRow = `<tr class="gtd-sprint4-total"><td>TOTAL</td><td colspan="4">${sprint7TaskCount} задач</td><td class="${progClass(sprint7Avg)}">${sprint7Avg}%</td><td>средн.</td><td></td></tr>`;
 
       return `
+        <div id="gtd-summary-bar" style="display:flex;align-items:center;gap:16px;padding:10px 16px;background:var(--locked-bg);border:1px solid var(--border);border-radius:8px;margin-bottom:16px;flex-wrap:wrap"></div>
+
         <div class="gtd-tabs">
           <button type="button" class="gtd-tab active" data-tab="goals">ЦЕЛИ</button>
           <button type="button" class="gtd-tab" data-tab="sprints">СПРИНТЫ</button>
           <button type="button" class="gtd-tab" data-tab="metrics">МЕТРИКИ</button>
           <button type="button" class="gtd-tab" data-tab="todo">ToDo</button>
-          <button type="button" class="gtd-login-btn gtd-pdf-btn" id="gtd-pdf-btn" style="margin-left:auto">Выгрузить в PDF</button>
+          <button type="button" class="gtd-login-btn gtd-pdf-btn" id="gtd-pdf-btn" style="margin-left:auto">PDF</button>
+          <button type="button" class="gtd-login-btn" id="gtd-export-json-btn" style="margin-left:6px;background:var(--locked-bg);color:var(--text);border:1px solid var(--border)">Экспорт JSON</button>
         </div>
 
         <div id="gtd-panel-goals" class="gtd-panel active">
@@ -1206,55 +1225,9 @@
         </div>
 
         <div id="gtd-panel-sprints" class="gtd-panel">
-          <p class="gtd-overview">Goals 1Q2026, формулировки спринта. <button type="button" class="gtd-login-btn" id="gtd-sprints-refresh-btn">Обновить</button></p>
+          <p class="gtd-overview">Goals 1Q2026, формулировки спринта. <button type="button" class="gtd-login-btn" id="gtd-sprints-refresh-btn">Синхронизировать спринты</button></p>
           <div id="gtd-export-sprints">
           <p style="margin:0 0 12px;font-size:0.75rem;color:var(--text-muted)">API Collect: <span class="gtd-sprint-api-display">—</span> <button type="button" class="gtd-login-btn" id="gtd-sprint-api-set" style="padding:2px 8px;font-size:0.7rem">Указать URL</button></p>
-          <h2>Спринт 7 (${getSprintDates(7)})</h2>
-          <p style="margin:0 0 8px"><button type="button" class="gtd-login-btn" id="gtd-sprint7-add-task" style="padding:6px 12px;font-size:0.8rem">+ задача</button> <button type="button" class="gtd-login-btn" id="gtd-sprint7-submit-btn" style="padding:6px 12px;font-size:0.8rem">Сдать отчёт</button></p>
-          <div class="gtd-table-wrap">
-            <table class="gtd-table gtd-sprint4-table">
-              <thead><tr><th>type</th><th>Name</th><th>A/P</th><th>Sub</th><th>Description</th><th>Progress %</th><th>Status</th><th></th></tr></thead>
-              <tbody id="gtd-sprint7-tbody">
-                ${sprint7Rows}${sprint7TotalRow}
-              </tbody>
-            </table>
-          </div>
-          <details class="gtd-sprint-details" id="gtd-sprint6-details">
-            <summary style="cursor:pointer;font-weight:600;margin-bottom:6px">Спринт 6 (${getSprintDates(6)}) ▼</summary>
-            <p style="margin:0 0 8px"><button type="button" class="gtd-login-btn" id="gtd-sprint6-add-task" style="padding:6px 12px;font-size:0.8rem">+ задача</button> <button type="button" class="gtd-login-btn" id="gtd-sprint6-submit-btn" style="padding:6px 12px;font-size:0.8rem">Сдать отчёт</button></p>
-            <div class="gtd-table-wrap">
-              <table class="gtd-table gtd-sprint4-table">
-                <thead><tr><th>type</th><th>Name</th><th>A/P</th><th>Sub</th><th>Description</th><th>Progress %</th><th>Status</th><th></th></tr></thead>
-                <tbody id="gtd-sprint6-tbody">
-                  ${sprint6Rows}${sprint6TotalRow}
-                </tbody>
-              </table>
-            </div>
-          </details>
-          <details class="gtd-sprint-details" id="gtd-sprint5-details">
-            <summary style="cursor:pointer;font-weight:600;margin-bottom:6px">Спринт 5 (${getSprintDates(5)}) ▼</summary>
-            <p style="margin:0 0 8px"><button type="button" class="gtd-login-btn" id="gtd-sprint5-add-task" style="padding:6px 12px;font-size:0.8rem">+ задача</button> <button type="button" class="gtd-login-btn" id="gtd-sprint5-submit-btn" style="padding:6px 12px;font-size:0.8rem">Сдать отчёт</button></p>
-            <div class="gtd-table-wrap">
-              <table class="gtd-table gtd-sprint4-table">
-                <thead><tr><th>type</th><th>Name</th><th>A/P</th><th>Sub</th><th>Description</th><th>Progress %</th><th>Status</th><th></th></tr></thead>
-                <tbody id="gtd-sprint5-tbody">
-                  ${sprint5Rows}${sprint5TotalRow}
-                </tbody>
-              </table>
-            </div>
-          </details>
-          <details class="gtd-sprint-details" id="gtd-sprint4-details">
-            <summary style="cursor:pointer;font-weight:600;margin-bottom:6px">Спринт 4 (${getSprintDates(4)}) ▼</summary>
-            <p style="margin:0 0 8px"><button type="button" class="gtd-login-btn" id="gtd-sprint4-add-life" style="padding:6px 12px;font-size:0.8rem">+ life</button> <button type="button" class="gtd-login-btn" id="gtd-sprint4-add-date" style="padding:6px 12px;font-size:0.8rem">+ date</button> <button type="button" class="gtd-login-btn" id="gtd-sprint4-add-task" style="padding:6px 12px;font-size:0.8rem">+ задача</button> <button type="button" class="gtd-login-btn" id="gtd-sprint4-submit-btn" style="padding:6px 12px;font-size:0.8rem">Сдать отчёт</button></p>
-            <div class="gtd-table-wrap">
-              <table class="gtd-table gtd-sprint4-table">
-                <thead><tr><th>type</th><th>Name</th><th>A/P</th><th>Sub</th><th>Description</th><th>Progress %</th><th>Status</th><th></th></tr></thead>
-                <tbody id="gtd-sprint4-tbody">
-                  ${sprint4AreaRows}${sprint4ProjectRows}${sprint4LifeRows}${sprint4DateRows}${sprint4ManualRows}${sprint4TotalRow}
-                </tbody>
-              </table>
-            </div>
-          </details>
           <h2>Goals 1Q2026 по AREA</h2>
           <div class="gtd-table-wrap">
             <table class="gtd-table">
@@ -1270,6 +1243,53 @@
             </table>
           </div>
           <div id="gtd-q1-total">${sprintsQ1TotalHtml}</div>
+          <h2 style="margin-top:24px">Спринты</h2>
+          <h2 id="gtd-sprint7-heading">Спринт 7 (${getSprintDates(7)})</h2>
+          <p style="margin:0 0 8px"><button type="button" class="gtd-login-btn" id="gtd-sprint7-add-task" style="padding:6px 12px;font-size:0.8rem">+ задача</button> <button type="button" class="gtd-login-btn" id="gtd-sprint7-submit-btn" style="padding:6px 12px;font-size:0.8rem">Сдать отчёт</button></p>
+          <div class="gtd-table-wrap">
+            <table class="gtd-table gtd-sprint4-table">
+              <thead><tr><th>type</th><th>Name</th><th>A/P</th><th>Sub</th><th>Description</th><th>Progress %</th><th>Status</th><th></th></tr></thead>
+              <tbody id="gtd-sprint7-tbody">
+                ${sprint7Rows}${sprint7TotalRow}
+              </tbody>
+            </table>
+          </div>
+          <details class="gtd-sprint-details" id="gtd-sprint6-details">
+            <summary style="cursor:pointer;font-weight:600;margin-bottom:6px" id="gtd-sprint6-summary">Спринт 6 (${getSprintDates(6)}) ▼</summary>
+            <p style="margin:0 0 8px"><button type="button" class="gtd-login-btn" id="gtd-sprint6-add-task" style="padding:6px 12px;font-size:0.8rem">+ задача</button> <button type="button" class="gtd-login-btn" id="gtd-sprint6-submit-btn" style="padding:6px 12px;font-size:0.8rem">Сдать отчёт</button></p>
+            <div class="gtd-table-wrap">
+              <table class="gtd-table gtd-sprint4-table">
+                <thead><tr><th>type</th><th>Name</th><th>A/P</th><th>Sub</th><th>Description</th><th>Progress %</th><th>Status</th><th></th></tr></thead>
+                <tbody id="gtd-sprint6-tbody">
+                  ${sprint6Rows}${sprint6TotalRow}
+                </tbody>
+              </table>
+            </div>
+          </details>
+          <details class="gtd-sprint-details" id="gtd-sprint5-details">
+            <summary style="cursor:pointer;font-weight:600;margin-bottom:6px" id="gtd-sprint5-summary">Спринт 5 (${getSprintDates(5)}) ▼</summary>
+            <p style="margin:0 0 8px"><button type="button" class="gtd-login-btn" id="gtd-sprint5-add-task" style="padding:6px 12px;font-size:0.8rem">+ задача</button> <button type="button" class="gtd-login-btn" id="gtd-sprint5-submit-btn" style="padding:6px 12px;font-size:0.8rem">Сдать отчёт</button></p>
+            <div class="gtd-table-wrap">
+              <table class="gtd-table gtd-sprint4-table">
+                <thead><tr><th>type</th><th>Name</th><th>A/P</th><th>Sub</th><th>Description</th><th>Progress %</th><th>Status</th><th></th></tr></thead>
+                <tbody id="gtd-sprint5-tbody">
+                  ${sprint5Rows}${sprint5TotalRow}
+                </tbody>
+              </table>
+            </div>
+          </details>
+          <details class="gtd-sprint-details" id="gtd-sprint4-details">
+            <summary style="cursor:pointer;font-weight:600;margin-bottom:6px" id="gtd-sprint4-summary">Спринт 4 (${getSprintDates(4)}) ▼</summary>
+            <p style="margin:0 0 8px"><button type="button" class="gtd-login-btn" id="gtd-sprint4-add-life" style="padding:6px 12px;font-size:0.8rem">+ life</button> <button type="button" class="gtd-login-btn" id="gtd-sprint4-add-date" style="padding:6px 12px;font-size:0.8rem">+ date</button> <button type="button" class="gtd-login-btn" id="gtd-sprint4-add-task" style="padding:6px 12px;font-size:0.8rem">+ задача</button> <button type="button" class="gtd-login-btn" id="gtd-sprint4-submit-btn" style="padding:6px 12px;font-size:0.8rem">Сдать отчёт</button></p>
+            <div class="gtd-table-wrap">
+              <table class="gtd-table gtd-sprint4-table">
+                <thead><tr><th>type</th><th>Name</th><th>A/P</th><th>Sub</th><th>Description</th><th>Progress %</th><th>Status</th><th></th></tr></thead>
+                <tbody id="gtd-sprint4-tbody">
+                  ${sprint4AreaRows}${sprint4ProjectRows}${sprint4LifeRows}${sprint4DateRows}${sprint4ManualRows}${sprint4TotalRow}
+                </tbody>
+              </table>
+            </div>
+          </details>
           </div>
         </div>
 
@@ -1330,6 +1350,8 @@
               </tbody>
             </table>
           </div>
+          <h2>Прогресс по областям 2026</h2>
+          <div id="gtd-area-progress-wrap" style="margin:16px 0"></div>
         </div>
 
         <div id="gtd-panel-todo" class="gtd-panel">
@@ -1409,6 +1431,7 @@
       updateSprintsTbodies();
       updateSprint4Table();
       updateMetrics();
+      updateGtdSummary();
     }
     function bindGtdEditableFormuls() {
       document.querySelectorAll('.gtd-cell-editable[contenteditable="true"][data-type]').forEach(cell => {
@@ -1573,6 +1596,7 @@
         totalRow.cells[1].innerHTML = n + ' задач';
         totalRow.cells[2].textContent = (n > 0 ? Math.round(sum / n) : 0) + '%';
       }
+      updateSprintHeadings();
     }
     function updateSprint6Total() {
       const tbody = document.getElementById('gtd-sprint6-tbody');
@@ -1584,6 +1608,7 @@
         totalRow.cells[1].innerHTML = n + ' задач';
         totalRow.cells[2].textContent = (n > 0 ? Math.round(sum / n) : 0) + '%';
       }
+      updateSprintHeadings();
     }
     function updateSprint7Total() {
       const tbody = document.getElementById('gtd-sprint7-tbody');
@@ -1595,6 +1620,24 @@
         totalRow.cells[1].innerHTML = n + ' задач';
         totalRow.cells[2].textContent = (n > 0 ? Math.round(sum / n) : 0) + '%';
       }
+      updateSprintHeadings();
+    }
+    function sprintHeadingText(num, tasks, avg) {
+      return `Спринт ${num} (${getSprintDates(num)}) — ${tasks} задач · <span class="${progClass(avg).trim()}" style="font-size:0.9em">${avg}%</span>`;
+    }
+    function updateSprintHeadings() {
+      const s7 = computeSprintTasksTotals(gtd1QState.sprint7Tasks || []);
+      const s6 = computeSprintTasksTotals(gtd1QState.sprint6Tasks || []);
+      const s5 = computeSprintTasksTotals(gtd1QState.sprint5Tasks || []);
+      const s4 = computeSprint4Totals();
+      const h7 = document.getElementById('gtd-sprint7-heading');
+      if (h7) h7.innerHTML = sprintHeadingText(7, s7.taskCount, s7.avgProg);
+      const sum6 = document.getElementById('gtd-sprint6-summary');
+      if (sum6) sum6.innerHTML = sprintHeadingText(6, s6.taskCount, s6.avgProg) + ' ▼';
+      const sum5 = document.getElementById('gtd-sprint5-summary');
+      if (sum5) sum5.innerHTML = sprintHeadingText(5, s5.taskCount, s5.avgProg) + ' ▼';
+      const sum4 = document.getElementById('gtd-sprint4-summary');
+      if (sum4) sum4.innerHTML = sprintHeadingText(4, s4.taskCount, s4.avgProg) + ' ▼';
     }
     function bindSprint4Editable() {
       const tbls = [document.getElementById('gtd-sprint4-tbody'), document.getElementById('gtd-sprint5-tbody'), document.getElementById('gtd-sprint6-tbody'), document.getElementById('gtd-sprint7-tbody')].filter(Boolean);
@@ -1786,6 +1829,7 @@
         totalRow.cells[1].innerHTML = taskCount + ' задач';
         totalRow.cells[2].textContent = avgProg + '%';
       }
+      updateSprintHeadings();
     }
     function saveSprint4FromDom() {
       const tbl = document.getElementById('gtd-sprint4-tbody');
@@ -1851,9 +1895,10 @@
       const area1Q = defaultGoalsByArea.filter(g => gtd1QState.areaKeys.has(goalKeyArea(g)));
       const proj1Q = defaultGoalsByProject.filter(g => gtd1QState.projectKeys.has(goalKeyProject(g)));
       const parseProg = v => { const n = parseFloat(String(v||'').replace(/%/g,'')); return isNaN(n) ? null : n; };
+      const q1p = gtd1QState.q1Progress || {};
       let sumProg = 0;
-      area1Q.forEach(g => { const src = defaultSprints1Q2026.byArea.find(a => goalKeyArea(a) === goalKeyArea(g)); const v = (src && src.progress != null ? src.progress : g.progress) || ''; const n = parseProg(v); sumProg += (n != null ? n : 0); });
-      proj1Q.forEach(g => { const src = defaultSprints1Q2026.byProject.find(a => goalKeyProject(a) === goalKeyProject(g)); const v = (src && src.progress != null ? src.progress : g.progress) || ''; const n = parseProg(v); sumProg += (n != null ? n : 0); });
+      area1Q.forEach(g => { const key = 'area|' + goalKeyArea(g); const v = q1p[key] != null ? q1p[key] : 0; sumProg += v; });
+      proj1Q.forEach(g => { const key = 'project|' + goalKeyProject(g); const v = q1p[key] != null ? q1p[key] : 0; sumProg += v; });
       const taskCount = area1Q.length + proj1Q.length;
       const avgProg = taskCount > 0 ? Math.round(sumProg / taskCount) : 0;
       return { taskCount, avgProg };
@@ -1865,6 +1910,7 @@
     }
     function renderMetricsCharts() {
       if (typeof Chart === 'undefined') return;
+      if (Chart.defaults) Chart.defaults.animation = false;
       const s4 = computeSprint4Totals();
       const s5 = computeSprintTasksTotals(gtd1QState.sprint5Tasks);
       const s6 = computeSprintTasksTotals(gtd1QState.sprint6Tasks);
@@ -1889,9 +1935,10 @@
       const avgDone2026 = Math.round(totalDone2026 / numSprints2026 * 10) / 10;
 
       const goalsArea = defaultGoalsByArea, goalsProj = defaultGoalsByProject;
+      const gpChart = (gtd1QState && gtd1QState.goalsProgress) || {};
       let gSum = 0;
-      goalsArea.forEach(g => { const n = parseFloat(String(g.progress||'').replace(/%/g,'')); gSum += isNaN(n) ? 0 : n; });
-      goalsProj.forEach(g => { const n = parseFloat(String(g.progress||'').replace(/%/g,'')); gSum += isNaN(n) ? 0 : n; });
+      goalsArea.forEach(g => { const key = goalKeyArea(g); const raw = gpChart[key] != null ? gpChart[key] : (g.progress != null ? g.progress : 0); const n = parseFloat(String(raw||'').replace(/%/g,'')); gSum += isNaN(n) ? 0 : n; });
+      goalsProj.forEach(g => { const key = goalKeyProject(g); const raw = gpChart[key] != null ? gpChart[key] : (g.progress != null ? g.progress : 0); const n = parseFloat(String(raw||'').replace(/%/g,'')); gSum += isNaN(n) ? 0 : n; });
       const gCount = goalsArea.length + goalsProj.length;
       const gAvg = gCount > 0 ? Math.round(gSum / gCount) : 0;
 
@@ -2009,6 +2056,123 @@
         });
       }
     }
+    function bindGoalEditable() {
+      document.querySelectorAll('[data-gcol]').forEach(cell => {
+        cell.onblur = function() {
+          const key = this.dataset.gkey;
+          const col = this.dataset.gcol;
+          const val = (this.textContent || '').trim();
+          if (!gtd1QState) return;
+          if (col === 'progress') {
+            gtd1QState.goalsProgress = gtd1QState.goalsProgress || {};
+            const n = parseFloat(val.replace(/%/g, ''));
+            gtd1QState.goalsProgress[key] = isNaN(n) ? 0 : n;
+            const cls = progClass(gtd1QState.goalsProgress[key]);
+            this.className = this.className.replace(/\bgtd-prog-\w+\b/g, '').trim() + (cls ? ' ' + cls.trim() : '');
+            this.textContent = (isNaN(n) ? 0 : n) + '%';
+          } else if (col === 'status') {
+            gtd1QState.goalsStatus = gtd1QState.goalsStatus || {};
+            gtd1QState.goalsStatus[key] = val;
+          }
+          saveGtd1QState(gtd1QState);
+          updateMetrics();
+          updateGtdSummary();
+        };
+      });
+    }
+
+    function updateGtdSummary() {
+      const bar = document.getElementById('gtd-summary-bar');
+      if (!bar) return;
+      const CURRENT_SPRINT = 7;
+      const sprintEndDate = new Date('2026-04-15');
+      const today = new Date();
+      today.setHours(0,0,0,0);
+      const daysLeft = Math.max(0, Math.ceil((sprintEndDate - today) / 86400000));
+      const s7 = computeSprintTasksTotals(gtd1QState ? gtd1QState.sprint7Tasks : []);
+      const q = computeQuarterTotals();
+      const gp = (gtd1QState && gtd1QState.goalsProgress) || {};
+      const allGoals = [...defaultGoalsByArea, ...defaultGoalsByProject];
+      const goalsDone = allGoals.filter(g => {
+        const key = g.area != null && g.proj == null ? goalKeyArea(g) : goalKeyProject(g);
+        const p = gp[key] != null ? parseFloat(gp[key]) : 0;
+        return p >= 100;
+      }).length;
+      const goalsTotal = allGoals.length;
+      const pctStyle = (p) => p >= 67 ? 'color:#15803d' : p >= 25 ? 'color:#a16207' : 'color:#b91c1c';
+      bar.innerHTML = `
+        <div style="display:flex;align-items:center;gap:6px">
+          <span style="font-weight:600;font-size:0.85rem">Спринт ${CURRENT_SPRINT}</span>
+          <span style="font-size:0.75rem;color:var(--text-muted)">${getSprintDates(CURRENT_SPRINT)}</span>
+        </div>
+        <div style="width:1px;height:28px;background:var(--border)"></div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:1px">
+          <span style="font-size:0.7rem;color:var(--text-muted)">задач</span>
+          <span style="font-weight:600;font-size:0.9rem">${s7.taskCount}</span>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:1px">
+          <span style="font-size:0.7rem;color:var(--text-muted)">выполнено</span>
+          <span style="font-weight:700;font-size:0.9rem;${pctStyle(s7.avgProg)}">${s7.avgProg}%</span>
+        </div>
+        <div style="width:1px;height:28px;background:var(--border)"></div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:1px">
+          <span style="font-size:0.7rem;color:var(--text-muted)">1Q итого</span>
+          <span style="font-weight:700;font-size:0.9rem;${pctStyle(q.avgProg)}">${q.avgProg}%</span>
+        </div>
+        <div style="width:1px;height:28px;background:var(--border)"></div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:1px">
+          <span style="font-size:0.7rem;color:var(--text-muted)">цели года</span>
+          <span style="font-weight:600;font-size:0.9rem">${goalsDone}/${goalsTotal}</span>
+        </div>
+        <div style="width:1px;height:28px;background:var(--border)"></div>
+        <div style="display:flex;align-items:center;gap:4px">
+          <span style="font-size:0.75rem;color:var(--text-muted)">осталось</span>
+          <span style="font-weight:700;font-size:0.9rem;${daysLeft <= 2 ? 'color:#b91c1c' : daysLeft <= 5 ? 'color:#a16207' : ''}">${daysLeft} дн.</span>
+        </div>
+      `;
+    }
+
+    function renderAreaProgress() {
+      const wrap = document.getElementById('gtd-area-progress-wrap');
+      if (!wrap) return;
+      const gp = (gtd1QState && gtd1QState.goalsProgress) || {};
+      const areas = [...new Set(defaultGoalsByArea.map(g => g.area))];
+      const rows = areas.map(area => {
+        const goals = defaultGoalsByArea.filter(g => g.area === area);
+        let sum = 0;
+        goals.forEach(g => {
+          const key = goalKeyArea(g);
+          const raw = gp[key] != null ? gp[key] : (g.progress != null ? g.progress : 0);
+          sum += parseFloat(String(raw||'').replace(/%/g,'')) || 0;
+        });
+        const avg = goals.length > 0 ? Math.round(sum / goals.length) : 0;
+        const color = avg >= 67 ? '#15803d' : avg >= 25 ? '#a16207' : '#b91c1c';
+        return `<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+          <span style="min-width:90px;font-size:0.8rem;font-weight:500">${area}</span>
+          <div style="flex:1;max-width:320px;height:10px;background:#f3f4f6;border-radius:6px;overflow:hidden">
+            <div style="width:${avg}%;height:100%;background:${color};border-radius:6px;transition:width 0.3s"></div>
+          </div>
+          <span style="min-width:38px;font-size:0.8rem;font-weight:700;color:${color};text-align:right">${avg}%</span>
+          <span style="font-size:0.7rem;color:var(--text-muted)">${goals.length} цел.</span>
+        </div>`;
+      }).join('');
+      wrap.innerHTML = `<div style="max-width:560px">${rows}</div>`;
+    }
+
+    function exportGtdJson() {
+      const data = {
+        exported_at: new Date().toISOString(),
+        gtd_1q: (() => { try { return JSON.parse(localStorage.getItem('gtd_1q_2026') || 'null'); } catch(e) { return null; } })(),
+        gtd_todo: (() => { try { return JSON.parse(localStorage.getItem('gtd_todo_2026') || 'null'); } catch(e) { return null; } })()
+      };
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'gtd_backup_' + new Date().toISOString().slice(0,10) + '.json';
+      a.click();
+      URL.revokeObjectURL(a.href);
+    }
+
     function updateMetrics() {
       const s4 = computeSprint4Totals();
       const s5 = computeSprintTasksTotals(gtd1QState.sprint5Tasks);
@@ -2059,9 +2223,10 @@
       if (el('m-avg-2026-pct')) el('m-avg-2026-pct').textContent = weightedPct2026 + '%';
 
       const goalsArea = defaultGoalsByArea, goalsProj = defaultGoalsByProject;
+      const gp = (gtd1QState && gtd1QState.goalsProgress) || {};
       let gSum = 0;
-      goalsArea.forEach(g => { const n = parseFloat(String(g.progress||'').replace(/%/g,'')); gSum += isNaN(n) ? 0 : n; });
-      goalsProj.forEach(g => { const n = parseFloat(String(g.progress||'').replace(/%/g,'')); gSum += isNaN(n) ? 0 : n; });
+      goalsArea.forEach(g => { const key = goalKeyArea(g); const raw = gp[key] != null ? gp[key] : (g.progress != null ? g.progress : 0); const n = parseFloat(String(raw||'').replace(/%/g,'')); gSum += isNaN(n) ? 0 : n; });
+      goalsProj.forEach(g => { const key = goalKeyProject(g); const raw = gp[key] != null ? gp[key] : (g.progress != null ? g.progress : 0); const n = parseFloat(String(raw||'').replace(/%/g,'')); gSum += isNaN(n) ? 0 : n; });
       const gCount = goalsArea.length + goalsProj.length;
       const gAvg = gCount > 0 ? Math.round(gSum / gCount) : 0;
       const gDone = Math.round(gCount * gAvg / 100);
@@ -2069,6 +2234,8 @@
       if (el('m-year-2026-done')) el('m-year-2026-done').textContent = gDone;
       if (el('m-year-2026-pct')) el('m-year-2026-pct').textContent = gAvg + '%';
       renderMetricsCharts();
+      renderAreaProgress();
+      updateGtdSummary();
     }
     function refreshSprints() {
       saveSprint4FromDom();
@@ -2076,6 +2243,7 @@
       bindSprint4Editable();
       updateSprintsTbodies();
       updateMetrics();
+      updateGtdSummary();
     }
     function addSprint4LifeRow() {
       gtd1QState.manualLife = gtd1QState.manualLife || [];
@@ -2117,7 +2285,8 @@
       });
       manualLife.forEach((m, i) => { const p = parseProg(m.progress); items.push({ type: 'life', name: m.name||'', ap: m.ap||'', sub: m.sub||'', description: m.desc||'', progress: p }); });
       manualDate.forEach((m, i) => { const p = parseProg(m.progress); items.push({ type: 'date', name: m.name||'', ap: m.ap||'', sub: m.sub||'', description: m.desc||'', progress: p }); });
-      return { sprint_id: 's4_2026', sprint: { id: 'Спринт 4', dates: getSprintDates(4), comment: '' }, items, insights: [] };
+      const sprintNum4 = 4, year4 = 2026;
+      return { sprint_id: `s${sprintNum4}_${year4}`, sprint: { id: `Спринт ${sprintNum4}`, dates: getSprintDates(sprintNum4), comment: '' }, items, insights: [] };
     }
     function buildSprintTasksOnlyPayload(tasks, sprintNum, sprintId) {
       const parseProg = v => { const n = parseFloat(String(v||'').replace(/%/g,'')); return isNaN(n) ? 0 : n; };
