@@ -407,6 +407,14 @@
     .gtd-q1-badge.gtd-prog-green { background:#dcfce7; color:#15803d; }
     .gtd-q1-badge.gtd-prog-yellow { background:#fef9c3; color:#a16207; }
     .gtd-q1-badge.gtd-prog-red { background:#fee2e2; color:#b91c1c; }
+    .gtd-qbtn { padding:5px 14px; border-radius:20px; border:1px solid var(--border); background:var(--locked-bg); color:var(--text-muted); cursor:pointer; font-size:0.8rem; font-weight:500; transition:all 0.15s; }
+    .gtd-qbtn:hover { border-color:#2383e2; color:#2383e2; }
+    .gtd-qbtn.active { background:#2383e2; color:#fff; border-color:#2383e2; }
+    .gtd-qbtn.done { color:var(--text); }
+    .gtd-q2-goal-row { display:flex; align-items:flex-start; gap:8px; padding:6px 8px; border-bottom:1px solid var(--border); }
+    .gtd-q2-goal-row:hover { background:var(--locked-bg); }
+    .gtd-q2-goal-row input[type=checkbox] { margin-top:3px; flex-shrink:0; }
+    .gtd-q-readonly-banner { padding:8px 14px; background:#fef9c3; border:1px solid #fde68a; border-radius:6px; font-size:0.82rem; color:#92400e; margin-bottom:16px; }
     .gtd-panel { display: none; }
     .gtd-panel.active { display: block; }
 
@@ -829,6 +837,8 @@
           bindSprintsPanel();
           bindTodoPanel();
           bindGoalEditable();
+          bindQuarterSwitcher();
+          if (activeGtdQuarter === 2) buildQ2Panel();
           const metricsBtn = document.getElementById('gtd-metrics-refresh-btn');
           if (metricsBtn) metricsBtn.onclick = () => { saveSprint4FromDom(); updateSprint4Total(); updateSprintsTbodies(); updateMetrics(); updateGtdSummary(); };
           updateMetrics();
@@ -862,19 +872,28 @@
       return ' gtd-prog-green';
     }
     const GTD_1Q_KEY = 'gtd_1q_2026';
+    const GTD_2Q_KEY = 'gtd_2q_2026';
+    const GTD_ACTIVE_Q_KEY = 'gtd_active_quarter_2026';
     const MONTHS_GEN = ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
-    function getSprintDates(sprintNum, year) {
-      year = year || 2026;
-      if (sprintNum === 5) return '1 - 14 марта';
-        if (sprintNum === 6) return '15 - 31 марта';
-        if (sprintNum === 7) return '1 - 15 апреля';
-      const monthIdx = sprintNum <= 2 ? 0 : 1;
-      const lastDay = new Date(year, monthIdx + 1, 0).getDate();
-      if (sprintNum === 1 || sprintNum === 3) return `1 - 15 ${MONTHS_GEN[monthIdx]}`;
-      if (sprintNum === 2) return `16 - ${lastDay} ${MONTHS_GEN[monthIdx]}`;
-      if (sprintNum === 4) return `15 - ${lastDay} ${MONTHS_GEN[monthIdx]}`;
-      return `16 - ${lastDay} ${MONTHS_GEN[monthIdx]}`;
-    }
+    const SPRINT_DATES_MAP = {
+      1:'1 - 15 января', 2:'16 - 31 января',
+      3:'1 - 14 февраля', 4:'15 - 28 февраля',
+      5:'1 - 14 марта', 6:'15 - 31 марта',
+      7:'1 - 15 апреля', 8:'16 - 30 апреля',
+      9:'1 - 15 мая', 10:'16 - 31 мая',
+      11:'1 - 15 июня', 12:'16 - 30 июня',
+      13:'1 - 15 июля', 14:'16 - 31 июля',
+      15:'1 - 15 августа', 16:'16 - 31 августа',
+      17:'1 - 15 сентября', 18:'16 - 30 сентября',
+      19:'1 - 15 октября', 20:'16 - 31 октября',
+      21:'1 - 15 ноября', 22:'16 - 30 ноября',
+      23:'1 - 15 декабря', 24:'16 - 31 декабря'
+    };
+    function getSprintDates(sprintNum) { return SPRINT_DATES_MAP[sprintNum] || `Спринт ${sprintNum}`; }
+    /* Quarter helpers: Q1=S4-S7, Q2=S8-S12 */
+    const QUARTER_SPRINTS = { 1:[4,5,6,7], 2:[8,9,10,11,12], 3:[13,14,15,16,17,18], 4:[19,20,21,22,23,24] };
+    function getActiveQuarter() { try { const v=localStorage.getItem(GTD_ACTIVE_Q_KEY); if(v) return parseInt(v); } catch(e){} return 2; }
+    function setActiveQuarter(q) { try { localStorage.setItem(GTD_ACTIVE_Q_KEY, String(q)); } catch(e){} activeGtdQuarter=q; }
     const defaultManualLife = [{ name: 'Пример Life', ap: 'Self', sub: 'Diary', desc: 'жизненная цель вне квартальных', progress: '', status: '' }];
     const defaultManualDate = [{ name: 'Пример Date', ap: 'Family', sub: 'General', desc: 'событие с датой', progress: '', status: '' }];
     function loadGtd1QState(sprints1Q) {
@@ -889,6 +908,16 @@
     function saveGtd1QState(st) {
       try { localStorage.setItem(GTD_1Q_KEY, JSON.stringify({ areaKeys: [...st.areaKeys], projectKeys: [...st.projectKeys], customFormuls: st.customFormuls||{}, manualLife: st.manualLife||[], manualDate: st.manualDate||[], sprint4Progress: st.sprint4Progress||{}, sprint4Status: st.sprint4Status||{}, sprint4Hidden: [...(st.sprint4Hidden||[])], sprint4Manual: st.sprint4Manual||[], sprint5Tasks: st.sprint5Tasks||[], sprint6Tasks: st.sprint6Tasks||[], sprint7Tasks: st.sprint7Tasks||[], q1Progress: st.q1Progress||{}, q1Status: st.q1Status||{}, goalsProgress: st.goalsProgress||{}, goalsStatus: st.goalsStatus||{} })); } catch(e) {}
     }
+    function loadGtd2QState() {
+      try {
+        const s = localStorage.getItem(GTD_2Q_KEY);
+        if (s) { const j = JSON.parse(s); return { areaKeys: new Set(j.areaKeys||[]), projectKeys: new Set(j.projectKeys||[]), customFormuls: j.customFormuls||{}, sprint8Tasks: j.sprint8Tasks||[], sprint9Tasks: j.sprint9Tasks||[], sprint10Tasks: j.sprint10Tasks||[], sprint11Tasks: j.sprint11Tasks||[], sprint12Tasks: j.sprint12Tasks||[], q2Progress: j.q2Progress||{}, q2Status: j.q2Status||{} }; }
+      } catch(e) {}
+      return { areaKeys: new Set(), projectKeys: new Set(), customFormuls: {}, sprint8Tasks: [], sprint9Tasks: [], sprint10Tasks: [], sprint11Tasks: [], sprint12Tasks: [], q2Progress: {}, q2Status: {} };
+    }
+    function saveGtd2QState(st) {
+      try { localStorage.setItem(GTD_2Q_KEY, JSON.stringify({ areaKeys: [...st.areaKeys], projectKeys: [...st.projectKeys], customFormuls: st.customFormuls||{}, sprint8Tasks: st.sprint8Tasks||[], sprint9Tasks: st.sprint9Tasks||[], sprint10Tasks: st.sprint10Tasks||[], sprint11Tasks: st.sprint11Tasks||[], sprint12Tasks: st.sprint12Tasks||[], q2Progress: st.q2Progress||{}, q2Status: st.q2Status||{} })); } catch(e) {}
+    }
     const GTD_TODO_KEY = 'gtd_todo_2026';
     function loadTodoState() {
       try { const s = localStorage.getItem(GTD_TODO_KEY); if (s) { const j = JSON.parse(s); return { tasks: j.tasks||[], ideas: j.ideas||[], wishlist: j.wishlist||[], watchRead: j.watchRead||[] }; } } catch(e) {}
@@ -896,6 +925,7 @@
     }
     function saveTodoState(st) { try { localStorage.setItem(GTD_TODO_KEY, JSON.stringify(st)); } catch(e) {} }
     let gtd1QState, todoState;
+    let gtd2QState, activeGtdQuarter;
     let gtdTodoContext = {};
 
     const METRICS_SPRINTS_2026_HIST = { s1: { tasks: 14, pct: 100 }, s2: { tasks: 5, pct: 100 }, s3: { tasks: 22, pct: 59 } };
@@ -915,6 +945,8 @@
 
     async function loadGtdContent() {
       if (!gtd1QState) gtd1QState = loadGtd1QState(defaultSprints1Q2026);
+      if (!gtd2QState) gtd2QState = loadGtd2QState();
+      if (!activeGtdQuarter) activeGtdQuarter = getActiveQuarter();
       const apiUrl = getCollectApiUrl();
       let projects = [], areas = [], goalsByArea = defaultGoalsByArea, goalsByProject = defaultGoalsByProject;
 
@@ -1179,6 +1211,16 @@
       const sprint7TotalRow = `<tr class="gtd-sprint4-total"><td>TOTAL</td><td colspan="4">${sprint7TaskCount} задач</td><td class="${progClass(sprint7Avg)}">${sprint7Avg}%</td><td>средн.</td><td></td></tr>`;
 
       return `
+        <div id="gtd-quarter-switcher" style="display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+          <button class="gtd-qbtn done${activeGtdQuarter===1?' active':''}" data-q="1">1Q 2026</button>
+          <button class="gtd-qbtn${activeGtdQuarter===2?' active':''}" data-q="2">2Q 2026</button>
+          <button class="gtd-qbtn${activeGtdQuarter===3?' active':''}" data-q="3">3Q 2026</button>
+          <button class="gtd-qbtn${activeGtdQuarter===4?' active':''}" data-q="4">4Q 2026</button>
+          <span id="gtd-q-label" style="margin-left:8px;font-size:0.78rem;color:var(--text-muted)">
+            ${activeGtdQuarter===1?'🔒 1Q завершён — просмотр результатов':'✏️ '+activeGtdQuarter+'Q — активный квартал'}
+          </span>
+        </div>
+
         <div id="gtd-summary-bar" style="display:flex;align-items:center;gap:16px;padding:10px 16px;background:var(--locked-bg);border:1px solid var(--border);border-radius:8px;margin-bottom:16px;flex-wrap:wrap"></div>
 
         <div class="gtd-tabs">
@@ -1225,7 +1267,10 @@
         </div>
 
         <div id="gtd-panel-sprints" class="gtd-panel">
-          <p class="gtd-overview">Goals 1Q2026, формулировки спринта. <button type="button" class="gtd-login-btn" id="gtd-sprints-refresh-btn">Синхронизировать спринты</button></p>
+          <!-- Q1 content (архив) -->
+          <div id="gtd-q1-content" style="display:${activeGtdQuarter===1?'block':'none'}">
+            <div class="gtd-q-readonly-banner">🔒 1Q 2026 завершён. Данные зафиксированы. Редактирование заблокировано.</div>
+            <p class="gtd-overview">Goals 1Q2026, формулировки спринта. <button type="button" class="gtd-login-btn" id="gtd-sprints-refresh-btn">Синхронизировать спринты</button></p>
           <div id="gtd-export-sprints">
           <p style="margin:0 0 12px;font-size:0.75rem;color:var(--text-muted)">API Collect: <span class="gtd-sprint-api-display">—</span> <button type="button" class="gtd-login-btn" id="gtd-sprint-api-set" style="padding:2px 8px;font-size:0.7rem">Указать URL</button></p>
           <h2>Goals 1Q2026 по AREA</h2>
@@ -1290,6 +1335,20 @@
               </table>
             </div>
           </details>
+          </div><!-- #gtd-export-sprints -->
+          </div><!-- #gtd-q1-content -->
+
+          <!-- Q2 content (активный квартал) -->
+          <div id="gtd-q2-content" style="display:${activeGtdQuarter===2?'block':'none'}">
+            <div id="gtd-q2-inner"><!-- заполняется через buildQ2Panel() --></div>
+          </div>
+
+          <!-- Q3/Q4 placeholder -->
+          <div id="gtd-q3-content" style="display:${activeGtdQuarter===3?'block':'none'}">
+            <p style="color:var(--text-muted);padding:24px 0">3Q 2026 — планирование начнётся после завершения 2Q.</p>
+          </div>
+          <div id="gtd-q4-content" style="display:${activeGtdQuarter===4?'block':'none'}">
+            <p style="color:var(--text-muted);padding:24px 0">4Q 2026 — планирование начнётся после завершения 3Q.</p>
           </div>
         </div>
 
@@ -2084,52 +2143,254 @@
     function updateGtdSummary() {
       const bar = document.getElementById('gtd-summary-bar');
       if (!bar) return;
-      const CURRENT_SPRINT = 7;
-      const sprintEndDate = new Date('2026-04-15');
-      const today = new Date();
-      today.setHours(0,0,0,0);
-      const daysLeft = Math.max(0, Math.ceil((sprintEndDate - today) / 86400000));
-      const s7 = computeSprintTasksTotals(gtd1QState ? gtd1QState.sprint7Tasks : []);
-      const q = computeQuarterTotals();
+      const aq = activeGtdQuarter || 1;
+      const today = new Date(); today.setHours(0,0,0,0);
+      const pctStyle = (p) => p >= 67 ? 'color:#15803d' : p >= 25 ? 'color:#a16207' : 'color:#b91c1c';
+      const sep = `<div style="width:1px;height:28px;background:var(--border)"></div>`;
+      function barHtml(sprintLabel, sprintDates, s, qPct, qLabel, goalsStat, daysLeft) {
+        return `
+          <div style="display:flex;align-items:center;gap:6px">
+            <span style="font-weight:600;font-size:0.85rem">${sprintLabel}</span>
+            <span style="font-size:0.75rem;color:var(--text-muted)">${sprintDates}</span>
+          </div>
+          ${sep}
+          <div style="display:flex;flex-direction:column;align-items:center;gap:1px">
+            <span style="font-size:0.7rem;color:var(--text-muted)">задач</span>
+            <span style="font-weight:600;font-size:0.9rem">${s.taskCount}</span>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:1px">
+            <span style="font-size:0.7rem;color:var(--text-muted)">выполнено</span>
+            <span style="font-weight:700;font-size:0.9rem;${pctStyle(s.avgProg)}">${s.avgProg}%</span>
+          </div>
+          ${sep}
+          <div style="display:flex;flex-direction:column;align-items:center;gap:1px">
+            <span style="font-size:0.7rem;color:var(--text-muted)">${qLabel} итого</span>
+            <span style="font-weight:700;font-size:0.9rem;${pctStyle(qPct)}">${qPct}%</span>
+          </div>
+          ${sep}
+          <div style="display:flex;flex-direction:column;align-items:center;gap:1px">
+            <span style="font-size:0.7rem;color:var(--text-muted)">цели года</span>
+            <span style="font-weight:600;font-size:0.9rem">${goalsStat}</span>
+          </div>
+          ${sep}
+          <div style="display:flex;align-items:center;gap:4px">
+            <span style="font-size:0.75rem;color:var(--text-muted)">осталось</span>
+            <span style="font-weight:700;font-size:0.9rem;${daysLeft<=2?'color:#b91c1c':daysLeft<=5?'color:#a16207':''}">${daysLeft} дн.</span>
+          </div>`;
+      }
       const gp = (gtd1QState && gtd1QState.goalsProgress) || {};
       const allGoals = [...defaultGoalsByArea, ...defaultGoalsByProject];
       const goalsDone = allGoals.filter(g => {
         const key = g.area != null && g.proj == null ? goalKeyArea(g) : goalKeyProject(g);
-        const p = gp[key] != null ? parseFloat(gp[key]) : 0;
-        return p >= 100;
+        return (gp[key] != null ? parseFloat(gp[key]) : 0) >= 100;
       }).length;
-      const goalsTotal = allGoals.length;
-      const pctStyle = (p) => p >= 67 ? 'color:#15803d' : p >= 25 ? 'color:#a16207' : 'color:#b91c1c';
-      bar.innerHTML = `
-        <div style="display:flex;align-items:center;gap:6px">
-          <span style="font-weight:600;font-size:0.85rem">Спринт ${CURRENT_SPRINT}</span>
-          <span style="font-size:0.75rem;color:var(--text-muted)">${getSprintDates(CURRENT_SPRINT)}</span>
+      const goalsStat = goalsDone + '/' + allGoals.length;
+
+      if (aq === 1) {
+        const CURRENT_SPRINT = 7;
+        const sprintEndDate = new Date('2026-04-15');
+        const daysLeft = Math.max(0, Math.ceil((sprintEndDate - today) / 86400000));
+        const s = computeSprintTasksTotals(gtd1QState ? gtd1QState.sprint7Tasks : []);
+        const q = computeQuarterTotals();
+        bar.innerHTML = barHtml('Спринт ' + CURRENT_SPRINT, getSprintDates(CURRENT_SPRINT), s, q.avgProg, '1Q', goalsStat, daysLeft);
+      } else if (aq === 2) {
+        const q2SprintEnds = {8:'2026-04-30',9:'2026-05-15',10:'2026-05-31',11:'2026-06-15',12:'2026-06-30'};
+        let curSprint = 8;
+        for (const [n, end] of Object.entries(q2SprintEnds)) {
+          if (today <= new Date(end)) { curSprint = parseInt(n); break; }
+          curSprint = parseInt(n);
+        }
+        const s = computeSprintTasksTotals((gtd2QState || {})[`sprint${curSprint}Tasks`] || []);
+        const q2 = computeQ2Totals();
+        const endDate = new Date(q2SprintEnds[curSprint]);
+        const daysLeft = Math.max(0, Math.ceil((endDate - today) / 86400000));
+        bar.innerHTML = barHtml('Спринт ' + curSprint, getSprintDates(curSprint), s, q2.avgProg, '2Q', goalsStat, daysLeft);
+      } else {
+        bar.innerHTML = `<span style="color:var(--text-muted);font-size:0.82rem">${aq}Q 2026 — в планировании</span>`;
+      }
+    }
+
+    function computeQ2Totals() {
+      if (!gtd2QState) return { taskCount: 0, avgProg: 0 };
+      const keys = ['sprint8Tasks','sprint9Tasks','sprint10Tasks','sprint11Tasks','sprint12Tasks'];
+      let cnt = 0, sum = 0;
+      keys.forEach(k => { (gtd2QState[k]||[]).forEach(t => { const n=parseFloat(String(t.progress||'').replace(/%/g,'')); sum+=isNaN(n)?0:n; cnt++; }); });
+      return { taskCount: cnt, avgProg: cnt>0?Math.round(sum/cnt):0 };
+    }
+
+    function buildQ2SprintSection(sprintNum, tasks, collapsed) {
+      const rows = tasks.map((m, i) => {
+        return `<tr data-rowid="q2s${sprintNum}|${i}" data-rowtype="q2s${sprintNum}">
+          <td>${escapeHtml(m.type||'life')}</td>
+          <td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-q2col="name" data-q2sprint="${sprintNum}" data-q2idx="${i}">${escapeHtml(m.name||'')}</td>
+          <td>${escapeHtml(m.ap||'')}</td>
+          <td>${escapeHtml(m.sub||'')}</td>
+          <td class="gtd-cell-editable gtd-cell-text" contenteditable="true" data-q2col="desc" data-q2sprint="${sprintNum}" data-q2idx="${i}">${escapeHtml(m.desc||'')}</td>
+          <td class="gtd-cell-editable gtd-cell-oneline${progClass(m.progress)}" contenteditable="true" data-q2col="progress" data-q2sprint="${sprintNum}" data-q2idx="${i}">${escapeHtml(fmtProg(m.progress))}</td>
+          <td class="gtd-cell-editable gtd-cell-oneline" contenteditable="true" data-q2col="status" data-q2sprint="${sprintNum}" data-q2idx="${i}">${escapeHtml(m.status||'')}</td>
+          <td>
+            <button type="button" class="gtd-login-btn gtd-q2-add-btn" data-q2sprint="${sprintNum}" data-q2idx="${i}" title="+">+</button>
+            <button type="button" class="gtd-login-btn gtd-q2-del-btn" data-q2sprint="${sprintNum}" data-q2idx="${i}" title="✕">✕</button>
+          </td>
+        </tr>`;
+      }).join('');
+      let cnt = tasks.length, s = 0;
+      tasks.forEach(t => { const n=parseFloat(String(t.progress||'').replace(/%/g,'')); s+=isNaN(n)?0:n; });
+      const avg = cnt > 0 ? Math.round(s/cnt) : 0;
+      const totalRow = `<tr class="gtd-sprint4-total"><td>TOTAL</td><td colspan="4">${cnt} задач</td><td class="${progClass(avg)}">${avg}%</td><td>средн.</td><td></td></tr>`;
+      const nextSprint = sprintNum < 12 ? sprintNum + 1 : null;
+      const nextSprintTasks = nextSprint ? ((gtd2QState||{})[`sprint${nextSprint}Tasks`]||[]) : null;
+      const copyBtn = nextSprint && cnt > 0 ? `<button type="button" class="gtd-login-btn gtd-q2-copy-btn" data-q2from="${sprintNum}" data-q2to="${nextSprint}" style="margin-left:6px;padding:5px 11px;font-size:0.8rem">→ Скопировать в Спринт ${nextSprint}</button>` : '';
+      const tableHtml = `
+        <div class="gtd-table-wrap">
+          <table class="gtd-table gtd-sprint4-table">
+            <thead><tr><th>type</th><th>Name</th><th>A/P</th><th>Sub</th><th>Description</th><th>Progress %</th><th>Status</th><th></th></tr></thead>
+            <tbody id="gtd-sprint${sprintNum}-tbody">${rows}${totalRow}</tbody>
+          </table>
         </div>
-        <div style="width:1px;height:28px;background:var(--border)"></div>
-        <div style="display:flex;flex-direction:column;align-items:center;gap:1px">
-          <span style="font-size:0.7rem;color:var(--text-muted)">задач</span>
-          <span style="font-weight:600;font-size:0.9rem">${s7.taskCount}</span>
+        <p style="margin:6px 0 16px">
+          <button type="button" class="gtd-login-btn gtd-q2-add-task-btn" data-q2sprint="${sprintNum}" style="padding:5px 11px;font-size:0.8rem">+ задача</button>
+          ${copyBtn}
+        </p>`;
+      if (!collapsed) {
+        return `<h2 id="gtd-sprint${sprintNum}-heading" style="margin-top:16px">Спринт ${sprintNum} (${getSprintDates(sprintNum)}) — ${cnt} задач · ${avg}%</h2>${tableHtml}`;
+      }
+      return `<details class="gtd-sprint-details" id="gtd-sprint${sprintNum}-details">
+        <summary style="cursor:pointer;font-weight:600;margin-bottom:6px">Спринт ${sprintNum} (${getSprintDates(sprintNum)}) — ${cnt} задач · ${avg}% ▼</summary>
+        ${tableHtml}
+      </details>`;
+    }
+
+    function buildQ2Panel() {
+      const container = document.getElementById('gtd-q2-inner');
+      if (!container) return;
+      if (!gtd2QState) gtd2QState = loadGtd2QState();
+      const area2Q = defaultGoalsByArea.filter(g => gtd2QState.areaKeys.has(goalKeyArea(g)));
+      const proj2Q = defaultGoalsByProject.filter(g => gtd2QState.projectKeys.has(goalKeyProject(g)));
+      const selectedCount = area2Q.length + proj2Q.length;
+
+      const areaGroups = {};
+      defaultGoalsByArea.forEach(g => { if (!areaGroups[g.area]) areaGroups[g.area]=[]; areaGroups[g.area].push(g); });
+      const areaPickerRows = Object.entries(areaGroups).map(([area, goals]) => {
+        const rows = goals.map(g => {
+          const key = goalKeyArea(g);
+          const checked = gtd2QState.areaKeys.has(key) ? 'checked' : '';
+          const name = goalName(key,'area');
+          const prioStyle = g.prio==='must' ? 'background:#fee2e2;color:#b91c1c' : 'background:#f0f9ff;color:#0369a1';
+          return `<div class="gtd-q2-goal-row"><input type="checkbox" data-gtype="area" data-gkey="${escapeHtml(key)}" ${checked}><div><span style="font-weight:500;font-size:0.85rem">${escapeHtml(name)}</span><span style="font-size:0.72rem;color:var(--text-muted);margin-left:6px">${escapeHtml(g.area1||'')}</span><span style="display:inline-block;margin-left:5px;padding:1px 5px;border-radius:8px;font-size:0.62rem;font-weight:600;${prioStyle}">${g.prio}</span><div style="font-size:0.72rem;color:var(--text-muted)">${escapeHtml(g.desc)}</div></div></div>`;
+        }).join('');
+        return `<div><div style="font-weight:600;font-size:0.78rem;color:var(--text-muted);padding:4px 8px;background:var(--locked-bg)">${escapeHtml(area)}</div>${rows}</div>`;
+      }).join('');
+      const projPickerRows = defaultGoalsByProject.map(g => {
+        const key = goalKeyProject(g);
+        const checked = gtd2QState.projectKeys.has(key) ? 'checked' : '';
+        const name = goalName(key,'project');
+        const prioStyle = g.prio==='must' ? 'background:#fee2e2;color:#b91c1c' : 'background:#f0f9ff;color:#0369a1';
+        return `<div class="gtd-q2-goal-row"><input type="checkbox" data-gtype="project" data-gkey="${escapeHtml(key)}" ${checked}><div><span style="font-weight:500;font-size:0.85rem">${escapeHtml(name)}</span><span style="font-size:0.72rem;color:var(--text-muted);margin-left:6px">${escapeHtml(g.proj+(g.proj1?'/'+ g.proj1:''))}</span><span style="display:inline-block;margin-left:5px;padding:1px 5px;border-radius:8px;font-size:0.62rem;font-weight:600;${prioStyle}">${g.prio}</span><div style="font-size:0.72rem;color:var(--text-muted)">${escapeHtml(g.desc)}</div></div></div>`;
+      }).join('');
+
+      const sprintsHtml = [8,9,10,11,12].map((n,i) => buildQ2SprintSection(n,(gtd2QState[`sprint${n}Tasks`]||[]),i>0)).join('');
+
+      container.innerHTML = `
+        <div style="margin-bottom:24px">
+          <h2 style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+            Goals 2Q2026
+            <span id="gtd-q2-count" style="font-size:0.78rem;font-weight:400;color:var(--text-muted)">${selectedCount} выбрано</span>
+            <button type="button" class="gtd-login-btn" id="gtd-q2-generate-btn" style="font-size:0.8rem;padding:5px 12px">Сгенерировать Спринт 8 из выбранных</button>
+          </h2>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+            <div>
+              <div style="font-weight:600;margin-bottom:6px;font-size:0.88rem">По Area <span style="font-weight:400;color:var(--text-muted)">(${area2Q.length})</span></div>
+              <div id="gtd-q2-area-picker" style="border:1px solid var(--border);border-radius:6px;overflow:hidden;max-height:380px;overflow-y:auto">${areaPickerRows}</div>
+            </div>
+            <div>
+              <div style="font-weight:600;margin-bottom:6px;font-size:0.88rem">По Project <span style="font-weight:400;color:var(--text-muted)">(${proj2Q.length})</span></div>
+              <div id="gtd-q2-project-picker" style="border:1px solid var(--border);border-radius:6px;overflow:hidden;max-height:380px;overflow-y:auto">${projPickerRows}</div>
+            </div>
+          </div>
         </div>
-        <div style="display:flex;flex-direction:column;align-items:center;gap:1px">
-          <span style="font-size:0.7rem;color:var(--text-muted)">выполнено</span>
-          <span style="font-weight:700;font-size:0.9rem;${pctStyle(s7.avgProg)}">${s7.avgProg}%</span>
-        </div>
-        <div style="width:1px;height:28px;background:var(--border)"></div>
-        <div style="display:flex;flex-direction:column;align-items:center;gap:1px">
-          <span style="font-size:0.7rem;color:var(--text-muted)">1Q итого</span>
-          <span style="font-weight:700;font-size:0.9rem;${pctStyle(q.avgProg)}">${q.avgProg}%</span>
-        </div>
-        <div style="width:1px;height:28px;background:var(--border)"></div>
-        <div style="display:flex;flex-direction:column;align-items:center;gap:1px">
-          <span style="font-size:0.7rem;color:var(--text-muted)">цели года</span>
-          <span style="font-weight:600;font-size:0.9rem">${goalsDone}/${goalsTotal}</span>
-        </div>
-        <div style="width:1px;height:28px;background:var(--border)"></div>
-        <div style="display:flex;align-items:center;gap:4px">
-          <span style="font-size:0.75rem;color:var(--text-muted)">осталось</span>
-          <span style="font-weight:700;font-size:0.9rem;${daysLeft <= 2 ? 'color:#b91c1c' : daysLeft <= 5 ? 'color:#a16207' : ''}">${daysLeft} дн.</span>
-        </div>
-      `;
+        <h2>Спринты 2Q2026</h2>
+        ${sprintsHtml}`;
+
+      container.querySelectorAll('input[type=checkbox]').forEach(cb => {
+        cb.addEventListener('change', () => {
+          const key = cb.dataset.gkey, type = cb.dataset.gtype;
+          if (type==='area') { if (cb.checked) gtd2QState.areaKeys.add(key); else gtd2QState.areaKeys.delete(key); }
+          else { if (cb.checked) gtd2QState.projectKeys.add(key); else gtd2QState.projectKeys.delete(key); }
+          saveGtd2QState(gtd2QState);
+          const a2=defaultGoalsByArea.filter(g=>gtd2QState.areaKeys.has(goalKeyArea(g))).length;
+          const p2=defaultGoalsByProject.filter(g=>gtd2QState.projectKeys.has(goalKeyProject(g))).length;
+          const c=document.getElementById('gtd-q2-count'); if(c) c.textContent=(a2+p2)+' выбрано';
+        });
+      });
+      document.getElementById('gtd-q2-generate-btn')?.addEventListener('click', () => {
+        const list=[];
+        defaultGoalsByArea.filter(g=>gtd2QState.areaKeys.has(goalKeyArea(g))).forEach(g=>{const k=goalKeyArea(g);list.push({type:'area',name:goalName(k,'area'),ap:g.area,sub:g.area1||'',desc:g.desc||'',progress:0,status:''});});
+        defaultGoalsByProject.filter(g=>gtd2QState.projectKeys.has(goalKeyProject(g))).forEach(g=>{const k=goalKeyProject(g);list.push({type:'project',name:goalName(k,'project'),ap:g.proj,sub:g.proj1||'',desc:g.desc||'',progress:0,status:''});});
+        if (!list.length) { alert('Выбери хотя бы одну цель для 2Q'); return; }
+        if ((gtd2QState.sprint8Tasks||[]).length && !confirm('Спринт 8 уже имеет задачи. Перезаписать?')) return;
+        gtd2QState.sprint8Tasks = list;
+        saveGtd2QState(gtd2QState);
+        buildQ2Panel();
+        updateGtdSummary();
+      });
+      bindQ2SprintTables();
+    }
+
+    function bindQ2SprintTables() {
+      const inner = document.getElementById('gtd-q2-inner');
+      if (!inner) return;
+      inner.querySelectorAll('[data-q2col]').forEach(el => {
+        if (el.contentEditable === 'true') {
+          el.onblur = function() {
+            const sprint=parseInt(this.dataset.q2sprint), idx=parseInt(this.dataset.q2idx), col=this.dataset.q2col;
+            const key=`sprint${sprint}Tasks`;
+            if (!(gtd2QState[key]&&gtd2QState[key][idx])) return;
+            gtd2QState[key][idx][col] = this.textContent.trim();
+            if (col==='progress') this.className = 'gtd-cell-editable gtd-cell-oneline'+progClass(this.textContent.trim());
+            saveGtd2QState(gtd2QState);
+            updateGtdSummary();
+          };
+        }
+      });
+      inner.addEventListener('click', function(e) {
+        const t = e.target;
+        if (t.classList.contains('gtd-q2-add-task-btn')) {
+          const sp=parseInt(t.dataset.q2sprint), k=`sprint${sp}Tasks`;
+          gtd2QState[k]=gtd2QState[k]||[]; gtd2QState[k].push({type:'life',name:'',ap:'',sub:'',desc:'',progress:0,status:''});
+          saveGtd2QState(gtd2QState); buildQ2Panel();
+        } else if (t.classList.contains('gtd-q2-add-btn')) {
+          const sp=parseInt(t.dataset.q2sprint), idx=parseInt(t.dataset.q2idx), k=`sprint${sp}Tasks`;
+          gtd2QState[k]=gtd2QState[k]||[]; gtd2QState[k].splice(idx+1,0,{type:'life',name:'',ap:'',sub:'',desc:'',progress:0,status:''});
+          saveGtd2QState(gtd2QState); buildQ2Panel();
+        } else if (t.classList.contains('gtd-q2-del-btn')) {
+          const sp=parseInt(t.dataset.q2sprint), idx=parseInt(t.dataset.q2idx), k=`sprint${sp}Tasks`;
+          if (gtd2QState[k]) { gtd2QState[k].splice(idx,1); saveGtd2QState(gtd2QState); buildQ2Panel(); }
+        } else if (t.classList.contains('gtd-q2-copy-btn')) {
+          const from=parseInt(t.dataset.q2from), to=parseInt(t.dataset.q2to);
+          const fk=`sprint${from}Tasks`, tk=`sprint${to}Tasks`;
+          if ((gtd2QState[tk]||[]).length && !confirm(`Спринт ${to} уже имеет задачи. Перезаписать?`)) return;
+          gtd2QState[tk]=(gtd2QState[fk]||[]).map(t=>({...t,progress:0,status:''}));
+          saveGtd2QState(gtd2QState); buildQ2Panel();
+        }
+      }, {once: true});
+    }
+
+    function bindQuarterSwitcher() {
+      const switcher = document.getElementById('gtd-quarter-switcher');
+      if (!switcher) return;
+      switcher.querySelectorAll('.gtd-qbtn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const q = parseInt(btn.dataset.q);
+          setActiveQuarter(q);
+          switcher.querySelectorAll('.gtd-qbtn').forEach(b => b.classList.toggle('active', parseInt(b.dataset.q)===q));
+          const label = document.getElementById('gtd-q-label');
+          if (label) label.textContent = q===1 ? '🔒 1Q завершён — просмотр результатов' : `✏️ ${q}Q — активный квартал`;
+          ['1','2','3','4'].forEach(n => { const el=document.getElementById(`gtd-q${n}-content`); if(el) el.style.display=String(q)===n?'block':'none'; });
+          if (q===2) buildQ2Panel();
+          updateGtdSummary();
+        });
+      });
     }
 
     function renderAreaProgress() {
