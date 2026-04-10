@@ -2325,11 +2325,13 @@
       { id: 'soe', name: 'СОЭ', unit: 'мм/ч', refMin: 0, refMax: 15, group: 'ОАК', note: '' },
       { id: 'vitd', name: 'Витамин D (25-OH)', unit: 'нг/мл', refMin: 30, refMax: 100, optMin: 40, group: 'Витамины', note: 'Оптимум 40–80 нг/мл' },
       { id: 'psa', name: 'ПСА общий', unit: 'нг/мл', refMin: 0, refMax: 4.0, group: 'Онкомаркеры', note: 'Скрининг рака простаты; с 45 лет — раз в год' },
-      { id: 'ferritin', name: 'Ферритин', unit: 'нг/мл', refMin: 21.8, refMax: 274.7, optMin: 50, group: 'Железо', note: 'Запас железа; оптимум >50 нг/мл для мужчин' },
+      { id: 'ferritin', name: 'Ферритин', unit: 'нг/мл', refMin: 30, refMax: 275, optMin: 50, optMax: 150, group: 'Железо', note: 'Депо железа; оптимум 50–150; при <30 дефицит' },
       { id: 'glucose', name: 'Глюкоза натощак', unit: 'ммоль/л', refMin: 4.1, refMax: 5.9, optMax: 5.6, group: 'Углеводный обмен', note: 'Преддиабет 6.0–6.9; диабет ≥7.0' },
       { id: 'testosterone', name: 'Тестостерон общий', unit: 'нг/мл', refMin: 1.66, refMax: 8.11, optMin: 5.0, group: 'Гормоны', note: 'Оптимум >5.0 нг/мл; снижается ~1% в год после 40' },
       { id: 'alt', name: 'АЛТ', unit: 'Е/л', refMin: 0, refMax: 41, group: 'Печень', note: 'Маркер печени; норма для мужчин <41' },
-      { id: 'creatinine', name: 'Креатинин', unit: 'мкмоль/л', refMin: 62, refMax: 115, group: 'Почки', note: 'Функция почек; норма мужчины 62–115' }
+      { id: 'creatinine', name: 'Креатинин', unit: 'мкмоль/л', refMin: 62, refMax: 115, group: 'Почки', note: 'Функция почек; норма мужчины 62–115' },
+      { id: 'tsh', name: 'ТТГ (щитовидная железа)', unit: 'мкМЕ/мл', refMin: 0.27, refMax: 4.2, optMax: 2.5, group: 'Гормоны', note: 'Оптимум 0.5–2.5; при >2.5 стоит пересдать с Т3/Т4' },
+      { id: 'vo2max', name: 'VO2max', unit: 'мл/кг/мин', refMin: 35, refMax: 99, optMin: 50, group: 'Физическая форма', note: 'Аэробная мощность; норма муж.45 лет >35; отлично >50' }
     ];
     const DEFAULT_HEALTH_MARKERS_DATA = [
       { markerId: 'vitd', date: '2025-08-01', value: 58.9 },
@@ -2418,7 +2420,20 @@
       { markerId: 'alt', date: '2016-08-23', value: 20 },
       { markerId: 'alt', date: '2019-02-14', value: 22.4 },
       { markerId: 'creatinine', date: '2016-08-23', value: 85 },
-      { markerId: 'creatinine', date: '2019-02-14', value: 101.8 }
+      { markerId: 'creatinine', date: '2019-02-14', value: 101.8 },
+      // RBC — исторические
+      { markerId: 'rbc', date: '2016-08-23', value: 5.10 },
+      { markerId: 'rbc', date: '2019-02-14', value: 5.39 },
+      { markerId: 'rbc', date: '2021-06-08', value: 5.45 },
+      { markerId: 'rbc', date: '2021-07-19', value: 5.51 },
+      { markerId: 'rbc', date: '2022-12-31', value: 5.63 },
+      { markerId: 'rbc', date: '2024-09-14', value: 5.34 },
+      { markerId: 'rbc', date: '2024-09-18', value: 5.33 },
+      // ТТГ
+      { markerId: 'tsh', date: '2022-08-30', value: 1.85 },
+      // VO2max
+      { markerId: 'vo2max', date: '2016-08-23', value: 58.1 },
+      { markerId: 'vo2max', date: '2022-08-30', value: 49.0 }
     ];
     function loadHealthData() {
       try {
@@ -2590,7 +2605,8 @@
       const today = new Date();
       const checkups = [
         { name: 'HbA1c (гликированный гемоглобин)', last: null, interval: 12, reason: 'Глюкоза была в норме в 2019, но HbA1c никогда не сдавался — скрытый преддиабет', p: 1 },
-        { name: 'ТТГ (щитовидная железа)', last: null, interval: 24, reason: 'Гипотиреоз влияет на вес, энергию, холестерин — часто скрытый', p: 1 },
+        { name: 'ТТГ (щитовидная железа)', last: '2022-08-30', interval: 24, reason: 'Последний в авг.2022 — 1.85 (норма). Следующий: авг.2024 (просрочено!)', p: 1 },
+        { name: 'VO2max (кардиореспираторный тест)', last: '2022-08-30', interval: 24, reason: 'Упал с 58.1 (2016) до 49.0 (2022) — ниже оптимума >50. Повторить для оценки динамики', p: 1 },
         { name: 'Тестостерон общий + ГСПГ', last: '2016-08-23', interval: 12, reason: 'Последний раз в 2016 — 7.85 нг/мл (отлично для 36 лет); с 45 лет падает активнее', p: 1 },
         { name: 'Инсулин натощак (HOMA-IR)', last: '2016-08-23', interval: 12, reason: 'В 2016 был 3.2 (↓ низкий); HbA1c никогда не сдавался — нужно пересдать', p: 1 },
         { name: 'Колоноскопия', last: null, interval: 60, reason: 'Скрининг рака кишечника с 45 лет — раз в 5 лет', p: 1 },
