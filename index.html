@@ -2295,10 +2295,81 @@
     const HEALTH_CATEGORIES = [
       { id: 'weight', name: 'Вес', unit: 'кг' },
       { id: 'pulse', name: 'Пульс', unit: 'уд/мин' },
+      { id: 'sleep', name: 'Сон', unit: 'ч' },
       { id: 'blood', name: 'Анализ крови', unit: '' },
       { id: 'sperm', name: 'Спермограмма', unit: '' },
       { id: 'other', name: 'Другое', unit: '' }
     ];
+    // Weight: monthly averages 2018-2023, daily changes 2024-2026 (from Ironman.xlsx)
+    const DEFAULT_WEIGHT_DATA = [
+{date:"2018-08-15",value:72.4},{date:"2018-09-15",value:71.9},{date:"2018-10-15",value:71.7},{date:"2018-11-15",value:72.1},{date:"2018-12-15",value:71.5},
+{date:"2019-01-15",value:71.8},{date:"2019-02-15",value:71.5},{date:"2019-03-15",value:70.8},{date:"2019-04-15",value:71.2},{date:"2019-05-15",value:72.3},{date:"2019-06-15",value:72.7},{date:"2019-07-15",value:74.4},{date:"2019-08-15",value:75.5},{date:"2019-09-15",value:74.9},{date:"2019-10-15",value:74.8},{date:"2019-11-15",value:74.8},{date:"2019-12-15",value:74.8},
+{date:"2020-01-15",value:76.4},{date:"2020-02-15",value:76.0},{date:"2020-03-15",value:76.0},{date:"2020-04-15",value:75.6},{date:"2020-05-15",value:74.9},{date:"2020-06-15",value:73.3},{date:"2020-07-15",value:72.3},{date:"2020-08-15",value:72.2},{date:"2020-09-15",value:72.3},{date:"2020-10-15",value:72.1},{date:"2020-11-15",value:72.1},{date:"2020-12-15",value:72.0},
+{date:"2021-01-15",value:71.8},{date:"2021-02-15",value:72.1},{date:"2021-03-15",value:72.5},{date:"2021-04-15",value:72.6},{date:"2021-05-15",value:71.7},{date:"2021-06-15",value:72.4},{date:"2021-07-15",value:73.3},{date:"2021-08-15",value:75.2},{date:"2021-09-15",value:75.0},{date:"2021-10-15",value:74.0},{date:"2021-11-15",value:73.9},{date:"2021-12-15",value:73.2},
+{date:"2022-01-15",value:73.3},{date:"2022-02-15",value:73.0},{date:"2022-03-15",value:73.6},{date:"2022-04-15",value:74.1},{date:"2022-05-15",value:74.0},{date:"2022-06-15",value:72.9},{date:"2022-07-15",value:70.8},{date:"2022-08-15",value:70.9},{date:"2022-09-15",value:71.9},{date:"2022-10-15",value:72.5},{date:"2022-11-15",value:72.2},{date:"2022-12-15",value:72.4},
+{date:"2023-01-15",value:73.9},{date:"2023-02-15",value:73.5},{date:"2023-03-15",value:73.5},{date:"2023-04-15",value:72.7},{date:"2023-05-15",value:74.1},{date:"2023-06-15",value:74.2},{date:"2023-07-15",value:74.3},{date:"2023-08-15",value:74.8},{date:"2023-09-15",value:75.1},{date:"2023-10-15",value:76.4},{date:"2023-11-15",value:75.7},{date:"2023-12-15",value:76.3},
+{date:"2024-01-01",value:76.8,notes:"Ironman"},{date:"2024-01-03",value:77.0,notes:"Ironman"},{date:"2024-01-04",value:76.9,notes:"Ironman"},
+{date:"2024-02-06",value:76.0,notes:"Ironman"},{date:"2024-02-09",value:75.4,notes:"Ironman"},{date:"2024-02-13",value:76.0,notes:"Ironman"},{date:"2024-02-14",value:75.6,notes:"Ironman"},{date:"2024-02-20",value:75.7,notes:"Ironman"},{date:"2024-02-28",value:76.3,notes:"Ironman"},{date:"2024-02-29",value:76.5,notes:"Ironman"},
+{date:"2024-03-03",value:76.1,notes:"Ironman"},{date:"2024-03-09",value:73.5,notes:"Ironman"},{date:"2024-03-13",value:74.0,notes:"Ironman"},{date:"2024-03-16",value:76.1,notes:"Ironman"},
+{date:"2024-04-15",value:76.0,notes:"Ironman"},{date:"2024-04-26",value:76.4,notes:"Ironman"},
+{date:"2024-05-01",value:76.3,notes:"Ironman"},{date:"2024-05-03",value:75.8,notes:"Ironman"},{date:"2024-05-14",value:75.6,notes:"Ironman"},{date:"2024-05-17",value:75.2,notes:"Ironman"},{date:"2024-05-18",value:75.0,notes:"Ironman"},{date:"2024-05-21",value:74.5,notes:"Ironman"},{date:"2024-05-22",value:74.0,notes:"Ironman"},{date:"2024-05-23",value:73.9,notes:"Ironman"},{date:"2024-05-25",value:74.2,notes:"Ironman"},{date:"2024-05-28",value:74.2,notes:"Ironman"},
+{date:"2024-06-02",value:74.5,notes:"Ironman"},{date:"2024-06-05",value:74.5,notes:"Ironman"},{date:"2024-06-09",value:75.0,notes:"Ironman"},{date:"2024-06-14",value:74.5,notes:"Ironman"},{date:"2024-06-15",value:74.0,notes:"Ironman"},{date:"2024-06-17",value:74.1,notes:"Ironman"},{date:"2024-06-18",value:73.9,notes:"Ironman"},{date:"2024-06-21",value:74.5,notes:"Ironman"},{date:"2024-06-25",value:73.9,notes:"Ironman"},
+{date:"2024-07-01",value:73.0,notes:"Ironman"},{date:"2024-07-04",value:74.1,notes:"Ironman"},{date:"2024-07-17",value:73.6,notes:"Ironman"},{date:"2024-07-23",value:73.5,notes:"Ironman"},{date:"2024-07-29",value:73.3,notes:"Ironman"},
+{date:"2024-08-01",value:73.5,notes:"Ironman"},{date:"2024-08-03",value:74.0,notes:"Ironman"},{date:"2024-08-04",value:73.6,notes:"Ironman"},{date:"2024-08-14",value:73.8,notes:"Ironman"},{date:"2024-08-16",value:74.1,notes:"Ironman"},{date:"2024-08-20",value:73.7,notes:"Ironman"},{date:"2024-08-21",value:73.5,notes:"Ironman"},{date:"2024-08-26",value:74.5,notes:"Ironman"},{date:"2024-08-28",value:73.9,notes:"Ironman"},
+{date:"2024-09-02",value:73.6,notes:"Ironman"},{date:"2024-09-04",value:73.3,notes:"Ironman"},{date:"2024-09-07",value:73.5,notes:"Ironman"},{date:"2024-09-16",value:73.3,notes:"Ironman"},{date:"2024-09-17",value:73.2,notes:"Ironman"},{date:"2024-09-18",value:73.1,notes:"Ironman"},
+{date:"2024-10-03",value:73.0,notes:"Ironman"},{date:"2024-10-09",value:72.9,notes:"Ironman"},{date:"2024-10-14",value:72.8,notes:"Ironman"},{date:"2024-10-18",value:72.8,notes:"Ironman"},{date:"2024-10-23",value:73.2,notes:"Ironman"},
+{date:"2024-11-01",value:73.0,notes:"Ironman"},{date:"2024-11-02",value:72.8,notes:"Ironman"},{date:"2024-11-06",value:72.5,notes:"Ironman"},{date:"2024-11-08",value:72.8,notes:"Ironman"},{date:"2024-11-09",value:73.1,notes:"Ironman"},{date:"2024-11-12",value:73.2,notes:"Ironman"},{date:"2024-11-16",value:73.3,notes:"Ironman"},{date:"2024-11-19",value:72.6,notes:"Ironman"},{date:"2024-11-21",value:72.8,notes:"Ironman"},{date:"2024-11-23",value:73.0,notes:"Ironman"},{date:"2024-11-28",value:72.8,notes:"Ironman"},
+{date:"2024-12-12",value:72.9,notes:"Ironman"},{date:"2024-12-18",value:73.0,notes:"Ironman"},
+{date:"2025-01-02",value:73.5,notes:"Ironman"},{date:"2025-01-04",value:74.0,notes:"Ironman"},{date:"2025-01-07",value:74.6,notes:"Ironman"},{date:"2025-01-08",value:75.0,notes:"Ironman"},{date:"2025-01-09",value:74.0,notes:"Ironman"},{date:"2025-01-10",value:73.7,notes:"Ironman"},{date:"2025-01-14",value:73.5,notes:"Ironman"},
+{date:"2025-02-04",value:73.2,notes:"Ironman"},{date:"2025-02-08",value:73.3,notes:"Ironman"},{date:"2025-02-13",value:73.2,notes:"Ironman"},{date:"2025-02-19",value:72.9,notes:"Ironman"},{date:"2025-02-20",value:73.2,notes:"Ironman"},
+{date:"2025-04-01",value:73.1,notes:"Ironman"},{date:"2025-04-05",value:73.0,notes:"Ironman"},{date:"2025-04-07",value:72.9,notes:"Ironman"},{date:"2025-04-10",value:73.0,notes:"Ironman"},{date:"2025-04-20",value:73.1,notes:"Ironman"},{date:"2025-04-28",value:72.9,notes:"Ironman"},
+{date:"2025-05-06",value:73.0,notes:"Ironman"},{date:"2025-05-13",value:73.2,notes:"Ironman"},{date:"2025-05-19",value:73.5,notes:"Ironman"},{date:"2025-05-25",value:73.7,notes:"Ironman"},{date:"2025-05-30",value:73.9,notes:"Ironman"},
+{date:"2025-06-01",value:73.7,notes:"Ironman"},{date:"2025-06-02",value:74.2,notes:"Ironman"},{date:"2025-06-16",value:74.0,notes:"Ironman"},{date:"2025-06-30",value:73.9,notes:"Ironman"},
+{date:"2025-07-09",value:74.0,notes:"Ironman"},{date:"2025-07-14",value:73.5,notes:"Ironman"},{date:"2025-07-18",value:73.2,notes:"Ironman"},{date:"2025-07-22",value:73.7,notes:"Ironman"},
+{date:"2025-08-01",value:73.6,notes:"Ironman"},{date:"2025-08-05",value:73.2,notes:"Ironman"},{date:"2025-08-09",value:73.5,notes:"Ironman"},{date:"2025-08-21",value:73.2,notes:"Ironman"},{date:"2025-08-30",value:73.2,notes:"Ironman"},
+{date:"2025-09-01",value:73.3,notes:"Ironman"},{date:"2025-09-02",value:73.2,notes:"Ironman"},{date:"2025-09-16",value:73.1,notes:"Ironman"},{date:"2025-09-20",value:73.0,notes:"Ironman"},{date:"2025-09-22",value:73.2,notes:"Ironman"},
+{date:"2025-12-01",value:73.5,notes:"Ironman"},{date:"2025-12-15",value:74.0,notes:"Ironman"},{date:"2025-12-21",value:74.8,notes:"Ironman"},{date:"2025-12-26",value:75.2,notes:"Ironman"},
+{date:"2026-01-01",value:74.8,notes:"Ironman"},{date:"2026-01-03",value:75.2,notes:"Ironman"},{date:"2026-01-13",value:74.9,notes:"Ironman"},{date:"2026-03-01",value:74.8,notes:"Ironman"},{date:"2026-03-20",value:74.7,notes:"Ironman"},{date:"2026-04-08",value:74.6,notes:"Ironman"}
+    ];
+    // Sleep: monthly averages 2018-2023, daily changes 2024-2026 (from Ironman.xlsx)
+    const DEFAULT_SLEEP_DATA = [
+{date:"2018-10-15",value:7.39},{date:"2018-11-15",value:7.61},{date:"2018-12-15",value:7.59},
+{date:"2019-01-15",value:7.92},{date:"2019-02-15",value:7.5},{date:"2019-03-15",value:7.74},{date:"2019-04-15",value:7.73},{date:"2019-05-15",value:7.64},{date:"2019-06-15",value:7.83},{date:"2019-07-15",value:7.98},{date:"2019-08-15",value:8.34},{date:"2019-09-15",value:8.2},{date:"2019-10-15",value:7.97},{date:"2019-11-15",value:7.78},{date:"2019-12-15",value:7.83},
+{date:"2020-01-15",value:7.82},{date:"2020-02-15",value:7.93},{date:"2020-03-15",value:7.87},{date:"2020-04-15",value:7.47},{date:"2020-05-15",value:7.47},{date:"2020-06-15",value:7.14},{date:"2020-07-15",value:7.1},{date:"2020-08-15",value:7.08},{date:"2020-09-15",value:7.31},{date:"2020-10-15",value:7.56},{date:"2020-11-15",value:7.07},{date:"2020-12-15",value:6.79},
+{date:"2021-01-15",value:7.7},{date:"2021-02-15",value:7.5},{date:"2021-03-15",value:7.5},{date:"2021-04-15",value:7.87},{date:"2021-05-15",value:8.39},{date:"2021-06-15",value:7.83},{date:"2021-07-15",value:7.73},{date:"2021-08-15",value:8.12},{date:"2021-09-15",value:8.27},{date:"2021-10-15",value:7.8},{date:"2021-11-15",value:8.6},{date:"2021-12-15",value:9.5},
+{date:"2022-01-15",value:9.6},{date:"2022-02-15",value:8.44},{date:"2022-03-15",value:8.0},{date:"2022-04-15",value:8.0},{date:"2022-05-15",value:7.76},{date:"2022-06-15",value:7.17},{date:"2022-07-15",value:6.69},{date:"2022-08-15",value:7.85},{date:"2022-09-15",value:8.1},{date:"2022-10-15",value:7.1},{date:"2022-11-15",value:7.62},{date:"2022-12-15",value:8.24},
+{date:"2023-01-15",value:8.52},{date:"2023-02-15",value:8.68},{date:"2023-03-15",value:8.29},{date:"2023-04-15",value:7.78},{date:"2023-05-15",value:8.4},{date:"2023-06-15",value:7.68},{date:"2023-07-15",value:8.5},{date:"2023-08-15",value:8.16},{date:"2023-09-15",value:8.5},{date:"2023-10-15",value:8.15},{date:"2023-11-15",value:7.7},{date:"2023-12-15",value:8.18},
+{date:"2024-02-15",value:8.5,notes:"Ironman"},{date:"2024-02-20",value:9.0,notes:"Ironman"},{date:"2024-02-21",value:8.5,notes:"Ironman"},{date:"2024-02-26",value:8.0,notes:"Ironman"},{date:"2024-02-27",value:7.5,notes:"Ironman"},{date:"2024-02-28",value:8.0,notes:"Ironman"},
+{date:"2024-03-01",value:7.5,notes:"Ironman"},{date:"2024-03-02",value:6.0,notes:"Ironman"},{date:"2024-03-03",value:7.5,notes:"Ironman"},{date:"2024-03-04",value:8.0,notes:"Ironman"},{date:"2024-03-19",value:7.5,notes:"Ironman"},
+{date:"2024-04-16",value:8.0,notes:"Ironman"},{date:"2024-04-24",value:7.5,notes:"Ironman"},
+{date:"2024-05-01",value:6.0,notes:"Ironman"},{date:"2024-05-02",value:5.0,notes:"Ironman"},{date:"2024-05-03",value:7.0,notes:"Ironman"},{date:"2024-05-04",value:8.0,notes:"Ironman"},{date:"2024-05-07",value:7.5,notes:"Ironman"},{date:"2024-05-10",value:7.0,notes:"Ironman"},{date:"2024-05-14",value:7.5,notes:"Ironman"},{date:"2024-05-17",value:8.5,notes:"Ironman"},{date:"2024-05-19",value:7.5,notes:"Ironman"},{date:"2024-05-28",value:7.0,notes:"Ironman"},
+{date:"2024-06-04",value:7.5,notes:"Ironman"},{date:"2024-06-12",value:9.0,notes:"Ironman"},{date:"2024-06-14",value:7.5,notes:"Ironman"},{date:"2024-06-15",value:9.0,notes:"Ironman"},{date:"2024-06-17",value:7.5,notes:"Ironman"},{date:"2024-06-21",value:7.0,notes:"Ironman"},{date:"2024-06-24",value:9.5,notes:"Ironman"},{date:"2024-06-25",value:7.5,notes:"Ironman"},{date:"2024-06-27",value:7.0,notes:"Ironman"},{date:"2024-06-28",value:7.5,notes:"Ironman"},
+{date:"2024-07-16",value:11.0,notes:"Ironman"},{date:"2024-07-17",value:7.5,notes:"Ironman"},{date:"2024-07-22",value:9.5,notes:"Ironman"},{date:"2024-07-25",value:8.5,notes:"Ironman"},
+{date:"2024-08-01",value:8.0,notes:"Ironman"},{date:"2024-08-03",value:9.0,notes:"Ironman"},{date:"2024-08-06",value:8.5,notes:"Ironman"},{date:"2024-08-13",value:8.0,notes:"Ironman"},{date:"2024-08-14",value:9.0,notes:"Ironman"},{date:"2024-08-22",value:8.0,notes:"Ironman"},{date:"2024-08-24",value:7.5,notes:"Ironman"},{date:"2024-08-31",value:8.5,notes:"Ironman"},
+{date:"2024-09-03",value:8.0,notes:"Ironman"},{date:"2024-09-06",value:7.5,notes:"Ironman"},{date:"2024-09-07",value:8.0,notes:"Ironman"},{date:"2024-09-09",value:8.5,notes:"Ironman"},{date:"2024-09-19",value:7.5,notes:"Ironman"},{date:"2024-09-23",value:8.0,notes:"Ironman"},
+{date:"2024-10-07",value:9.0,notes:"Ironman"},{date:"2024-10-08",value:8.0,notes:"Ironman"},{date:"2024-10-21",value:9.0,notes:"Ironman"},{date:"2024-10-22",value:8.5,notes:"Ironman"},{date:"2024-10-25",value:8.0,notes:"Ironman"},{date:"2024-10-29",value:8.5,notes:"Ironman"},
+{date:"2024-11-04",value:8.0,notes:"Ironman"},{date:"2024-11-05",value:8.5,notes:"Ironman"},{date:"2024-11-11",value:9.0,notes:"Ironman"},{date:"2024-11-18",value:9.5,notes:"Ironman"},{date:"2024-11-19",value:8.0,notes:"Ironman"},{date:"2024-11-25",value:8.5,notes:"Ironman"},
+{date:"2024-12-09",value:8.0,notes:"Ironman"},{date:"2024-12-16",value:8.5,notes:"Ironman"},{date:"2024-12-28",value:9.0,notes:"Ironman"},
+{date:"2025-01-04",value:7.5,notes:"Ironman"},{date:"2025-01-12",value:8.5,notes:"Ironman"},{date:"2025-01-13",value:7.5,notes:"Ironman"},{date:"2025-01-14",value:8.0,notes:"Ironman"},{date:"2025-01-20",value:8.5,notes:"Ironman"},{date:"2025-01-31",value:6.0,notes:"Ironman"},
+{date:"2025-02-01",value:10.5,notes:"Ironman"},{date:"2025-02-02",value:5.5,notes:"Ironman"},{date:"2025-02-03",value:9.0,notes:"Ironman"},{date:"2025-02-05",value:8.0,notes:"Ironman"},{date:"2025-02-10",value:11.0,notes:"Ironman"},{date:"2025-02-11",value:6.0,notes:"Ironman"},{date:"2025-02-14",value:8.0,notes:"Ironman"},{date:"2025-02-15",value:9.0,notes:"Ironman"},{date:"2025-02-17",value:8.0,notes:"Ironman"},
+{date:"2025-03-01",value:7.5,notes:"Ironman"},{date:"2025-03-02",value:8.0,notes:"Ironman"},
+{date:"2025-04-06",value:5.5,notes:"Ironman"},{date:"2025-04-07",value:7.5,notes:"Ironman"},{date:"2025-04-08",value:8.0,notes:"Ironman"},
+{date:"2025-05-09",value:5.0,notes:"Ironman"},{date:"2025-05-10",value:11.0,notes:"Ironman"},{date:"2025-05-11",value:9.0,notes:"Ironman"},{date:"2025-05-12",value:8.0,notes:"Ironman"},
+{date:"2025-06-02",value:7.0,notes:"Ironman"},{date:"2025-06-03",value:8.0,notes:"Ironman"},{date:"2025-06-08",value:8.5,notes:"Ironman"},
+{date:"2025-07-05",value:6.5,notes:"Ironman"},{date:"2025-07-06",value:5.5,notes:"Ironman"},{date:"2025-07-07",value:6.5,notes:"Ironman"},{date:"2025-07-08",value:8.0,notes:"Ironman"},{date:"2025-07-09",value:8.5,notes:"Ironman"},{date:"2025-07-19",value:5.5,notes:"Ironman"},{date:"2025-07-22",value:8.5,notes:"Ironman"},
+{date:"2025-08-01",value:7.5,notes:"Ironman"},{date:"2025-08-04",value:8.5,notes:"Ironman"},{date:"2025-08-05",value:7.5,notes:"Ironman"},{date:"2025-08-15",value:8.5,notes:"Ironman"},{date:"2025-08-30",value:7.5,notes:"Ironman"},
+{date:"2025-09-01",value:8.0,notes:"Ironman"},{date:"2025-09-05",value:7.5,notes:"Ironman"},{date:"2025-09-10",value:8.0,notes:"Ironman"},{date:"2025-09-12",value:8.0,notes:"Ironman"},{date:"2025-09-14",value:8.0,notes:"Ironman"},{date:"2025-09-16",value:8.0,notes:"Ironman"},{date:"2025-09-19",value:6.5,notes:"Ironman"},{date:"2025-09-22",value:8.0,notes:"Ironman"},
+{date:"2025-10-22",value:8.5,notes:"Ironman"},{date:"2025-11-01",value:7.5,notes:"Ironman"},{date:"2025-11-17",value:8.5,notes:"Ironman"},
+{date:"2026-01-01",value:7.5,notes:"Ironman"},{date:"2026-01-03",value:8.5,notes:"Ironman"},{date:"2026-01-13",value:8.0,notes:"Ironman"},{date:"2026-01-17",value:7.5,notes:"Ironman"},{date:"2026-01-21",value:8.5,notes:"Ironman"},{date:"2026-01-27",value:8.0,notes:"Ironman"},
+{date:"2026-02-02",value:6.5,notes:"Ironman"},{date:"2026-02-20",value:7.5,notes:"Ironman"},
+{date:"2026-03-01",value:6.5,notes:"Ironman"},{date:"2026-03-03",value:7.5,notes:"Ironman"},{date:"2026-04-08",value:8.0,notes:"Ironman"}
+    ];
+    // Lifestyle stats from Ironman.xlsx daily log
+    const HEALTH_LIFESTYLE_STATS = {
+      sickDays: { 2023: 11, 2024: 18, 2025: 22, 2026: 5 },
+      smokeDays: { 2021: 12, 2025: 71, 2026: 2 },
+      lastSmoke: '2026-03-29'
+    };
     const DEFAULT_HEALTH_ANALYSES = [
       // ── 2015 ──
       { date: '2015-12-06', type: 'blood', description: 'ОАК расшир.: WBC 10.38 (↑); Hb 157 г/л; PLT 293; MPV 10.9 (↑); NEU 63%; LYM 28%; ретикулоциты 0.7%', notes: '201512_ОАК' },
@@ -2491,10 +2562,21 @@
             if (!defaultMarkerKeys.includes(m.markerId + '|' + m.date)) mergedMarkers.push(m);
           }
           data.markers = mergedMarkers;
+          // Merge default weight/sleep (user-added entries supplement defaults)
+          const defaultWeightKeys = new Set(DEFAULT_WEIGHT_DATA.map(w => w.date));
+          const existingWeight = data.weight || [];
+          const mergedWeight = [...DEFAULT_WEIGHT_DATA];
+          for (const w of existingWeight) { if (!defaultWeightKeys.has(w.date)) mergedWeight.push(w); }
+          data.weight = mergedWeight;
+          const defaultSleepKeys = new Set(DEFAULT_SLEEP_DATA.map(s => s.date));
+          const existingSleep = data.sleep || [];
+          const mergedSleep = [...DEFAULT_SLEEP_DATA];
+          for (const s of existingSleep) { if (!defaultSleepKeys.has(s.date)) mergedSleep.push(s); }
+          data.sleep = mergedSleep;
           return data;
         }
       } catch (e) {}
-      return { weight: [], pulse: [], analyses: DEFAULT_HEALTH_ANALYSES.slice(), markers: DEFAULT_HEALTH_MARKERS_DATA.slice() };
+      return { weight: DEFAULT_WEIGHT_DATA.slice(), pulse: [], sleep: DEFAULT_SLEEP_DATA.slice(), analyses: DEFAULT_HEALTH_ANALYSES.slice(), markers: DEFAULT_HEALTH_MARKERS_DATA.slice() };
     }
     function saveHealthData(data) {
       try { localStorage.setItem(HEALTH_DATA_KEY, JSON.stringify(data)); } catch (e) {}
@@ -2507,8 +2589,10 @@
         if (m) return `${m[3]}.${m[2]}.${m[1]}`;
         return d;
       };
-      const weightRows = (data.weight || []).slice().sort((a,b) => (b.date||'').localeCompare(a.date||'')).slice(0, 50).map(r => `<tr><td>${escapeHtml(fmtDate(r.date))}</td><td>${escapeHtml(String(r.value??''))}</td><td>${escapeHtml(r.notes||'')}</td></tr>`).join('') || '<tr><td colspan="3" class="empty">Нет данных. Добавь в разделе «Добавить».</td></tr>';
-      const pulseRows = (data.pulse || []).slice().sort((a,b) => (b.date||'').localeCompare(a.date||'')).slice(0, 50).map(r => `<tr><td>${escapeHtml(fmtDate(r.date))}</td><td>${escapeHtml(String(r.value??''))}</td><td>${escapeHtml(r.notes||'')}</td></tr>`).join('') || '<tr><td colspan="3" class="empty">Нет данных.</td></tr>';
+      const mkRows = (arr, empty) => (arr||[]).slice().sort((a,b)=>(b.date||'').localeCompare(a.date||'')).slice(0,50).map(r=>`<tr><td>${escapeHtml(fmtDate(r.date))}</td><td>${escapeHtml(String(r.value??''))}</td><td>${escapeHtml(r.notes||'')}</td></tr>`).join('')||`<tr><td colspan="3" class="empty">${empty}</td></tr>`;
+      const weightRows = mkRows(data.weight, 'Нет данных. Добавь в разделе «Добавить».');
+      const pulseRows = mkRows(data.pulse, 'Нет данных.');
+      const sleepRows = mkRows(data.sleep, 'Нет данных.');
       const analyses = (data.analyses || []).slice().sort((a,b) => (b.date||'').localeCompare(a.date||'')).slice(0, 100);
       const analysesRows = analyses.map(r => {
         const typeName = HEALTH_CATEGORIES.find(c => c.id === r.type)?.name || r.type || '—';
@@ -2523,7 +2607,7 @@
 
       const markersHtml = renderHealthMarkers(data.markers || []);
       const checkupHtml = renderHealthCheckup();
-      const dashboardHtml = renderHealthDashboard(data.markers || []);
+      const dashboardHtml = renderHealthDashboard(data);
       return `
         <div class="gtd-tabs">
           <button type="button" class="gtd-tab active" data-tab="dashboard">Сводка</button>
@@ -2540,6 +2624,13 @@
             <table class="gtd-table">
               <thead><tr><th>Дата</th><th>Значение</th><th>Примечание</th></tr></thead>
               <tbody id="health-weight-tbody">${weightRows}</tbody>
+            </table>
+          </div>
+          <h2>Сон (ч)</h2>
+          <div class="gtd-table-wrap">
+            <table class="gtd-table">
+              <thead><tr><th>Дата</th><th>Длительность</th><th>Примечание</th></tr></thead>
+              <tbody id="health-sleep-tbody">${sleepRows}</tbody>
             </table>
           </div>
           <h2>Пульс (уд/мин)</h2>
@@ -2694,10 +2785,59 @@
         return { ...c, dueDate, status };
       });
     }
-    function renderHealthDashboard(markersData) {
+    function renderHealthDashboard(data) {
+      const markersData = (data && data.markers) ? data.markers : (Array.isArray(data) ? data : []);
       const today = new Date();
       const monthName = today.toLocaleString('ru-RU', { month: 'long', year: 'numeric' });
       const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
+
+      // Weight vitals card
+      const weightArr = ((data && data.weight) || []).slice().sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+      const latestWeight = weightArr[0];
+      const prevMonthWeight = weightArr.find(w => w.date && w.date < today.toISOString().slice(0,8).replace(/\d{2}$/,'01'));
+      const weightDelta = latestWeight && prevMonthWeight ? (latestWeight.value - prevMonthWeight.value).toFixed(1) : null;
+      const weightCard = latestWeight ? (() => {
+        const d = weightDelta !== null ? (weightDelta > 0 ? `+${weightDelta}` : weightDelta) : '';
+        const dc = weightDelta !== null ? (parseFloat(weightDelta) > 1 ? '#e53e3e' : parseFloat(weightDelta) < -1 ? '#38a169' : '#d69e2e') : 'var(--text-muted)';
+        return `<div class="health-card" style="border-left-color:#4299e1">
+          <div class="health-card-name">Вес</div>
+          <div class="health-card-val" style="color:#4299e1"><strong>${latestWeight.value}</strong> <span style="font-size:0.72rem;color:var(--text-muted)">кг</span>${d ? `<span style="font-size:0.8rem;color:${dc};margin-left:6px">${d}</span>` : ''}</div>
+          <div class="health-card-date">${latestWeight.date.slice(0,7)}</div>
+        </div>`;
+      })() : '';
+
+      // Sleep vitals card
+      const sleepArr = ((data && data.sleep) || []).slice().sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+      const recentSleep = sleepArr.slice(0, 10);
+      const avgSleep = recentSleep.length ? (recentSleep.reduce((s,r)=>s+r.value,0)/recentSleep.length).toFixed(1) : null;
+      const sleepColor = avgSleep ? (avgSleep >= 7.5 ? '#38a169' : avgSleep >= 6.5 ? '#d69e2e' : '#e53e3e') : 'var(--text-muted)';
+      const sleepCard = avgSleep ? `<div class="health-card" style="border-left-color:${sleepColor}">
+        <div class="health-card-name">Сон (среднее)</div>
+        <div class="health-card-val" style="color:${sleepColor}"><strong>${avgSleep}</strong> <span style="font-size:0.72rem;color:var(--text-muted)">ч</span></div>
+        <div class="health-card-date">последние ${recentSleep.length} записей</div>
+      </div>` : '';
+
+      // Smoking status card
+      const lastSmoke = HEALTH_LIFESTYLE_STATS.lastSmoke;
+      const smokeDays2026 = HEALTH_LIFESTYLE_STATS.smokeDays[2026] || 0;
+      const smokeDays2025 = HEALTH_LIFESTYLE_STATS.smokeDays[2025] || 0;
+      const daysSinceSmoke = lastSmoke ? Math.floor((today - new Date(lastSmoke)) / (1000*60*60*24)) : null;
+      const smokeColor = daysSinceSmoke !== null ? (daysSinceSmoke > 30 ? '#38a169' : daysSinceSmoke > 7 ? '#d69e2e' : '#e53e3e') : '#38a169';
+      const smokeCard = `<div class="health-card" style="border-left-color:${smokeColor}">
+        <div class="health-card-name">Курение</div>
+        <div class="health-card-val" style="color:${smokeColor}"><strong>${daysSinceSmoke !== null ? `${daysSinceSmoke} дн.` : 'нет данных'}</strong> <span style="font-size:0.72rem;color:var(--text-muted)">без сигарет</span></div>
+        <div class="health-card-date">2025: ${smokeDays2025}д · 2026: ${smokeDays2026}д</div>
+      </div>`;
+
+      // Sick days card
+      const sick25 = HEALTH_LIFESTYLE_STATS.sickDays[2025] || 0;
+      const sick26 = HEALTH_LIFESTYLE_STATS.sickDays[2026] || 0;
+      const sickColor = sick25 > 15 ? '#e53e3e' : sick25 > 10 ? '#d69e2e' : '#38a169';
+      const sickCard = `<div class="health-card" style="border-left-color:${sickColor}">
+        <div class="health-card-name">Болезни</div>
+        <div class="health-card-val" style="color:${sickColor}"><strong>${sick26}</strong> <span style="font-size:0.72rem;color:var(--text-muted)">дн. в 2026</span></div>
+        <div class="health-card-date">2024: 18 · 2025: ${sick25} (↑ тренд)</div>
+      </div>`;
 
       // Checkup items by status
       const withDue = computeCheckupStatuses();
@@ -2764,7 +2904,11 @@
           </div>
         </div>
         <div class="health-dash-section">
-          <div class="health-dash-heading" style="margin-bottom:12px">📊 Ключевые показатели</div>
+          <div class="health-dash-heading" style="margin-bottom:12px">📈 Витальные показатели</div>
+          <div class="health-marker-cards">${weightCard}${sleepCard}${smokeCard}${sickCard}</div>
+        </div>
+        <div class="health-dash-section">
+          <div class="health-dash-heading" style="margin-bottom:12px">📊 Ключевые маркеры</div>
           <div class="health-marker-cards">${markerCards}</div>
         </div>
         <div class="health-dash-section" style="margin-top:24px">
@@ -2916,7 +3060,7 @@
         const notes = (document.getElementById('health-add-notes').value || '').trim();
         if (!date) { alert('Укажи дату'); return; }
         const data = loadHealthData();
-        if (cat === 'weight' || cat === 'pulse') {
+        if (cat === 'weight' || cat === 'pulse' || cat === 'sleep') {
           if (!data[cat]) data[cat] = [];
           data[cat].push({ date, value: value || '-', notes });
         } else {
