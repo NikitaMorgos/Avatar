@@ -380,6 +380,13 @@
     .health-lifestyle-list { display: flex; flex-direction: column; gap: 11px; }
     .health-lifestyle-item { display: flex; gap: 10px; align-items: flex-start; }
     .health-lifestyle-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: 1px; }
+    .health-rec-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(255px,1fr)); gap: 10px; margin-bottom: 24px; }
+    .health-rec-card { padding: 11px 13px; border-radius: 8px; border-left: 3px solid; }
+    .health-rec-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+    .health-rec-badge { font-size: 0.67rem; font-weight: 700; padding: 1px 7px; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.04em; }
+    .health-rec-cat { font-size: 0.71rem; color: var(--text-muted); }
+    .health-rec-title { font-size: 0.875rem; font-weight: 600; margin-bottom: 3px; }
+    .health-rec-desc { font-size: 0.78rem; color: var(--text-muted); line-height: 1.43; }
     .health-lifestyle-title { font-size: 0.875rem; font-weight: 600; margin-bottom: 1px; }
     .health-lifestyle-desc { font-size: 0.78rem; color: var(--text-muted); line-height: 1.4; }
     .health-marker-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(155px, 1fr)); gap: 10px; }
@@ -2856,6 +2863,90 @@
         return { ...c, dueDate, status };
       });
     }
+    function generateHealthRecommendations(data) {
+      const markersData = (data && data.markers) ? data.markers : [];
+      const sleepArr = ((data && data.sleep) || []).slice().sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+      const avgSleep = sleepArr.length ? sleepArr.slice(0,10).reduce((s,r)=>s+r.value,0)/Math.min(10,sleepArr.length) : null;
+      const lastSmoke = HEALTH_LIFESTYLE_STATS.lastSmoke;
+      const daysSinceSmoke = lastSmoke ? Math.floor((new Date()-new Date(lastSmoke))/(864e5)) : null;
+      const getLatest = mid => {
+        const r = markersData.filter(r=>r.markerId===mid).sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+        return r[0] ? { value: parseFloat(r[0].value), date: r[0].date } : null;
+      };
+      const monthsAgo = dateStr => (new Date()-new Date(dateStr))/(864e5*30);
+      const vitd = getLatest('vitd');
+      const homocysteine = getLatest('homocysteine');
+      const vo2max = getLatest('vo2max');
+      const recs = [];
+
+      // Витамин D
+      if (vitd && vitd.value < 30)
+        recs.push({ cat: '☀️ Добавки', prio: 'high', title: 'Вит. D3 5000 IU + K2 — срочно', desc: `Уровень ${vitd.value} нг/мл — дефицит (<30). Ежедневно с жирной едой. Пересдать через 2 мес.` });
+      else if (vitd && vitd.value < 40)
+        recs.push({ cat: '☀️ Добавки', prio: 'high', title: 'Вит. D3 4000 IU + K2', desc: `Уровень ${vitd.value} нг/мл — недостаточность. Цель 40–80. Пересдать через 2 мес.` });
+      else if (vitd && vitd.value < 60)
+        recs.push({ cat: '☀️ Добавки', prio: 'medium', title: 'Вит. D3 — поддерживать', desc: `Уровень ${vitd.value} нг/мл (норма). Держать 2000–3000 IU, летом — пауза.` });
+      else if (vitd)
+        recs.push({ cat: '☀️ Добавки', prio: 'low', title: 'Вит. D — отлично', desc: `${vitd.value} нг/мл. Можно снизить до 2000 IU. Переконтроль через 6 мес.` });
+
+      // Медь + Железо (по дате последнего анализа)
+      const copperMonths = monthsAgo('2025-07-11');
+      if (copperMonths > 6)
+        recs.push({ cat: '🔬 Анализы', prio: 'high', title: 'Пересдать: Медь + Железо', desc: `Оба ↓ в июл.2025 (Cu 9.88, Fe 9.2). Прошло ${Math.floor(copperMonths)} мес без контроля.` });
+      else
+        recs.push({ cat: '🥩 Питание', prio: 'medium', title: 'Медь + Железо — дефицит', desc: 'Cu 9.88↓, Fe 9.2↓ (июл.2025). Красное мясо, печень, кешью. Пересдать через 3 мес.' });
+
+      // Гомоцистеин / B-комплекс
+      if (homocysteine && homocysteine.value > 12)
+        recs.push({ cat: '💊 Добавки', prio: 'high', title: 'B6 + B9 + B12 — усилить', desc: `Гомоцистеин ${homocysteine.value} мкмоль/л (риск при >10). Метилфолат 800 мкг + B12 500 мкг + B6 P5P.` });
+      else if (homocysteine && homocysteine.value > 9)
+        recs.push({ cat: '💊 Добавки', prio: 'medium', title: 'B-комплекс — поддерживать', desc: `Гомоцистеин ${homocysteine.value} мкмоль/л, тренд снижения. Цель <9.` });
+      else if (homocysteine)
+        recs.push({ cat: '💊 Добавки', prio: 'low', title: 'Гомоцистеин — отлично', desc: `${homocysteine.value} мкмоль/л — ниже целевых 9. Поддерживать B-комплекс.` });
+
+      // Интерфероны (снижены авг.2025)
+      recs.push({ cat: '🛡 Добавки', prio: 'medium', title: 'Поддержка иммунитета', desc: 'Интерфероны снижены (авг.2025). Цинк 15–25 мг + Вит C 500–1000 мг. Полноценный сон ≥7.5 ч.' });
+
+      // Сон
+      if (avgSleep !== null && avgSleep < 7)
+        recs.push({ cat: '😴 Образ жизни', prio: 'high', title: 'Сон — критично', desc: `Среднее ${avgSleep.toFixed(1)} ч — ниже нормы. Снижает тестостерон, VO2max, иммунитет. Цель: 7.5–8.5 ч.` });
+      else if (avgSleep !== null && avgSleep < 7.5)
+        recs.push({ cat: '😴 Образ жизни', prio: 'medium', title: 'Сон — подтянуть', desc: `Среднее ${avgSleep.toFixed(1)} ч. Ложиться до 23:30, ограничить экраны за час.` });
+
+      // VO2max
+      if (vo2max && vo2max.value < 50)
+        recs.push({ cat: '🏃 Образ жизни', prio: 'medium', title: 'Кардио 3× в неделю', desc: `VO2max ${vo2max.value} мл/кг/мин — ниже оптимума 50. Бег / велосипед / плавание 30–45 мин.` });
+      else if (!vo2max)
+        recs.push({ cat: '🔬 Анализы', prio: 'medium', title: 'VO2max — замерить', desc: 'Последний раз авг.2022 (49.0). Кардиотест или тест Купера. Цель ≥50 мл/кг/мин.' });
+
+      // Дисбиоз (янв.2025)
+      recs.push({ cat: '🦠 Питание', prio: monthsAgo('2025-01-17') < 12 ? 'medium' : 'low', title: 'Пробиотики + пребиотики', desc: 'Дисбиоз янв.2025 (лактобактерии↓, E.coli↑). Кефир, кимчи, мультиштаммовые пробиотики ≥10 млрд КОЕ.' });
+
+      // Демодекс (дек.2024)
+      recs.push({ cat: '👁 Контроль', prio: 'medium', title: 'Уход за веками — демодекс', desc: 'Demodex Brevis 4 ос. (дек.2024). Теплые компрессы + Блефаролосьон ежедневно. Пересдать через 6 мес.' });
+
+      // Поджелудочная
+      recs.push({ cat: '🍷 Контроль', prio: 'medium', title: 'Алкоголь с осторожностью', desc: 'Амилаза 79↑ + Липаза 177↑ (окт.2024), норм. к янв.2025. Алкоголь — триггер. Не более 1-2 доз.' });
+
+      // Не курить
+      if (daysSinceSmoke !== null && daysSinceSmoke < 30)
+        recs.push({ cat: '🚭 Образ жизни', prio: 'high', title: 'Не курить!', desc: `${daysSinceSmoke} дней — критический период. Следующая цель: 30 дней.` });
+      else if (daysSinceSmoke !== null && daysSinceSmoke < 180)
+        recs.push({ cat: '🚭 Образ жизни', prio: 'medium', title: 'Без сигарет — держать', desc: `${daysSinceSmoke} дней — молодец. Следующая цель: 6 месяцев.` });
+
+      // Белок — всегда
+      recs.push({ cat: '🥗 Питание', prio: 'low', title: 'Белок ≥ 130 г/день', desc: '1.6–2 г/кг при тренировках. Мясо, рыба, яйца, творог, бобовые.' });
+
+      // ПСА — ежегодно
+      if (monthsAgo('2025-08-14') > 10)
+        recs.push({ cat: '🔬 Анализы', prio: 'medium', title: 'ПСА + онкомаркеры', desc: `Плановый скрининг раз в год. Прошло ${Math.floor(monthsAgo('2025-08-14'))} мес с авг.2025.` });
+
+      // Сортировка high → medium → low
+      const order = { high: 0, medium: 1, low: 2 };
+      recs.sort((a,b) => order[a.prio]-order[b.prio]);
+      return recs;
+    }
+
     function renderHealthDashboard(data) {
       const markersData = (data && data.markers) ? data.markers : (Array.isArray(data) ? data : []);
       const today = new Date();
@@ -2944,25 +3035,33 @@
         </div>`;
       }).join('');
 
-      // Lifestyle items (data-driven, profile-specific)
-      const lifestyle = [
-        { icon: '🏃', title: 'Кардио 3× в неделю', desc: 'VO2max 49 — ниже оптимума 50. Бег, велосипед или плавание 30–45 мин' },
-        { icon: '💊', title: 'B12 + фолат (продолжать)', desc: 'Гомоцистеин 9.62 снижается — хороший тренд. Поддерживай приём' },
-        { icon: '😴', title: 'Сон 7–8 часов', desc: 'Напрямую влияет на тестостерон, VO2max и восстановление' },
-        { icon: '💧', title: 'Гидратация 2–2.5 л/день', desc: 'В 2022 фиксировалась обезвоженность (плотность мочи 1031)' },
-        { icon: '🥗', title: 'Белок ≥130 г/день', desc: 'Общий белок в 2016 был ↓59 г/л. Мясо, рыба, яйца, бобовые' },
-        { icon: '☀️', title: 'Вит. D — контроль в августе', desc: 'Сейчас 58.9 нг/мл (норма). Проверь снова авг.2026 после лета' }
-      ];
-      const lifestyleHtml = lifestyle.map(l => `
-        <div class="health-lifestyle-item">
-          <span class="health-lifestyle-icon">${l.icon}</span>
-          <div><div class="health-lifestyle-title">${escapeHtml(l.title)}</div><div class="health-lifestyle-desc">${escapeHtml(l.desc)}</div></div>
-        </div>`).join('');
+      // Dynamic recommendations
+      const recs = generateHealthRecommendations(data);
+      const prioConf = {
+        high:   { label: 'Приоритет',     color: '#e53e3e' },
+        medium: { label: 'В этом месяце', color: '#d69e2e' },
+        low:    { label: 'Поддержание',   color: '#38a169' }
+      };
+      const recHtml = recs.map(r => {
+        const p = prioConf[r.prio];
+        return `<div class="health-rec-card" style="border-left-color:${p.color};background:${p.color}0d">
+          <div class="health-rec-header">
+            <span class="health-rec-badge" style="color:${p.color};background:${p.color}22">${p.label}</span>
+            <span class="health-rec-cat">${r.cat}</span>
+          </div>
+          <div class="health-rec-title">${escapeHtml(r.title)}</div>
+          <div class="health-rec-desc">${escapeHtml(r.desc)}</div>
+        </div>`;
+      }).join('');
 
       return `
         <h2 style="margin:0 0 4px;font-size:1.4rem;font-weight:600">${cap(monthName)} — план здоровья</h2>
-        <p class="gtd-overview" style="margin-bottom:24px">Персональный чеклист на месяц. Формируется автоматически по данным анализов.</p>
-        <div class="health-dash-grid">
+        <p class="gtd-overview" style="margin-bottom:20px">Персональный чеклист на месяц. Формируется автоматически по данным анализов.</p>
+        <div class="health-dash-section" style="margin-bottom:28px">
+          <div class="health-dash-heading">💡 Рекомендации на месяц</div>
+          <div class="health-rec-grid">${recHtml}</div>
+        </div>
+        <div class="health-dash-grid" style="margin-bottom:28px">
           <div class="health-dash-section">
             <div class="health-dash-heading">🧪 Анализы и обследования</div>
             ${urgent.length ? `<div class="health-check-group"><div class="health-check-grouplabel">Нужно сдать (${urgent.length})</div><ul class="health-checklist">${urgentHtml}</ul></div>` : ''}
@@ -2970,13 +3069,9 @@
             ${!urgent.length && !soon.length ? '<p style="color:var(--text-muted);font-size:0.875rem">Всё актуально 🎉</p>' : ''}
           </div>
           <div class="health-dash-section">
-            <div class="health-dash-heading">💡 Образ жизни</div>
-            <div class="health-lifestyle-list">${lifestyleHtml}</div>
+            <div class="health-dash-heading">📈 Витальные показатели</div>
+            <div class="health-marker-cards">${weightCard}${sleepCard}${smokeCard}${sickCard}</div>
           </div>
-        </div>
-        <div class="health-dash-section">
-          <div class="health-dash-heading" style="margin-bottom:12px">📈 Витальные показатели</div>
-          <div class="health-marker-cards">${weightCard}${sleepCard}${smokeCard}${sickCard}</div>
         </div>
         <div class="health-dash-section">
           <div class="health-dash-heading" style="margin-bottom:12px">📊 Ключевые маркеры</div>
