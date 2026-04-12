@@ -404,6 +404,32 @@
     .health-chronic-rows { display: flex; flex-direction: column; gap: 5px; }
     .health-chronic-row { font-size: 0.8125rem; display: flex; gap: 6px; }
     .health-chronic-label { color: var(--text-muted); flex-shrink: 0; min-width: 110px; }
+    .health-complaint-card { border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px; background: var(--card-bg); border-left: 4px solid; margin-bottom: 16px; }
+    .health-complaint-header { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+    .health-complaint-icon { font-size: 1.4rem; }
+    .health-complaint-title { font-weight: 700; font-size: 1rem; }
+    .health-complaint-status { font-size: 0.7rem; font-weight: 600; padding: 2px 8px; border-radius: 4px; margin-left: auto; }
+    .health-complaint-note { font-style: italic; font-size: 0.8125rem; color: var(--text-muted); margin: 4px 0 14px 0; padding-left: 2px; }
+    .health-complaint-diag-main { font-size: 0.84rem; font-weight: 600; margin-bottom: 8px; padding: 8px 10px; border-radius: 6px; background: rgba(66,153,225,0.08); border-left: 3px solid #4299e1; }
+    .health-complaint-sections { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 12px; }
+    @media (max-width: 700px) { .health-complaint-sections { grid-template-columns: 1fr; } }
+    .health-complaint-section { }
+    .health-complaint-section-title { font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); margin-bottom: 8px; }
+    .health-complaint-diff { display: flex; flex-direction: column; gap: 5px; }
+    .health-complaint-diff-item { font-size: 0.8rem; line-height: 1.4; padding: 4px 8px; border-radius: 5px; }
+    .hc-prob-high { background: rgba(229,62,62,0.07); }
+    .hc-prob-medium { background: rgba(214,158,46,0.07); }
+    .hc-prob-low { background: rgba(160,174,192,0.07); }
+    .health-complaint-list { margin: 0; padding: 0 0 0 14px; display: flex; flex-direction: column; gap: 5px; }
+    .health-complaint-list li { font-size: 0.8rem; line-height: 1.4; }
+    .health-complaint-tests { display: flex; flex-direction: column; gap: 5px; }
+    .health-complaint-test { font-size: 0.8rem; line-height: 1.4; display: flex; gap: 6px; align-items: baseline; }
+    .hct-badge { font-size: 0.65rem; font-weight: 700; padding: 1px 5px; border-radius: 3px; flex-shrink: 0; }
+    .hct-high { background: #fff5f5; color: #c53030; }
+    .hct-medium { background: #fffff0; color: #975a16; }
+    .hct-cond { background: #f0f4ff; color: #2b4acb; }
+    .health-complaint-phases { display: flex; flex-direction: column; gap: 8px; }
+    .health-complaint-phase-label { font-size: 0.72rem; font-weight: 600; color: var(--text-muted); margin-bottom: 3px; }
     .gtd-login-form input { width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 6px; margin-bottom: 12px; font-size: 0.9375rem; box-sizing: border-box; }
     .gtd-login-form input:focus { outline: none; border-color: var(--accent); }
     .gtd-tabs { display: flex; gap: 4px; margin-bottom: 20px; border-bottom: 1px solid var(--border); }
@@ -2689,6 +2715,7 @@
       return `
         <div class="gtd-tabs">
           <button type="button" class="gtd-tab active" data-tab="dashboard">Сводка</button>
+          <button type="button" class="gtd-tab" data-tab="complaints">Жалобы</button>
           <button type="button" class="gtd-tab" data-tab="markers">Маркеры</button>
           <button type="button" class="gtd-tab" data-tab="checkup">Чекап</button>
           <button type="button" class="gtd-tab" data-tab="analyses">Анализы</button>
@@ -2696,6 +2723,7 @@
           <button type="button" class="gtd-tab" data-tab="add">Добавить</button>
         </div>
         <div id="health-panel-dashboard" class="gtd-panel active">${dashboardHtml}</div>
+        <div id="health-panel-complaints" class="gtd-panel">${renderHealthComplaints()}</div>
         <div id="health-panel-metrics" class="gtd-panel">
           <h2>Вес (кг)</h2>
           <div class="gtd-table-wrap">
@@ -2849,6 +2877,82 @@
         nextStep: 'Дерматолог → валацикловир 500 мг/день (супрессия). Сдать: цинк, иммунограмма'
       }
     ];
+    const HEALTH_COMPLAINTS = [
+      {
+        id: 'headache',
+        icon: '🤕',
+        title: 'Периодическая головная боль',
+        userNote: 'Иногда параллельно с вирусной историей, иногда отдельно',
+        statusLabel: 'На контроле',
+        statusColor: '#d69e2e',
+        diagMain: 'Вероятнее всего — тензионная и/или вирус-ассоциированная (ВЭБ, HHV6 — нейротропны; интерфероны снижены → хрон. нейровоспалит. фон)',
+        differentials: [
+          { prob: 'high', name: 'Тензионная (напряжения)', desc: 'Стресс, долгая работа за компьютером, напряжение мышц шеи' },
+          { prob: 'high', name: 'Вирус-ассоциированная', desc: 'ВЭБ/HHV6 нейротропны; снижены интерфероны → хронический воспалительный фон' },
+          { prob: 'medium', name: 'Цервикогенная', desc: 'Шейный остеохондроз — боль идёт из затылка, усиливается при повороте шеи' },
+          { prob: 'medium', name: 'Мигрень', desc: 'Если односторонняя + тошнота + светобоязнь — рассмотреть' },
+          { prob: 'low', name: 'Гипертензионная', desc: 'Нужен дневник АД для исключения' },
+          { prob: 'low', name: 'Дефицит Mg', desc: 'Mg 0.99 норма, но при хроническом стрессе расходуется быстро' }
+        ],
+        tests: [
+          { prio: 'high', name: 'Дневник АД (7 дней)', desc: 'Утром и вечером — исключить гипертензионную причину' },
+          { prio: 'high', name: 'Дневник ГБ', desc: 'Частота / интенсивность / триггеры / связь с вирусом' },
+          { prio: 'medium', name: 'Магний в крови', desc: 'Пересдать — при хроническом стрессе быстро расходуется' },
+          { prio: 'cond', name: 'МРТ головного мозга', desc: 'Если >15 эпизодов/мес или нетипичная боль (громовая, в покое)' },
+          { prio: 'cond', name: 'МРТ шейного отдела', desc: 'Если боль из затылка / скованность / онемение рук' }
+        ],
+        prevention: [
+          'Магний глицинат 400 мг вечером — доказанная профилактика мигрени и тензионной ГБ',
+          'Растяжка шеи и плеч 2× в день (особенно при сидячей работе)',
+          'Режим сна 7.5–8.5 ч — уже отслеживается',
+          'Гидратация ≥2.5 л/день',
+          'Стабилизировать кофеин: не резко бросать, не злоупотреблять',
+          'Лечить вирусный фон (иммунитет, интерфероны)'
+        ],
+        treatment: [
+          { phase: 'Острый эпизод', items: ['Ибупрофен 400 мг или напроксен 500 мг (не чаще 15 дней/мес!)', 'Тёмная тихая комната, холодный компресс на лоб / тёплый на шею'] },
+          { phase: 'При мигрени', items: ['Суматриптан 50–100 мг при первых симптомах', 'Метоклопрамид 10 мг при тошноте'] },
+          { phase: 'Профилактика', items: ['Магний глицинат 400 мг/сут', 'Рибофлавин (B2) 400 мг/сут — доказан при мигрени', 'Физиотерапия / остеопатия шейного отдела'] }
+        ]
+      },
+      {
+        id: 'eye_bags',
+        icon: '👁',
+        title: 'Мешки под глазами',
+        userNote: 'Беспокоят',
+        statusLabel: 'Требует внимания',
+        statusColor: '#e53e3e',
+        diagMain: 'Вероятнее всего — комбинация: Demodex brevis (подтверждён!) + белковый дефицит (альбумин был ↓) + недосыпание',
+        differentials: [
+          { prob: 'high', name: 'Demodex brevis — подтверждён', desc: 'Обнаружен дек.2024 (4 особи). Хроническое воспаление краёв век → периорбитальные отёки' },
+          { prob: 'high', name: 'Белковый/альбуминовый дефицит', desc: 'Общий белок 64↓ (норма 65–85) в сент.2024. Гипоальбуминемия → задержка жидкости в тканях' },
+          { prob: 'medium', name: 'Недосыпание', desc: 'Замедляется лимфодренаж, периорбитальная клетчатка отекает — связь прямая' },
+          { prob: 'medium', name: 'Хрон. вирусная нагрузка', desc: 'ВЭБ, снижение интерферонов → вялотекущее воспаление' },
+          { prob: 'medium', name: 'Задержка жидкости (почечная)', desc: 'Белок мочи не проверялся. Нужно ОАМ + альбумин' },
+          { prob: 'low', name: 'Аллергия', desc: 'IgE 22.68 и ECP в норме — маловероятно; специфические IgE не проверялись' }
+        ],
+        tests: [
+          { prio: 'high', name: 'ОАМ + белок мочи', desc: 'Исключить потерю белка с мочой (нефротическая причина отёков)' },
+          { prio: 'high', name: 'Биохимия: альбумин + общий белок', desc: 'Был 64↓ в сент.2024 — ключевой анализ, повторить' },
+          { prio: 'high', name: 'Демодекс — контроль', desc: 'Пересдать через 6 мес после начала лечения (дек.2024 → к июню 2025)' },
+          { prio: 'medium', name: 'Кортизол утренний', desc: 'Хронический стресс → задержка жидкости, пастозность' },
+          { prio: 'cond', name: 'Аллергопанель (клещ, пыль)', desc: 'Если есть сезонность или усиление в определённых условиях' }
+        ],
+        prevention: [
+          'Лечить Demodex — Блефаролосьон + теплые компрессы ежедневно',
+          'Белок ≥130 г/день (альбумин был снижен — прямая связь с отёками)',
+          'Ограничить соль <5 г/день — задержка жидкости',
+          'Сон на высокой подушке — улучшает лимфодренаж',
+          'Ограничить алкоголь (провоцирует отёчность)',
+          'Холодные компрессы или лёд утром — сосудосуживающий эффект'
+        ],
+        treatment: [
+          { phase: 'Demodex (основное)', items: ['Блефаролосьон CLIN или Демодекс-Стоп 2× в день', 'Метронидазол гель 1% на веки на ночь, курс 3–4 нед', 'Тёплые компрессы 5 мин утром перед очищением'] },
+          { phase: 'Питание', items: ['Белок ≥130г/день: яйца, мясо, рыба, творог', 'Омега-3 EPA+DHA 2 г/день — противовоспалительный'] },
+          { phase: 'Уход', items: ['Крем с кофеином или ретинолом под глаза вечером', 'Лимфодренажный массаж зоны глаз — 2 мин утром (от внутр. угла наружу)', 'Контрастное умывание утром'] }
+        ]
+      }
+    ];
     function computeCheckupStatuses() {
       const today = new Date();
       return HEALTH_CHECKUP_PLAN.map(c => {
@@ -2863,6 +2967,65 @@
         return { ...c, dueDate, status };
       });
     }
+    function renderHealthComplaints() {
+      const probLabel = { high: '🔴 Вероятно', medium: '🟡 Возможно', low: '⚪ Маловероятно' };
+      const probClass = { high: 'hc-prob-high', medium: 'hc-prob-medium', low: 'hc-prob-low' };
+      const prioLabel = { high: 'Срочно', medium: 'Важно', cond: 'При необх.' };
+      const prioClass = { high: 'hct-high', medium: 'hct-medium', cond: 'hct-cond' };
+
+      const cards = HEALTH_COMPLAINTS.map(c => {
+        const diffHtml = c.differentials.map(d =>
+          `<div class="health-complaint-diff-item ${probClass[d.prob]}">
+            <span style="font-weight:600">${probLabel[d.prob]} — ${escapeHtml(d.name)}</span>
+            <span style="color:var(--text-muted)"> · ${escapeHtml(d.desc)}</span>
+          </div>`).join('');
+
+        const testsHtml = c.tests.map(t =>
+          `<div class="health-complaint-test">
+            <span class="hct-badge ${prioClass[t.prio]}">${prioLabel[t.prio]}</span>
+            <span><strong>${escapeHtml(t.name)}</strong> — <span style="color:var(--text-muted)">${escapeHtml(t.desc)}</span></span>
+          </div>`).join('');
+
+        const prevHtml = `<ul class="health-complaint-list">${c.prevention.map(p => `<li>${escapeHtml(p)}</li>`).join('')}</ul>`;
+
+        const treatHtml = c.treatment.map(ph =>
+          `<div>
+            <div class="health-complaint-phase-label">${escapeHtml(ph.phase)}</div>
+            <ul class="health-complaint-list">${ph.items.map(i => `<li>${escapeHtml(i)}</li>`).join('')}</ul>
+          </div>`).join('');
+
+        return `<div class="health-complaint-card" style="border-left-color:${c.statusColor}">
+          <div class="health-complaint-header">
+            <span class="health-complaint-icon">${c.icon}</span>
+            <span class="health-complaint-title">${escapeHtml(c.title)}</span>
+            <span class="health-complaint-status" style="background:${c.statusColor}18;color:${c.statusColor}">${escapeHtml(c.statusLabel)}</span>
+          </div>
+          <div class="health-complaint-note">«${escapeHtml(c.userNote)}»</div>
+          <div class="health-complaint-diag-main">🔍 ${escapeHtml(c.diagMain)}</div>
+          <div class="health-complaint-sections">
+            <div class="health-complaint-section">
+              <div class="health-complaint-section-title">Дифференциальная диагностика</div>
+              <div class="health-complaint-diff">${diffHtml}</div>
+            </div>
+            <div class="health-complaint-section">
+              <div class="health-complaint-section-title">🔬 Анализы и обследования</div>
+              <div class="health-complaint-tests">${testsHtml}</div>
+            </div>
+            <div class="health-complaint-section">
+              <div class="health-complaint-section-title">🛡 Профилактика</div>
+              ${prevHtml}
+            </div>
+            <div class="health-complaint-section">
+              <div class="health-complaint-section-title">💊 Лечение</div>
+              <div class="health-complaint-phases">${treatHtml}</div>
+            </div>
+          </div>
+        </div>`;
+      }).join('');
+
+      return `<p class="gtd-overview" style="margin-bottom:20px">Жалобы с диагностикой, планом анализов и лечения. Обновляется по мере новых данных.</p>${cards}`;
+    }
+
     function generateHealthRecommendations(data) {
       const markersData = (data && data.markers) ? data.markers : [];
       const sleepArr = ((data && data.sleep) || []).slice().sort((a,b)=>(b.date||'').localeCompare(a.date||''));
