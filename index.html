@@ -452,6 +452,11 @@
     .cle-ctx { flex-shrink: 0; font-size: 0.75rem; padding: 1px 6px; border-radius: 4px; background: rgba(66,153,225,0.1); color: #2b6cb0; }
     .cle-note { color: var(--text-muted); }
     .complaint-log-empty { font-size: 0.8125rem; color: var(--text-muted); font-style: italic; }
+    .cle-actions { margin-left: auto; display: flex; gap: 2px; flex-shrink: 0; }
+    .cle-edit-btn, .cle-delete-btn { background: none; border: none; cursor: pointer; font-size: 0.72rem; padding: 2px 6px; border-radius: 4px; color: var(--text-muted); opacity: 0.4; transition: opacity 0.15s; }
+    .cle-edit-btn:hover { opacity: 1; color: #4299e1; background: rgba(66,153,225,0.1); }
+    .cle-delete-btn:hover { opacity: 1; color: #e53e3e; background: rgba(229,62,62,0.1); }
+    .complaint-log-entry:hover .cle-edit-btn, .complaint-log-entry:hover .cle-delete-btn { opacity: 0.7; }
     .gtd-login-form input { width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 6px; margin-bottom: 12px; font-size: 0.9375rem; box-sizing: border-box; }
     .gtd-login-form input:focus { outline: none; border-color: var(--accent); }
     .gtd-tabs { display: flex; gap: 4px; margin-bottom: 20px; border-bottom: 1px solid var(--border); }
@@ -2998,7 +3003,9 @@
       });
     }
     function renderHealthComplaints(data) {
-      const log = (data && data.complaintLog) ? data.complaintLog.slice().sort((a,b)=>(b.date||'').localeCompare(a.date||'')) : [];
+      const log = (data && data.complaintLog)
+        ? data.complaintLog.map((e,i) => ({...e, _origIdx: i})).sort((a,b)=>(b.date||'').localeCompare(a.date||''))
+        : [];
       const sevLabel = { 1:'слабая', 2:'умеренная', 3:'заметная', 4:'сильная', 5:'невыносимая' };
       const ctxLabel = { solo:'🧠 само', viral:'🦠 вирус', unclear:'❓ неясно' };
       const fmtDate = d => { const m=/^(\d{4})-(\d{2})-(\d{2})/.exec(d); return m?`${m[3]}.${m[2]}.${m[1].slice(2)}`:d; };
@@ -3070,7 +3077,7 @@
               const sevStr = e.severity ? `<span class="cle-sev">${e.severity}/5 ${sevLabel[e.severity]||''}</span>` : '';
               const ctxStr = e.context ? `<span class="cle-ctx">${ctxLabel[e.context]||e.context}</span>` : '';
               const noteStr = e.notes ? `<span class="cle-note">${escapeHtml(e.notes)}</span>` : '';
-              return `<div class="complaint-log-entry"><span class="cle-date">${fmtDate(e.date)}</span>${sevStr}${ctxStr}${noteStr}</div>`;
+              return `<div class="complaint-log-entry"><span class="cle-date">${fmtDate(e.date)}</span>${sevStr}${ctxStr}${noteStr}<span class="cle-actions"><button class="cle-edit-btn" data-idx="${e._origIdx}" title="Редактировать">✏</button><button class="cle-delete-btn" data-idx="${e._origIdx}" title="Удалить">✕</button></span></div>`;
             }).join('')
           : `<p class="complaint-log-empty">Эпизодов пока нет — добавь первый через форму выше.</p>`;
         const last30 = entries.filter(e => e.date >= new Date(Date.now()-30*864e5).toISOString().slice(0,10)).length;
@@ -3510,7 +3517,13 @@
     }
 
     function bindComplaintLogForm() {
-      let _clfSev = null, _clfCtx = 'solo';
+      let _clfSev = null, _clfCtx = 'solo', _editIdx = null;
+
+      const rerender = () => {
+        const panel = document.getElementById('health-panel-complaints');
+        if (panel) { panel.innerHTML = renderHealthComplaints(loadHealthData()); bindComplaintLogForm(); }
+      };
+
       document.querySelectorAll('.clf-sev-btn').forEach(btn => {
         btn.onclick = () => {
           _clfSev = parseInt(btn.dataset.sev);
@@ -3523,6 +3536,38 @@
           document.querySelectorAll('.clf-ctx-btn').forEach(b => b.classList.toggle('active', b === btn));
         };
       });
+
+      // Delete
+      document.querySelectorAll('.cle-delete-btn').forEach(btn => {
+        btn.onclick = () => {
+          if (!confirm('Удалить этот эпизод?')) return;
+          const hdata = loadHealthData();
+          hdata.complaintLog.splice(parseInt(btn.dataset.idx), 1);
+          saveHealthData(hdata);
+          rerender();
+        };
+      });
+
+      // Edit — prefill form
+      document.querySelectorAll('.cle-edit-btn').forEach(btn => {
+        btn.onclick = () => {
+          const idx = parseInt(btn.dataset.idx);
+          const entry = loadHealthData().complaintLog[idx];
+          if (!entry) return;
+          _editIdx = idx;
+          document.getElementById('clf-date').value = entry.date || '';
+          document.getElementById('clf-complaint').value = entry.complaintId || '';
+          document.getElementById('clf-notes').value = entry.notes || '';
+          _clfCtx = entry.context || 'solo';
+          document.querySelectorAll('.clf-ctx-btn').forEach(b => b.classList.toggle('active', b.dataset.ctx === _clfCtx));
+          _clfSev = entry.severity || null;
+          document.querySelectorAll('.clf-sev-btn').forEach(b => b.classList.toggle('active', parseInt(b.dataset.sev) === _clfSev));
+          const saveBtn = document.getElementById('clf-save');
+          if (saveBtn) saveBtn.textContent = 'Обновить';
+          document.querySelector('.complaint-log-form')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        };
+      });
+
       const clfSave = document.getElementById('clf-save');
       if (!clfSave) return;
       clfSave.onclick = () => {
@@ -3532,16 +3577,17 @@
         if (!date || !complaintId) { alert('Укажи дату и жалобу'); return; }
         const hdata = loadHealthData();
         if (!hdata.complaintLog) hdata.complaintLog = [];
-        hdata.complaintLog.push({ date, complaintId, severity: _clfSev, context: _clfCtx, notes });
-        saveHealthData(hdata);
-        // Обновляем только панель Жалобы — без полного ре-рендера страницы
-        const panel = document.getElementById('health-panel-complaints');
-        if (panel) {
-          panel.innerHTML = renderHealthComplaints(hdata);
-          bindComplaintLogForm();
+        const entry = { date, complaintId, severity: _clfSev, context: _clfCtx, notes };
+        if (_editIdx !== null) {
+          hdata.complaintLog[_editIdx] = entry;
+        } else {
+          hdata.complaintLog.push(entry);
         }
+        saveHealthData(hdata);
+        const isEdit = _editIdx !== null;
+        rerender();
         const msg = document.getElementById('clf-msg');
-        if (msg) { msg.textContent = '✓ Записано'; setTimeout(() => { if (msg) msg.textContent = ''; }, 3000); }
+        if (msg) { msg.textContent = isEdit ? '✓ Обновлено' : '✓ Записано'; setTimeout(() => { if (msg) msg.textContent = ''; }, 3000); }
       };
     }
     function bindGtdTabs() {
