@@ -430,6 +430,28 @@
     .hct-cond { background: #f0f4ff; color: #2b4acb; }
     .health-complaint-phases { display: flex; flex-direction: column; gap: 8px; }
     .health-complaint-phase-label { font-size: 0.72rem; font-weight: 600; color: var(--text-muted); margin-bottom: 3px; }
+    .complaint-log-form { background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px; margin-bottom: 20px; }
+    .complaint-log-form h3 { margin: 0 0 12px; font-size: 0.9375rem; font-weight: 600; }
+    .clf-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 16px; margin-bottom: 10px; }
+    @media (max-width: 600px) { .clf-grid { grid-template-columns: 1fr; } }
+    .clf-field { display: flex; flex-direction: column; gap: 4px; }
+    .clf-field label { font-size: 0.75rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em; }
+    .clf-field input, .clf-field select, .clf-field textarea { font-size: 0.8125rem; padding: 6px 8px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--text); width: 100%; box-sizing: border-box; }
+    .clf-sev { display: flex; gap: 6px; }
+    .clf-sev-btn { width: 32px; height: 32px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); cursor: pointer; font-size: 0.8125rem; font-weight: 600; color: var(--text-muted); display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
+    .clf-sev-btn.active { border-color: #e53e3e; background: #fff5f5; color: #e53e3e; font-weight: 700; }
+    .clf-ctx { display: flex; gap: 6px; flex-wrap: wrap; }
+    .clf-ctx-btn { padding: 4px 10px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); cursor: pointer; font-size: 0.78rem; color: var(--text-muted); }
+    .clf-ctx-btn.active { border-color: #4299e1; background: #ebf8ff; color: #2b6cb0; font-weight: 600; }
+    .complaint-log-section { margin-top: 16px; border-top: 1px solid var(--border); padding-top: 14px; }
+    .complaint-log-section-title { font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); margin-bottom: 10px; }
+    .complaint-log-entry { display: flex; gap: 10px; align-items: baseline; padding: 6px 0; border-bottom: 1px solid var(--border); font-size: 0.8125rem; }
+    .complaint-log-entry:last-child { border-bottom: none; }
+    .cle-date { color: var(--text-muted); flex-shrink: 0; min-width: 72px; font-size: 0.78rem; }
+    .cle-sev { flex-shrink: 0; font-weight: 700; font-size: 0.78rem; color: #e53e3e; }
+    .cle-ctx { flex-shrink: 0; font-size: 0.75rem; padding: 1px 6px; border-radius: 4px; background: rgba(66,153,225,0.1); color: #2b6cb0; }
+    .cle-note { color: var(--text-muted); }
+    .complaint-log-empty { font-size: 0.8125rem; color: var(--text-muted); font-style: italic; }
     .gtd-login-form input { width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 6px; margin-bottom: 12px; font-size: 0.9375rem; box-sizing: border-box; }
     .gtd-login-form input:focus { outline: none; border-color: var(--accent); }
     .gtd-tabs { display: flex; gap: 4px; margin-bottom: 20px; border-bottom: 1px solid var(--border); }
@@ -2647,6 +2669,9 @@
       // СРБ 2025-08
       { markerId: 'crp', date: '2025-08-04', value: 0.04 }
     ];
+    const DEFAULT_COMPLAINT_LOG = [
+      { date: '2026-04-12', complaintId: 'headache', severity: null, context: 'solo', notes: 'Сама по себе, без вирусной истории' }
+    ];
     function loadHealthData() {
       try {
         const raw = localStorage.getItem(HEALTH_DATA_KEY);
@@ -2677,10 +2702,15 @@
           const mergedSleep = [...DEFAULT_SLEEP_DATA];
           for (const s of existingSleep) { if (!defaultSleepKeys.has(s.date)) mergedSleep.push(s); }
           data.sleep = mergedSleep;
+          const defaultLogKeys = new Set(DEFAULT_COMPLAINT_LOG.map(e => e.date + '|' + e.complaintId));
+          const existingLog = data.complaintLog || [];
+          const mergedLog = [...DEFAULT_COMPLAINT_LOG];
+          for (const e of existingLog) { if (!defaultLogKeys.has(e.date + '|' + e.complaintId)) mergedLog.push(e); }
+          data.complaintLog = mergedLog;
           return data;
         }
       } catch (e) {}
-      return { weight: DEFAULT_WEIGHT_DATA.slice(), pulse: [], sleep: DEFAULT_SLEEP_DATA.slice(), analyses: DEFAULT_HEALTH_ANALYSES.slice(), markers: DEFAULT_HEALTH_MARKERS_DATA.slice() };
+      return { weight: DEFAULT_WEIGHT_DATA.slice(), pulse: [], sleep: DEFAULT_SLEEP_DATA.slice(), analyses: DEFAULT_HEALTH_ANALYSES.slice(), markers: DEFAULT_HEALTH_MARKERS_DATA.slice(), complaintLog: DEFAULT_COMPLAINT_LOG.slice() };
     }
     function saveHealthData(data) {
       try { localStorage.setItem(HEALTH_DATA_KEY, JSON.stringify(data)); } catch (e) {}
@@ -2723,7 +2753,7 @@
           <button type="button" class="gtd-tab" data-tab="add">Добавить</button>
         </div>
         <div id="health-panel-dashboard" class="gtd-panel active">${dashboardHtml}</div>
-        <div id="health-panel-complaints" class="gtd-panel">${renderHealthComplaints()}</div>
+        <div id="health-panel-complaints" class="gtd-panel">${renderHealthComplaints(data)}</div>
         <div id="health-panel-metrics" class="gtd-panel">
           <h2>Вес (кг)</h2>
           <div class="gtd-table-wrap">
@@ -2967,7 +2997,47 @@
         return { ...c, dueDate, status };
       });
     }
-    function renderHealthComplaints() {
+    function renderHealthComplaints(data) {
+      const log = (data && data.complaintLog) ? data.complaintLog.slice().sort((a,b)=>(b.date||'').localeCompare(a.date||'')) : [];
+      const sevLabel = { 1:'слабая', 2:'умеренная', 3:'заметная', 4:'сильная', 5:'невыносимая' };
+      const ctxLabel = { solo:'🧠 само', viral:'🦠 вирус', unclear:'❓ неясно' };
+      const fmtDate = d => { const m=/^(\d{4})-(\d{2})-(\d{2})/.exec(d); return m?`${m[3]}.${m[2]}.${m[1].slice(2)}`:d; };
+
+      const addForm = `
+        <div class="complaint-log-form">
+          <h3>📅 Записать эпизод</h3>
+          <div class="clf-grid">
+            <div class="clf-field">
+              <label>Жалоба</label>
+              <select id="clf-complaint">${HEALTH_COMPLAINTS.map(c=>`<option value="${c.id}">${c.icon} ${escapeHtml(c.title)}</option>`).join('')}</select>
+            </div>
+            <div class="clf-field">
+              <label>Дата</label>
+              <input type="date" id="clf-date" value="${new Date().toISOString().slice(0,10)}">
+            </div>
+            <div class="clf-field">
+              <label>Контекст</label>
+              <div class="clf-ctx">
+                <button type="button" class="clf-ctx-btn active" data-ctx="solo">🧠 Само по себе</button>
+                <button type="button" class="clf-ctx-btn" data-ctx="viral">🦠 Вирус</button>
+                <button type="button" class="clf-ctx-btn" data-ctx="unclear">❓ Неясно</button>
+              </div>
+            </div>
+            <div class="clf-field">
+              <label>Интенсивность</label>
+              <div class="clf-sev">
+                ${[1,2,3,4,5].map(n=>`<button type="button" class="clf-sev-btn" data-sev="${n}">${n}</button>`).join('')}
+              </div>
+            </div>
+          </div>
+          <div class="clf-field" style="margin-bottom:10px">
+            <label>Заметка</label>
+            <input type="text" id="clf-notes" placeholder="необязательно — что предшествовало, как прошло">
+          </div>
+          <button type="button" class="gtd-login-btn" id="clf-save" style="padding:7px 18px;font-size:0.875rem">Записать</button>
+          <span id="clf-msg" style="margin-left:10px;font-size:0.8125rem;color:#38a169"></span>
+        </div>`;
+
       const probLabel = { high: '🔴 Вероятно', medium: '🟡 Возможно', low: '⚪ Маловероятно' };
       const probClass = { high: 'hc-prob-high', medium: 'hc-prob-medium', low: 'hc-prob-low' };
       const prioLabel = { high: 'Срочно', medium: 'Важно', cond: 'При необх.' };
@@ -2993,6 +3063,18 @@
             <div class="health-complaint-phase-label">${escapeHtml(ph.phase)}</div>
             <ul class="health-complaint-list">${ph.items.map(i => `<li>${escapeHtml(i)}</li>`).join('')}</ul>
           </div>`).join('');
+
+        const entries = log.filter(e => e.complaintId === c.id);
+        const logHtml = entries.length
+          ? entries.slice(0,20).map(e => {
+              const sevStr = e.severity ? `<span class="cle-sev">${e.severity}/5 ${sevLabel[e.severity]||''}</span>` : '';
+              const ctxStr = e.context ? `<span class="cle-ctx">${ctxLabel[e.context]||e.context}</span>` : '';
+              const noteStr = e.notes ? `<span class="cle-note">${escapeHtml(e.notes)}</span>` : '';
+              return `<div class="complaint-log-entry"><span class="cle-date">${fmtDate(e.date)}</span>${sevStr}${ctxStr}${noteStr}</div>`;
+            }).join('')
+          : `<p class="complaint-log-empty">Эпизодов пока нет — добавь первый через форму выше.</p>`;
+        const last30 = entries.filter(e => e.date >= new Date(Date.now()-30*864e5).toISOString().slice(0,10)).length;
+        const statStr = entries.length ? `<span style="font-size:0.75rem;color:var(--text-muted);margin-left:8px">за 30 дней: ${last30} · всего: ${entries.length}</span>` : '';
 
         return `<div class="health-complaint-card" style="border-left-color:${c.statusColor}">
           <div class="health-complaint-header">
@@ -3020,10 +3102,14 @@
               <div class="health-complaint-phases">${treatHtml}</div>
             </div>
           </div>
+          <div class="complaint-log-section">
+            <div class="complaint-log-section-title">📅 Дневник эпизодов${statStr}</div>
+            ${logHtml}
+          </div>
         </div>`;
       }).join('');
 
-      return `<p class="gtd-overview" style="margin-bottom:20px">Жалобы с диагностикой, планом анализов и лечения. Обновляется по мере новых данных.</p>${cards}`;
+      return `<p class="gtd-overview" style="margin-bottom:20px">Жалобы с диагностикой и дневником эпизодов. Записывай каждый эпизод — со временем появится паттерн.</p>${addForm}${cards}`;
     }
 
     function generateHealthRecommendations(data) {
@@ -3417,6 +3503,38 @@
         document.getElementById('health-add-value').value = '';
         document.getElementById('health-add-desc').value = '';
         document.getElementById('health-add-notes').value = '';
+        selectSection('health');
+      };
+
+      // Complaint log form handlers
+      let _clfSev = null, _clfCtx = 'solo';
+      document.querySelectorAll('.clf-sev-btn').forEach(btn => {
+        btn.onclick = () => {
+          _clfSev = parseInt(btn.dataset.sev);
+          document.querySelectorAll('.clf-sev-btn').forEach(b => b.classList.toggle('active', b === btn));
+        };
+      });
+      document.querySelectorAll('.clf-ctx-btn').forEach(btn => {
+        btn.onclick = () => {
+          _clfCtx = btn.dataset.ctx;
+          document.querySelectorAll('.clf-ctx-btn').forEach(b => b.classList.toggle('active', b === btn));
+        };
+      });
+      const clfSave = document.getElementById('clf-save');
+      if (clfSave) clfSave.onclick = () => {
+        const date = (document.getElementById('clf-date').value || '').trim();
+        const complaintId = (document.getElementById('clf-complaint').value || '').trim();
+        const notes = (document.getElementById('clf-notes').value || '').trim();
+        if (!date || !complaintId) { alert('Укажи дату и жалобу'); return; }
+        const hdata = loadHealthData();
+        if (!hdata.complaintLog) hdata.complaintLog = [];
+        hdata.complaintLog.push({ date, complaintId, severity: _clfSev, context: _clfCtx, notes });
+        saveHealthData(hdata);
+        document.getElementById('clf-notes').value = '';
+        _clfSev = null;
+        document.querySelectorAll('.clf-sev-btn').forEach(b => b.classList.remove('active'));
+        const msg = document.getElementById('clf-msg');
+        if (msg) { msg.textContent = 'Записано ✓'; setTimeout(() => { msg.textContent = ''; }, 2000); }
         selectSection('health');
       };
     }
