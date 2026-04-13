@@ -4426,7 +4426,10 @@
         selectSection('health');
       };
 
-      // Complaint log form handlers
+      bindComplaintLogForm();
+    }
+
+    function bindComplaintLogForm() {
       let _clfSev = null, _clfCtx = 'solo';
       document.querySelectorAll('.clf-sev-btn').forEach(btn => {
         btn.onclick = () => {
@@ -4441,7 +4444,8 @@
         };
       });
       const clfSave = document.getElementById('clf-save');
-      if (clfSave) clfSave.onclick = () => {
+      if (!clfSave) return;
+      clfSave.onclick = () => {
         const date = (document.getElementById('clf-date').value || '').trim();
         const complaintId = (document.getElementById('clf-complaint').value || '').trim();
         const notes = (document.getElementById('clf-notes').value || '').trim();
@@ -4450,12 +4454,14 @@
         if (!hdata.complaintLog) hdata.complaintLog = [];
         hdata.complaintLog.push({ date, complaintId, severity: _clfSev, context: _clfCtx, notes });
         saveHealthData(hdata);
-        document.getElementById('clf-notes').value = '';
-        _clfSev = null;
-        document.querySelectorAll('.clf-sev-btn').forEach(b => b.classList.remove('active'));
+        // Обновляем только панель Жалобы — без полного ре-рендера страницы
+        const panel = document.getElementById('health-panel-complaints');
+        if (panel) {
+          panel.innerHTML = renderHealthComplaints(hdata);
+          bindComplaintLogForm();
+        }
         const msg = document.getElementById('clf-msg');
-        if (msg) { msg.textContent = 'Записано ✓'; setTimeout(() => { msg.textContent = ''; }, 2000); }
-        selectSection('health');
+        if (msg) { msg.textContent = '✓ Записано'; setTimeout(() => { if (msg) msg.textContent = ''; }, 3000); }
       };
     }
     function bindGtdTabs() {
