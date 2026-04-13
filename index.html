@@ -879,6 +879,45 @@
         }
         return;
       }
+      if (id === 'family') {
+        const gtdUnlocked = sessionStorage.getItem('gtd_unlocked') === '1';
+        if (!gtdUnlocked) {
+          main.innerHTML = `
+            <h1 class="page-title">Семья</h1>
+            <p class="page-meta">🔒 Раздел под замком</p>
+            <div class="block">
+              <p>Войди для доступа (тот же логин/пароль, что и GTD).</p>
+              <input id="family-email" type="email" placeholder="Email" style="display:block;margin:8px 0;padding:6px;width:260px;" />
+              <input id="family-password" type="password" placeholder="Пароль" style="display:block;margin:8px 0;padding:6px;width:260px;" />
+              <button id="family-auth-btn" style="padding:6px 16px;">Войти</button>
+              <p id="family-auth-error" style="color:red;display:none;"></p>
+            </div>
+          `;
+          const bindFamily = () => {
+            document.getElementById('family-auth-btn').onclick = () => {
+              const email = document.getElementById('family-email').value.trim().toLowerCase();
+              const password = document.getElementById('family-password').value.trim();
+              const errEl = document.getElementById('family-auth-error');
+              const expectedEmail = AUTH_CREDENTIALS.email.trim().toLowerCase();
+              const expectedPass = AUTH_CREDENTIALS.password;
+              if (email === expectedEmail && password === expectedPass) {
+                sessionStorage.setItem('gtd_unlocked', '1');
+                selectSection('family');
+              } else {
+                errEl.textContent = 'Неверный email или пароль';
+                errEl.style.display = 'block';
+              }
+            };
+          };
+          bindFamily();
+        } else {
+          main.innerHTML = `
+            <h1 class="page-title">Семья</h1>
+            <div class="block">${section.content || '<p>Раздел в разработке.</p>'}</div>
+          `;
+        }
+        return;
+      }
 
       const content = section.content || '<p>Пусто</p>';
       const lockedClass = section.locked ? 'locked-content' : '';
