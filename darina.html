@@ -140,6 +140,24 @@
     .ctbl th { text-align: left; padding: 7px 11px; background: var(--sidebar-bg); font-weight: 600; border: 1px solid var(--border); }
     .ctbl td { padding: 7px 11px; border: 1px solid var(--border); vertical-align: top; }
 
+    /* ── INTERVIEW ── */
+    .interview { padding: 30px 36px; max-width: 720px; }
+    .iv-header { margin-bottom: 24px; }
+    .iv-header h1 { font-family: 'Cormorant Garamond', serif; font-size: 1.9rem; font-weight: 300; margin-bottom: 6px; }
+    .iv-header p { color: var(--muted); font-size: 0.875rem; line-height: 1.7; }
+    .iv-progress { display: inline-flex; align-items: center; gap: 8px; margin-top: 12px; font-size: 0.8rem; color: var(--muted); }
+    .iv-bar { width: 160px; height: 5px; background: var(--border); border-radius: 3px; overflow: hidden; }
+    .iv-bar-fill { height: 100%; background: var(--accent); border-radius: 3px; transition: width .3s; }
+    .iv-block { background: var(--card); border: 1px solid var(--border); border-radius: 9px; padding: 18px 20px; margin-bottom: 14px; transition: border-color .15s; }
+    .iv-block:focus-within { border-color: var(--warm); }
+    .iv-block.answered { border-left: 3px solid var(--accent); }
+    .iv-num { font-size: 0.68rem; font-weight: 600; text-transform: uppercase; letter-spacing: .07em; color: var(--warm); margin-bottom: 6px; }
+    .iv-q { font-family: 'Cormorant Garamond', serif; font-size: 1.05rem; line-height: 1.65; color: var(--text); margin-bottom: 10px; }
+    .iv-a { width: 100%; border: none; border-top: 1px solid var(--border); padding: 10px 0 4px; font-size: 0.875rem; font-family: inherit; color: var(--text); background: transparent; resize: none; line-height: 1.65; min-height: 38px; outline: none; }
+    .iv-a::placeholder { color: var(--border); }
+    .iv-actions { display: flex; gap: 8px; margin-top: 18px; }
+    .iv-export-btn { margin-top: 0; }
+
     /* ── PRINT ── */
     @media print {
       body { overflow: visible; height: auto; }
@@ -177,6 +195,7 @@
     <div class="tabs">
       <button class="tab on" data-tab="editor">✏️ Редактор</button>
       <button class="tab" data-tab="preview">📖 Предпросмотр</button>
+      <button class="tab" data-tab="interview">🎤 Интервью</button>
       <button class="tab" data-tab="concept">💡 Концепция</button>
     </div>
     <span id="top-stats"></span>
@@ -383,6 +402,7 @@ function switchTab(tab) {
   document.querySelectorAll('.tab').forEach(b => b.classList.toggle('on', b.dataset.tab === tab));
   if (tab === 'editor')  { curId ? renderEditor(curId) : renderEmpty(); }
   if (tab === 'preview') { renderPreview(); }
+  if (tab === 'interview') { renderInterview(); }
   if (tab === 'concept') { renderConcept(); }
 }
 
@@ -677,6 +697,117 @@ function renderPg(p, n) {
   }
   return '';
 }
+
+// ── INTERVIEW ─────────────────────────────────────────────────────────────────
+const IK = 'darina_interview_v1';
+const QUESTIONS = [
+  { id: 1,  cat: 'Чувства и запахи',    q: 'Какой запах мгновенно возвращает тебя в детство?' },
+  { id: 2,  cat: 'Чувства и запахи',    q: 'Какой звук из детства ты помнишь — не музыка, а просто звук?' },
+  { id: 3,  cat: 'Чувства и запахи',    q: 'Было ли какое-то место — угол, полка, закуток — где ты чувствовала себя в полной безопасности?' },
+  { id: 4,  cat: 'Чувства и запахи',    q: 'Что на ощупь помнишь лучше всего — ткань, игрушка, поверхность?' },
+  { id: 5,  cat: 'Еда',                  q: 'Какой момент с едой из детства помнишь ярче всего — не что ело, а как это было?' },
+  { id: 6,  cat: 'Еда',                  q: 'Было ли что-то, что ты ела в детстве и считала вкуснейшим в мире, а потом оказалось — ну так?' },
+  { id: 7,  cat: 'Родители',             q: 'Каким ты помнишь папу, когда тебе было лет 4–5? Что первым приходит в голову?' },
+  { id: 8,  cat: 'Родители',             q: 'Каким ты помнишь маму в то же время?' },
+  { id: 9,  cat: 'Родители',             q: 'Было ли что-то, что папа или мама делали, что тебе казалось странным — а потом ты поняла, зачем?' },
+  { id: 10, cat: 'Родители',             q: 'Что ты хочешь, чтобы родители знали про твоё детство, чего они, скорее всего, не знают?' },
+  { id: 11, cat: 'Внутренний мир',       q: 'Был ли у тебя воображаемый мир, персонаж или история, о которых никто не знал?' },
+  { id: 12, cat: 'Внутренний мир',       q: 'Что тебя пугало в детстве — что сейчас кажется смешным?' },
+  { id: 13, cat: 'Внутренний мир',       q: 'Был ли момент, когда тебе было очень стыдно? Что это было?' },
+  { id: 14, cat: 'Внутренний мир',       q: 'Что тебе казалось несправедливым, но ты не могла толком объяснить — почему?' },
+  { id: 15, cat: 'Внутренний мир',       q: 'Был ли у тебя секрет, который ты не говорила родителям?' },
+  { id: 16, cat: 'Внутренний мир',       q: 'О чём ты думала прямо перед сном, когда была маленькой?' },
+  { id: 17, cat: 'Открытия и понимание', q: 'Что тебе говорили взрослые и ты верила без сомнений — что потом оказалось неправдой или просто не так?' },
+  { id: 18, cat: 'Открытия и понимание', q: 'Что ты думала про деньги? Как ты объясняла себе, откуда они берутся?' },
+  { id: 19, cat: 'Открытия и понимание', q: 'Был ли момент, когда что-то внутри щёлкнуло — ты поняла что-то важное про мир или про себя?' },
+  { id: 20, cat: 'Открытия и понимание', q: 'Что тебе тогда казалось огромным и страшно важным — что сейчас кажется маленьким?' },
+  { id: 21, cat: 'Игры и придумки',      q: 'Что ты любила рисовать? Были ли любимые темы или персонажи?' },
+  { id: 22, cat: 'Игры и придумки',      q: 'Была ли игра или правило, которые ты придумала сама — и которые прижились?' },
+  { id: 23, cat: 'Игры и придумки',      q: 'Слово или фраза, которую ты изобрела, — что она значила?' },
+  { id: 24, cat: 'Игры и придумки',      q: 'Что тебя смешило до слёз или до икоты — что было самым смешным?' },
+  { id: 25, cat: 'Животные и природа',   q: 'Какое животное из детства запомнилось больше всего — и что именно?' },
+  { id: 26, cat: 'Путешествия',          q: 'Какое путешествие помнишь ярче всего? Не места — а что ощущала?' },
+  { id: 27, cat: 'Путешествия',          q: 'Было ли место, куда ты хотела вернуться — и говорила ли об этом?' },
+  { id: 28, cat: 'Взросление',           q: 'Был ли момент, когда ты почувствовала, что стала взрослее — что-то изменилось внутри?' },
+  { id: 29, cat: 'Взросление',           q: 'Что ты хотела стать, когда вырастешь? Это менялось?' },
+  { id: 30, cat: 'Взросление',           q: 'Если бы ты могла задать одной вопрос себе четырёхлетней — что бы спросила?' },
+];
+
+function loadAnswers() {
+  try { const d = localStorage.getItem(IK); if (d) return JSON.parse(d); } catch(e) {}
+  return {};
+}
+function saveAnswers(ans) {
+  try { localStorage.setItem(IK, JSON.stringify(ans)); } catch(e) {}
+}
+
+function renderInterview() {
+  const ans = loadAnswers();
+  const filled = QUESTIONS.filter(q => (ans[q.id] || '').trim()).length;
+  const pct = Math.round(filled / QUESTIONS.length * 100);
+
+  // group by category
+  const cats = {};
+  QUESTIONS.forEach(q => { if (!cats[q.cat]) cats[q.cat] = []; cats[q.cat].push(q); });
+
+  const blocksHtml = Object.entries(cats).map(([cat, qs]) => `
+    <div style="margin-bottom:8px">
+      <div style="font-size:0.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin:20px 0 10px">${cat}</div>
+      ${qs.map(q => `
+        <div class="iv-block ${(ans[q.id]||'').trim()?'answered':''}" id="ivb-${q.id}">
+          <div class="iv-num">вопрос ${q.id}</div>
+          <div class="iv-q">${q.q}</div>
+          <textarea class="iv-a" data-qid="${q.id}" placeholder="Ответ Дарины..." rows="2">${escH(ans[q.id]||'')}</textarea>
+        </div>`).join('')}
+    </div>`).join('');
+
+  document.getElementById('main').innerHTML = `
+    <div class="interview">
+      <div class="iv-header">
+        <h1>Интервью с Дариной</h1>
+        <p>30 вопросов о детстве — задать Дарине и записать её ответы сюда.<br>Ответы станут частью книги или останутся личным архивом.</p>
+        <div class="iv-progress">
+          <div class="iv-bar"><div class="iv-bar-fill" style="width:${pct}%"></div></div>
+          <span>${filled} из ${QUESTIONS.length} ответов</span>
+        </div>
+      </div>
+      ${blocksHtml}
+      <div class="iv-actions">
+        <button class="btn-p" onclick="saveAllAnswers()">Сохранить все ответы</button>
+        <button class="btn-s iv-export-btn" onclick="exportAnswers()">⬇ Экспорт</button>
+      </div>
+    </div>`;
+
+  // auto-resize textareas
+  document.querySelectorAll('.iv-a').forEach(ta => {
+    ta.addEventListener('input', () => {
+      ta.style.height = 'auto';
+      ta.style.height = ta.scrollHeight + 'px';
+      const block = document.getElementById('ivb-' + ta.dataset.qid);
+      if (block) block.classList.toggle('answered', ta.value.trim().length > 0);
+    });
+    ta.style.height = 'auto';
+    ta.style.height = ta.scrollHeight + 'px';
+  });
+}
+
+window.saveAllAnswers = () => {
+  const ans = loadAnswers();
+  document.querySelectorAll('.iv-a').forEach(ta => {
+    ans[ta.dataset.qid] = ta.value;
+  });
+  saveAnswers(ans);
+  const b = document.querySelector('.btn-p'); if (b) { b.textContent = '✓ Сохранено'; setTimeout(()=>b.textContent='Сохранить все ответы', 1400); }
+  renderInterview();
+};
+
+window.exportAnswers = () => {
+  const ans = loadAnswers();
+  const out = QUESTIONS.map(q => ({ question: q.q, answer: ans[q.id] || '' }));
+  const blob = new Blob([JSON.stringify(out, null, 2)], {type:'application/json'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+  a.download = 'darina-interview.json'; a.click();
+};
 
 // ── CONCEPT ───────────────────────────────────────────────────────────────────
 function renderConcept() {
