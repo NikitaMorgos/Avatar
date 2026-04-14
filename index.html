@@ -583,6 +583,11 @@
     // URL API для Photo diary (Collect). Оставь пустым или укажи свой VPS, например: https://your-vps.com:8080
     const COLLECT_API_URL = '';
 
+    // Claude (Anthropic) API key для AI-тренера в разделе Спорт.
+    // Получить на https://console.anthropic.com/settings/keys
+    // Хранится здесь (не в .env — это frontend). Файл в .gitignore для безопасности.
+    const SPORT_CLAUDE_KEY = '';
+
     // Доступ к MarComTeam и GTD (email + пароль):
     const AUTH_CREDENTIALS = { email: 'n.morgos@gmail.com', password: 'Nthvbyfk2020' };
     // Доступ к разделу Семья (дополнительные пользователи):
@@ -5248,8 +5253,8 @@
 
     async function sendSportAI() {
       const data = loadSportData();
-      const key = (data.aiKey || '').trim();
-      if (!key) { alert('Сначала введи Claude API Key в поле выше.'); return; }
+      const key = (SPORT_CLAUDE_KEY || data.aiKey || '').trim();
+      if (!key) { alert('Сначала введи Claude API Key в поле выше или вставь ключ в константу SPORT_CLAUDE_KEY в index.html.'); return; }
       const input = document.getElementById('sport-ai-input');
       const userText = (input.value || '').trim();
       if (!userText) return;
