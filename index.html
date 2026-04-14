@@ -107,6 +107,41 @@
       margin-bottom: 32px;
     }
 
+    /* Sport section */
+    .sport-prog-header { display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:20px;flex-wrap:wrap; }
+    .sport-week-badge { background:var(--accent);color:#fff;padding:6px 14px;border-radius:20px;font-size:0.875rem;font-weight:600;white-space:nowrap; }
+    .sport-phase-nav { display:flex;gap:6px;flex-wrap:wrap;margin-bottom:20px; }
+    .sport-phase-btn { padding:6px 14px;border:1px solid var(--border);border-radius:6px;cursor:pointer;font-size:0.8125rem;background:var(--locked-bg);color:var(--text);transition:all 0.15s; }
+    .sport-phase-btn.active { background:var(--accent);color:#fff;border-color:var(--accent); }
+    .sport-phase-block { background:var(--locked-bg);border:1px solid var(--border);border-radius:10px;padding:20px; }
+    .sport-phase-title { display:flex;align-items:baseline;gap:12px;margin-bottom:4px; }
+    .sport-ex-list { display:flex;flex-direction:column;gap:10px; }
+    .sport-ex-row { display:flex;align-items:flex-start;justify-content:space-between;gap:12px;background:var(--card-bg);border:1px solid var(--border);border-radius:8px;padding:14px 16px;transition:box-shadow 0.15s; }
+    .sport-ex-row:hover { box-shadow:0 2px 8px rgba(0,0,0,0.07); }
+    .sport-ex-info { flex:1;min-width:0; }
+    .sport-ex-info strong { display:block;margin-bottom:2px; }
+    .sport-ex-note { font-size:0.8125rem;color:var(--accent);font-weight:500; }
+    .sport-ex-desc { font-size:0.8125rem;color:var(--text-muted);margin-top:6px;line-height:1.5; }
+    .sport-ex-why { font-size:0.75rem;color:var(--text-muted);margin-top:4px;font-style:italic; }
+    .sport-log-btn { flex-shrink:0;padding:6px 14px;background:var(--accent);color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:0.8125rem;font-weight:500;transition:background 0.15s;white-space:nowrap; }
+    .sport-log-btn:hover { background:var(--accent-hover); }
+    .sport-checkpoints { display:flex;flex-direction:column;gap:8px; }
+    .sport-checkpoint { display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:8px;background:var(--locked-bg);border:1px solid var(--border);transition:all 0.15s; }
+    .sport-checkpoint.done { background:#f0fff4;border-color:#9ae6b4; }
+    .sport-checkpoint.near { border-color:var(--accent); }
+    .sport-cp-week { font-size:0.75rem;font-weight:600;color:var(--text-muted);min-width:48px; }
+    .sport-cp-test { flex:1;font-size:0.875rem; }
+    .sport-cp-btn { background:none;border:2px solid var(--border);border-radius:50%;width:28px;height:28px;cursor:pointer;font-size:0.875rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all 0.15s; }
+    .sport-cp-btn.done { background:#38a169;border-color:#38a169;color:#fff; }
+    .sport-ai-history { min-height:160px;max-height:440px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:12px;display:flex;flex-direction:column;gap:12px;background:var(--card-bg); }
+    .sport-ai-msg { padding:10px 14px;border-radius:8px;max-width:90%; }
+    .sport-ai-user { background:var(--accent);color:#fff;align-self:flex-end; }
+    .sport-ai-assistant { background:var(--locked-bg);border:1px solid var(--border);align-self:flex-start; }
+    .sport-ai-role { font-size:0.7rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px;opacity:0.7; }
+    .sport-ai-text { font-size:0.875rem;line-height:1.55;white-space:pre-wrap; }
+    .sport-ai-input-row { display:flex;gap:8px;align-items:flex-end; }
+    .sport-ai-input-row textarea { flex:1;padding:8px 12px;border:1px solid var(--border);border-radius:6px;font-size:0.875rem;font-family:inherit;resize:vertical; }
+
     /* Blocks */
     .block {
       margin-bottom: 16px;
@@ -550,6 +585,11 @@
 
     // Доступ к MarComTeam и GTD (email + пароль):
     const AUTH_CREDENTIALS = { email: 'n.morgos@gmail.com', password: 'Nthvbyfk2020' };
+    // Доступ к разделу Семья (дополнительные пользователи):
+    const FAMILY_CREDENTIALS = [
+      { email: 'n.morgos@gmail.com', password: 'Nthvbyfk2020' },
+      { email: 'dyeska@yandex.ru',   password: 'darina' },
+    ];
 
     const LOCK_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>';
     const TG_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.161c-.18 1.897-.962 6.502-1.359 8.627-.168.9-.5 1.201-.82 1.23-.697.064-1.226-.461-1.901-.903-1.056-.693-1.653-1.124-2.678-1.8-1.185-.781-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.139-5.062 3.345-.479.329-.913.489-1.302.481-.428-.009-1.252-.242-1.865-.44-.752-.244-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.831-2.529 6.998-3.015 3.333-1.386 4.025-1.627 4.476-1.635.099-.002.321.023.465.141.121.1.155.234.171.331.015.098.034.321.019.495z"/></svg>';
@@ -870,6 +910,13 @@
         content: null
       },
       {
+        id: 'sport',
+        name: 'Спорт',
+        locked: true,
+        authFor: 'gtd',
+        content: null
+      },
+      {
         id: 'gtd',
         name: 'GTD',
         locked: true,
@@ -993,7 +1040,7 @@
       });
 
       const main = document.getElementById('main-content');
-      main.classList.toggle('gtd-wide', id === 'gtd' || id === 'health' || id === 'diary');
+      main.classList.toggle('gtd-wide', id === 'gtd' || id === 'health' || id === 'diary' || id === 'sport');
 
       if (id === 'diary') {
         const gtdUnlocked = sessionStorage.getItem('gtd_unlocked') === '1';
@@ -1081,6 +1128,46 @@
         }
         return;
       }
+      if (id === 'sport') {
+        const gtdUnlocked = sessionStorage.getItem('gtd_unlocked') === '1';
+        if (!gtdUnlocked) {
+          main.innerHTML = `
+            <h1 class="page-title">Спорт</h1>
+            <p class="page-meta">🔒 Раздел под замком</p>
+            <div class="block">
+              <p>Тренировочный дневник, программы, AI-тренер. Войди для доступа.</p>
+              <form class="gtd-login-form" id="sport-login-form">
+                <input type="email" id="sport-email" placeholder="Email" autocomplete="email" required>
+                <input type="password" id="sport-password" placeholder="Пароль" autocomplete="current-password" required>
+                <button type="submit" class="gtd-login-btn">Войти</button>
+                <div id="sport-auth-error" class="error" style="display:none;margin-top:8px;"></div>
+              </form>
+            </div>
+          `;
+          document.getElementById('sport-login-form').onsubmit = function(e) {
+            e.preventDefault();
+            const email = document.getElementById('sport-email').value.trim().toLowerCase();
+            const password = document.getElementById('sport-password').value.trim();
+            const errEl = document.getElementById('sport-auth-error');
+            if (email === AUTH_CREDENTIALS.email.trim().toLowerCase() && password === AUTH_CREDENTIALS.password) {
+              sessionStorage.setItem('gtd_unlocked', '1');
+              selectSection('sport');
+            } else {
+              errEl.textContent = 'Неверный email или пароль';
+              errEl.style.display = 'block';
+            }
+          };
+        } else {
+          main.innerHTML = '<h1 class="page-title">Спорт</h1><p class="page-meta">Загрузка…</p><div class="block"></div>';
+          main.innerHTML = `
+            <h1 class="page-title">Спорт</h1>
+            <p class="page-meta">Тренировочный дневник · Программы · AI-тренер</p>
+            <div class="block">${loadSportContent()}</div>
+          `;
+          bindSport();
+        }
+        return;
+      }
       if (id === 'gtd') {
         const gtdUnlocked = sessionStorage.getItem('gtd_unlocked') === '1';
         if (!gtdUnlocked) {
@@ -1139,39 +1226,52 @@
         return;
       }
       if (id === 'family') {
-        const gtdUnlocked = sessionStorage.getItem('gtd_unlocked') === '1';
-        if (!gtdUnlocked) {
+        const familyUnlocked = sessionStorage.getItem('family_unlocked') === '1' || sessionStorage.getItem('gtd_unlocked') === '1';
+        if (!familyUnlocked) {
           main.innerHTML = `
             <h1 class="page-title">Семья</h1>
             <p class="page-meta">🔒 Раздел под замком</p>
             <div class="block">
-              <p>Войди для доступа (тот же логин/пароль, что и GTD).</p>
-              <input id="family-email" type="email" placeholder="Email" style="display:block;margin:8px 0;padding:6px;width:260px;" />
-              <input id="family-password" type="password" placeholder="Пароль" style="display:block;margin:8px 0;padding:6px;width:260px;" />
-              <button id="family-auth-btn" style="padding:6px 16px;">Войти</button>
-              <p id="family-auth-error" style="color:red;display:none;"></p>
+              <p style="margin-bottom:12px">Войди для доступа.</p>
+              <input id="family-email" type="email" placeholder="Email" style="display:block;margin:8px 0;padding:7px 10px;width:280px;border:1px solid var(--border);border-radius:6px;font-family:inherit;font-size:0.875rem;" />
+              <input id="family-password" type="password" placeholder="Пароль" style="display:block;margin:8px 0;padding:7px 10px;width:280px;border:1px solid var(--border);border-radius:6px;font-family:inherit;font-size:0.875rem;" />
+              <button id="family-auth-btn" style="padding:7px 18px;background:var(--accent);color:#fff;border:none;border-radius:6px;font-family:inherit;cursor:pointer;margin-top:4px;">Войти</button>
+              <p id="family-auth-error" style="color:#c0392b;display:none;margin-top:8px;font-size:0.85rem;"></p>
             </div>
           `;
-          const bindFamily = () => {
-            document.getElementById('family-auth-btn').onclick = () => {
-              const email = document.getElementById('family-email').value.trim().toLowerCase();
-              const password = document.getElementById('family-password').value.trim();
-              const errEl = document.getElementById('family-auth-error');
-              const expectedEmail = AUTH_CREDENTIALS.email.trim().toLowerCase();
-              const expectedPass = AUTH_CREDENTIALS.password;
-              if (email === expectedEmail && password === expectedPass) {
+          document.getElementById('family-auth-btn').onclick = () => {
+            const email = document.getElementById('family-email').value.trim().toLowerCase();
+            const password = document.getElementById('family-password').value.trim();
+            const errEl = document.getElementById('family-auth-error');
+            const ok = FAMILY_CREDENTIALS.some(c => c.email.toLowerCase() === email && c.password === password);
+            if (ok) {
+              sessionStorage.setItem('family_unlocked', '1');
+              // also unlock gtd if main credentials
+              if (email === AUTH_CREDENTIALS.email.toLowerCase() && password === AUTH_CREDENTIALS.password) {
                 sessionStorage.setItem('gtd_unlocked', '1');
-                selectSection('family');
-              } else {
-                errEl.textContent = 'Неверный email или пароль';
-                errEl.style.display = 'block';
               }
-            };
+              selectSection('family');
+            } else {
+              errEl.textContent = 'Неверный email или пароль';
+              errEl.style.display = 'block';
+            }
           };
-          bindFamily();
+          document.getElementById('family-password').addEventListener('keydown', e => {
+            if (e.key === 'Enter') document.getElementById('family-auth-btn').click();
+          });
         } else {
           main.innerHTML = `
             <h1 class="page-title">Семья</h1>
+            <div class="block">
+              <div style="background:var(--card-bg);border:1px solid var(--border);border-radius:10px;padding:20px 24px;margin-bottom:20px;display:flex;align-items:center;gap:20px;">
+                <div style="font-size:2rem;">📖</div>
+                <div>
+                  <div style="font-weight:600;margin-bottom:4px;">Книга детства Дарины</div>
+                  <div style="font-size:0.85rem;color:var(--text-muted);margin-bottom:10px;">Редактор бумажной книги · 2011–2018 · 75 заметок загружено</div>
+                  <a href="darina.html" target="_blank" style="display:inline-block;padding:7px 16px;background:var(--accent);color:#fff;border-radius:6px;font-size:0.875rem;text-decoration:none;">Открыть редактор →</a>
+                </div>
+              </div>
+            </div>
             <div class="block">${section.content || '<p>Раздел в разработке.</p>'}</div>
           `;
         }
@@ -4644,6 +4744,554 @@
         _pendingLockedUrl = null;
       }
     };
+
+    // =====================================================================
+    // СПОРТ — данные, рендер, биндинг
+    // =====================================================================
+
+    const SPORT_DATA_KEY = 'avatar_sport_data';
+
+    const HANDSTAND_PROGRAM = {
+      id: 'handstand_freestanding_2026',
+      title: 'Стойка на руках без опоры',
+      goal: 'Уверенная стойка 5–10 сек без стены',
+      startDate: '2026-04-14',
+      endDate: '2026-08-04',
+      checkpoints: [
+        { week: 4,  test: 'Стойка грудью к стене — 45 сек, корпус прямой' },
+        { week: 8,  test: 'Стойка спиной к стене 60 сек + выход пируэтом в обе стороны' },
+        { week: 12, test: 'Чистый подъём 1 из 3 попыток + ощущение момента баланса' },
+        { week: 16, test: 'Свободная стойка 5–10 секунд' }
+      ],
+      exercises: {
+        wrist_rocks:            { name: 'Разминка запястий', phase: [1,2,3,4], desc: 'В упоре лёжа на прямых руках — медленно переносить вес вперёд к пальцам и назад к пяткам ладони. Локти прямые всё время. 10 качаний вперёд-назад + 10 в стороны. Не форсировать, только лёгкое растяжение.', why: 'В стойке всё давление на запястья. Без разминки — боль и травма.' },
+        hollow_body_hold:       { name: 'Hollow body hold', phase: [1,2,3,4], desc: 'Лечь на спину. Прижать поясницу к полу — это главное. Руки за голову, ноги прямые. Поднять плечи (5–10 см) и ноги (15–20 см). Форма вогнутой дуги. Если поясница отрывается — поднять ноги выше. Дышать!', why: 'Это и есть правильное положение тела в стойке. Без него — прогиб и неустойчивость.' },
+        arch_body_hold:         { name: 'Arch body hold', phase: [1],       desc: 'Лечь на живот, руки вперёд. Одновременно поднять руки, грудь и ноги. Ягодицы сжаты, ноги вместе. Противоположность hollow body.', why: 'Тренирует заднюю цепь и чувство тела в воздухе.' },
+        scapular_pushups:       { name: 'Лопаточные отжимания', phase: [1,2], desc: 'Упор лёжа на прямых руках. Локти не сгибать! Только лопатки: провалиться вниз между рук (лопатки сходятся) → протолкнуть тело вверх, разводя лопатки (спина округляется). Амплитуда 5–8 см. Руки прямые всегда.', why: 'Активная лопатка — основа устойчивости плеч в стойке.' },
+        shoulder_shrugs_downdog:{ name: 'Пожимания в собаке', phase: [1,2], desc: 'Поза собаки мордой вниз (перевёрнутая V). Руки и ноги прямые. Поднять плечи к ушам (голова уходит вниз) → опустить плечи максимально (шея вытягивается). 10 медленных повторов.', why: 'Учит активировать плечи в перевёрнутом положении — репетиция стойки.' },
+        pike_compression:       { name: 'Пайк-компрессия', phase: [1,2],   desc: 'Сесть на пол, ноги прямые вместе, носки на себя. Спина прямая (не горбиться!). Наклоняться вперёд, тянуть ГРУДЬ к ногам — не лоб к коленям. В нижней точке задержка 2–3 сек, напрягать живот. Не пружинить.', why: 'Без гибкости в пайке стойка будет с прогнутой спиной и согнутыми ногами.' },
+        chest_to_wall:          { name: 'Стойка грудью к стене', phase: [1,2], desc: 'Лицом к стене, руки в 15–20 см от стены. Забраться ногами по стене. Затем ОТВЕСТИ живот от стены — выровнять тело в одну линию. Стена как ориентир, не опора. Главные ошибки: прогиб в пояснице и голова вперёд.', why: 'Учит правильной позиции тела без балансировки — сначала форма, потом баланс.' },
+        back_to_wall:           { name: 'Стойка спиной к стене', phase: [2,3], desc: 'Встать в 50–60 см от стены, мах в стойку — пятки касаются стены. Тело выровнять: пятки едва касаются, всё остальное — прямая линия. Постепенно уменьшать контакт с стеной.', why: 'Переходный этап: тело уже держит правильную позицию, стена только подстраховывает.' },
+        pirouette_exit:         { name: 'Выход пируэтом', phase: [2,3,4], desc: 'При падении вперёд: согнуть ОДИН локоть (выбери сторону заранее), тело поворачивается в эту сторону, ноги описывают дугу и приземляются сбоку. Тренировать сначала медленно из низкого положения.', why: 'Страх упасть — главный враг баланса. Когда умеешь выходить — перестаёшь бояться.' },
+        cartwheel_exit:         { name: 'Выход колесом', phase: [2,3,4],   desc: 'При падении вперёд: широко развести ноги и приземлиться поочерёдно — одна нога впереди, другая сзади. Это колесо из стойки. Сначала потренировать отдельно само колесо.', why: 'Второй безопасный выход. Иметь два — полная уверенность при попытках баланса.' },
+        wall_pushoff:           { name: 'Отталкивание от стены', phase: [2,3], desc: 'В стойке спиной к стене. Мягко оттолкнуть одну пятку от стены, удержать баланс 1–3 сек, вернуть. Потом другую ногу. Когда получается — обе ноги вместе.', why: 'Первый контакт с реальным балансом. Самый важный переходный навык.' },
+        kickup:                 { name: 'Подъём в стойку (kick-up)', phase: [3,4], desc: 'Руки на полу, одна нога толчковая (спереди), другая маховая (сзади, прямая). Смотреть на пол между руками. МОЩНЫЙ МАХ задней ногой строго вертикально — жёсткой и прямой. Толчковая догоняет. Не прыгать руками — именно мах ногой.', why: 'Стабильный подъём = можно тренировать баланс. Без него каждая попытка — лотерея.' },
+        tuck_handstand:         { name: 'Стойка в группировке', phase: [3,4], desc: 'После kick-up не выпрямлять ноги — держать колени у груди. Центр тяжести ниже = баланс легче. Потом медленно раскрыть одну ногу вверх → поймать баланс → раскрыть вторую.', why: 'Промежуточная форма. Позволяет тренировать баланс на руках без требования полной гибкости.' },
+        pike_box_hold:          { name: 'Пайк с ногами на возвышении', phase: [2,3], desc: 'Ноги (голени/ступни) на стуле 50–70 см, руки на полу под плечами, руки прямые. Тело под углом — таз выше плеч. Держать 30 сек. Плечи активно тянуть от ушей.', why: 'Нагрузка на плечи как в стойке — без балансировки. Мост между планкой и стойкой.' },
+        finger_pressure_drill:  { name: 'Контроль пальцами', phase: [3,4], desc: 'В стойке у стены: сознательно управлять балансом пальцами. Тело падает вперёд — давить подушечками пальцев сильнее. Тело падает назад — переносить вес на пятки ладоней. Намеренно отклоняться и возвращаться. Движения 1–2 см.', why: 'Единственный реальный инструмент баланса в стойке. Всё остальное вторично.' }
+      },
+      phases: [
+        {
+          phase: 1, name: 'Фундамент', weeks: [1,2,3,4],
+          goal: 'Запястья, плечи, полый корпус, первая стойка у стены',
+          session: [
+            { ex: 'wrist_rocks',             note: 'каждую сессию, 3 мин' },
+            { ex: 'hollow_body_hold',         note: '3×30 сек → к нед.4 45 сек' },
+            { ex: 'arch_body_hold',           note: '3×20 сек' },
+            { ex: 'chest_to_wall',            note: '5×20 сек → к нед.4 45 сек' },
+            { ex: 'shoulder_shrugs_downdog',  note: '3×10 повторов' },
+            { ex: 'scapular_pushups',         note: '3×12' },
+            { ex: 'pike_compression',         note: '3×8, 3 сек задержка' }
+          ]
+        },
+        {
+          phase: 2, name: 'Контроль в стойке', weeks: [5,6,7,8],
+          goal: 'Правильная позиция, безопасные выходы, первый баланс',
+          session: [
+            { ex: 'wrist_rocks',             note: '2 мин' },
+            { ex: 'hollow_body_hold',         note: '2×45 сек' },
+            { ex: 'back_to_wall',             note: '5×30 сек → к нед.8 60 сек' },
+            { ex: 'pirouette_exit',           note: '3×5 в обе стороны' },
+            { ex: 'cartwheel_exit',           note: '3×5' },
+            { ex: 'pike_box_hold',            note: '3×30 сек' },
+            { ex: 'wall_pushoff',             note: '3×5 — сначала одна нога' }
+          ]
+        },
+        {
+          phase: 3, name: 'Подъём и первые секунды', weeks: [9,10,11,12],
+          goal: 'Стабильный kick-up, первые моменты свободного баланса',
+          session: [
+            { ex: 'wrist_rocks',            note: '2 мин' },
+            { ex: 'hollow_body_hold',        note: '2×45 сек' },
+            { ex: 'kickup',                  note: '15–20 попыток у стены' },
+            { ex: 'tuck_handstand',          note: '5×10 сек → раскрыть одну ногу' },
+            { ex: 'wall_pushoff',            note: 'обе ноги одновременно' },
+            { ex: 'finger_pressure_drill',   note: '3×30 сек — намеренные качания' }
+          ]
+        },
+        {
+          phase: 4, name: 'Свободная стойка', weeks: [13,14,15,16],
+          goal: '5–10 секунд без опоры',
+          session: [
+            { ex: 'wrist_rocks',           note: '2 мин' },
+            { ex: 'hollow_body_hold',       note: '2×45 сек' },
+            { ex: 'kickup',                 note: 'зона 1–2 м от стены, без опоры' },
+            { ex: 'tuck_handstand',         note: 'tuck → прямая → удержание' },
+            { ex: 'finger_pressure_drill',  note: 'активно при каждой попытке' }
+          ]
+        }
+      ]
+    };
+
+    function loadSportData() {
+      try {
+        const raw = localStorage.getItem(SPORT_DATA_KEY);
+        if (raw) return JSON.parse(raw);
+      } catch(e) {}
+      return { sessions: [], aiKey: '', aiMessages: [] };
+    }
+    function saveSportData(data) {
+      try { localStorage.setItem(SPORT_DATA_KEY, JSON.stringify(data)); } catch(e) {}
+    }
+
+    function sportCurrentPhase() {
+      const start = new Date(HANDSTAND_PROGRAM.startDate);
+      const now = new Date();
+      const weekNum = Math.max(1, Math.ceil((now - start) / (7*24*3600*1000)));
+      return HANDSTAND_PROGRAM.phases.find(p => p.weeks.includes(Math.min(weekNum, 16))) || HANDSTAND_PROGRAM.phases[0];
+    }
+
+    function loadSportContent() {
+      const data = loadSportData();
+      const phase = sportCurrentPhase();
+      const fmtDate = d => { if(!d) return '—'; const m=/^(\d{4})-(\d{2})-(\d{2})/.exec(d); return m?`${m[3]}.${m[2]}.${m[1]}`:d; };
+
+      // --- Вкладка: Программа ---
+      const prog = HANDSTAND_PROGRAM;
+      const start = new Date(prog.startDate);
+      const now = new Date();
+      const weekNum = Math.max(1, Math.ceil((now - start) / (7*24*3600*1000)));
+      const weekDisplay = Math.min(weekNum, 16);
+
+      const checkpointsHtml = prog.checkpoints.map(cp => {
+        const done = data.checkpoints && data.checkpoints[cp.week];
+        return `<div class="sport-checkpoint ${done ? 'done' : weekDisplay >= cp.week - 3 ? 'near' : ''}">
+          <span class="sport-cp-week">Нед.${cp.week}</span>
+          <span class="sport-cp-test">${escapeHtml(cp.test)}</span>
+          <button type="button" class="sport-cp-btn ${done ? 'done' : ''}" data-week="${cp.week}" title="${done ? 'Выполнено' : 'Отметить выполненным'}">${done ? '✓' : '○'}</button>
+        </div>`;
+      }).join('');
+
+      const todayExercises = phase.session.map(s => {
+        const ex = prog.exercises[s.ex];
+        return `<div class="sport-ex-row" data-exid="${s.ex}">
+          <div class="sport-ex-info">
+            <strong>${escapeHtml(ex.name)}</strong>
+            <span class="sport-ex-note">${escapeHtml(s.note)}</span>
+            <div class="sport-ex-desc">${escapeHtml(ex.desc)}</div>
+            <div class="sport-ex-why">Зачем: ${escapeHtml(ex.why)}</div>
+          </div>
+          <button type="button" class="sport-log-btn" data-exid="${s.ex}" data-exname="${escapeHtml(ex.name)}">Выполнено</button>
+        </div>`;
+      }).join('');
+
+      const phasesNav = prog.phases.map(p =>
+        `<button type="button" class="sport-phase-btn ${p.phase === phase.phase ? 'active' : ''}" data-phase="${p.phase}">Фаза ${p.phase}: ${escapeHtml(p.name)}</button>`
+      ).join('');
+
+      // --- Вкладка: Дневник ---
+      const sessions = (data.sessions || []).slice().sort((a,b) => (b.date||'').localeCompare(a.date||'')).slice(0,50);
+      const diaryRows = sessions.length ? sessions.map(s => {
+        const exNames = (s.exercises||[]).map(e => prog.exercises[e.exerciseId]?.name || e.exerciseId).join(', ');
+        return `<tr>
+          <td>${fmtDate(s.date)}</td>
+          <td style="max-width:280px;font-size:0.85rem">${escapeHtml(exNames.slice(0,80))}</td>
+          <td>${s.bestWallHold ? s.bestWallHold+'с' : '—'}</td>
+          <td>${s.bestFreeHold ? s.bestFreeHold+'с' : '—'}</td>
+          <td>${s.wristComfort ? s.wristComfort+'/5' : '—'}</td>
+          <td style="max-width:200px;font-size:0.85rem">${escapeHtml((s.notes||'').slice(0,80))}</td>
+          <td><button type="button" class="sport-del-session" data-id="${s.id}" style="color:var(--text-muted);background:none;border:none;cursor:pointer;font-size:0.8rem">✕</button></td>
+        </tr>`;
+      }).join('') : `<tr><td colspan="7" class="empty">Нет записей. После тренировки нажми «Выполнено» у любого упражнения.</td></tr>`;
+
+      // --- Вкладка: AI-тренер ---
+      const aiKey = data.aiKey || '';
+      const aiMessages = (data.aiMessages || []).slice(-20);
+      const aiHistoryHtml = aiMessages.length ? aiMessages.map(m =>
+        `<div class="sport-ai-msg sport-ai-${m.role}">
+          <div class="sport-ai-role">${m.role === 'user' ? 'Ты' : 'AI-тренер'}</div>
+          <div class="sport-ai-text">${escapeHtml(m.content)}</div>
+        </div>`
+      ).join('') : '<p style="color:var(--text-muted);font-size:0.875rem">История пуста. Задай вопрос тренеру — он видит твои последние тренировки.</p>';
+
+      return `
+        <div class="gtd-tabs" id="sport-tabs">
+          <button type="button" class="gtd-tab active" data-tab="program">Программа</button>
+          <button type="button" class="gtd-tab" data-tab="diary">Дневник</button>
+          <button type="button" class="gtd-tab" data-tab="ai">AI-тренер</button>
+          <button type="button" class="gtd-tab" data-tab="log">Добавить запись</button>
+        </div>
+
+        <!-- Программа -->
+        <div id="sport-panel-program" class="gtd-panel active">
+          <div class="sport-prog-header">
+            <div>
+              <h2 style="margin:0 0 4px">${escapeHtml(prog.title)}</h2>
+              <p style="margin:0;color:var(--text-muted);font-size:0.875rem">${escapeHtml(prog.goal)}</p>
+            </div>
+            <div class="sport-week-badge">Неделя ${weekDisplay} / 16</div>
+          </div>
+
+          <div class="sport-phase-nav" id="sport-phase-nav">${phasesNav}</div>
+
+          <div id="sport-phase-content">
+            <div class="sport-phase-block">
+              <div class="sport-phase-title">
+                <strong>Фаза ${phase.phase} — ${escapeHtml(phase.name)}</strong>
+                <span style="color:var(--text-muted);font-size:0.875rem">Нед. ${phase.weeks[0]}–${phase.weeks[phase.weeks.length-1]}</span>
+              </div>
+              <p style="color:var(--text-muted);font-size:0.875rem;margin:0 0 16px">${escapeHtml(phase.goal)}</p>
+              <div class="sport-ex-list">${todayExercises}</div>
+            </div>
+          </div>
+
+          <h3 style="margin:28px 0 12px;font-size:0.8rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-muted)">Контрольные точки</h3>
+          <div class="sport-checkpoints">${checkpointsHtml}</div>
+        </div>
+
+        <!-- Дневник -->
+        <div id="sport-panel-diary" class="gtd-panel">
+          <div class="gtd-table-wrap">
+            <table class="gtd-table">
+              <thead><tr><th>Дата</th><th>Упражнения</th><th>Стойка у стены</th><th>Свободная</th><th>Запястья</th><th>Заметки</th><th></th></tr></thead>
+              <tbody id="sport-diary-tbody">${diaryRows}</tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- AI-тренер -->
+        <div id="sport-panel-ai" class="gtd-panel">
+          <div style="margin-bottom:16px;padding:14px;background:var(--locked-bg);border-radius:8px;border:1px solid var(--border)">
+            <label style="font-size:0.875rem;font-weight:500;display:block;margin-bottom:6px">Claude API Key (хранится только в браузере)</label>
+            <div style="display:flex;gap:8px">
+              <input type="password" id="sport-ai-key" placeholder="sk-ant-..." value="${escapeHtml(aiKey)}" style="flex:1;padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-size:0.875rem">
+              <button type="button" id="sport-ai-key-save" class="gtd-login-btn" style="white-space:nowrap">Сохранить</button>
+            </div>
+          </div>
+          <div id="sport-ai-history" class="sport-ai-history">${aiHistoryHtml}</div>
+          <div class="sport-ai-input-row">
+            <textarea id="sport-ai-input" placeholder="Спроси тренера — например: «Запястья немного болят после вчерашней сессии, что делать?» или «Можешь оценить мой прогресс и скорректировать план?»" rows="3"></textarea>
+            <button type="button" id="sport-ai-send" class="gtd-login-btn">Отправить</button>
+          </div>
+          <p style="font-size:0.8rem;color:var(--text-muted);margin-top:8px">Тренер автоматически видит твои последние 10 тренировок и текущую фазу программы.</p>
+        </div>
+
+        <!-- Добавить запись -->
+        <div id="sport-panel-log" class="gtd-panel">
+          <p class="gtd-overview">Ручная запись тренировочной сессии. Можно также использовать кнопку «Выполнено» у каждого упражнения.</p>
+          <form id="sport-log-form" class="health-add-form">
+            <div class="health-form-row">
+              <label>Дата *</label>
+              <input type="date" id="sport-log-date" required value="${new Date().toISOString().slice(0,10)}">
+            </div>
+            <div class="health-form-row">
+              <label>Лучший hold у стены (сек)</label>
+              <input type="number" id="sport-log-wall" placeholder="0" min="0" max="300">
+            </div>
+            <div class="health-form-row">
+              <label>Лучший свободный hold (сек)</label>
+              <input type="number" id="sport-log-free" placeholder="0" min="0" max="60">
+            </div>
+            <div class="health-form-row">
+              <label>Запястья (1–5, где 5 = отлично)</label>
+              <input type="number" id="sport-log-wrist" placeholder="5" min="1" max="5">
+            </div>
+            <div class="health-form-row">
+              <label>Заметки</label>
+              <textarea id="sport-log-notes" rows="3" placeholder="Что получилось, что не вышло, самочувствие" style="padding:8px;border:1px solid var(--border);border-radius:6px;font-size:0.875rem;font-family:inherit;width:100%"></textarea>
+            </div>
+            <button type="submit" class="gtd-login-btn">Сохранить тренировку</button>
+          </form>
+        </div>
+
+        <!-- Модал: отметить упражнение -->
+        <div id="sport-ex-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.35);z-index:1000;align-items:center;justify-content:center">
+          <div style="background:var(--card-bg);border-radius:12px;padding:28px;width:420px;max-width:94vw;box-shadow:0 8px 32px rgba(0,0,0,0.15)">
+            <h3 id="sport-modal-title" style="margin:0 0 16px;font-size:1.1rem"></h3>
+            <div class="health-add-form">
+              <div class="health-form-row">
+                <label>Подходы / повторы / время</label>
+                <input type="text" id="sport-modal-sets" placeholder="напр. 3×30 сек или 15 попыток">
+              </div>
+              <div class="health-form-row">
+                <label>Усилие RPE (1–10)</label>
+                <input type="number" id="sport-modal-rpe" placeholder="7" min="1" max="10">
+              </div>
+              <div class="health-form-row">
+                <label>Hold у стены (сек, если было)</label>
+                <input type="number" id="sport-modal-wall" placeholder="0" min="0">
+              </div>
+              <div class="health-form-row">
+                <label>Свободный hold (сек, если было)</label>
+                <input type="number" id="sport-modal-free" placeholder="0" min="0">
+              </div>
+              <div class="health-form-row">
+                <label>Заметка</label>
+                <input type="text" id="sport-modal-notes" placeholder="коротко что получилось / не вышло">
+              </div>
+              <div style="display:flex;gap:10px;margin-top:8px">
+                <button type="button" id="sport-modal-save" class="gtd-login-btn">Сохранить</button>
+                <button type="button" id="sport-modal-cancel" style="padding:8px 16px;border:1px solid var(--border);border-radius:6px;cursor:pointer;background:none">Отмена</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function bindSport() {
+      // Tabs
+      document.querySelectorAll('#sport-tabs .gtd-tab').forEach(tab => {
+        tab.onclick = () => {
+          const id = tab.dataset.tab;
+          document.querySelectorAll('#sport-tabs .gtd-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === id));
+          document.querySelectorAll('[id^="sport-panel-"]').forEach(p => p.classList.toggle('active', p.id === 'sport-panel-' + id));
+        };
+      });
+
+      // Phase nav
+      document.querySelectorAll('#sport-phase-nav .sport-phase-btn').forEach(btn => {
+        btn.onclick = () => {
+          const phaseNum = parseInt(btn.dataset.phase);
+          const phase = HANDSTAND_PROGRAM.phases.find(p => p.phase === phaseNum);
+          if (!phase) return;
+          document.querySelectorAll('#sport-phase-nav .sport-phase-btn').forEach(b => b.classList.toggle('active', parseInt(b.dataset.phase) === phaseNum));
+          const container = document.getElementById('sport-phase-content');
+          const exList = phase.session.map(s => {
+            const ex = HANDSTAND_PROGRAM.exercises[s.ex];
+            return `<div class="sport-ex-row" data-exid="${s.ex}">
+              <div class="sport-ex-info">
+                <strong>${escapeHtml(ex.name)}</strong>
+                <span class="sport-ex-note">${escapeHtml(s.note)}</span>
+                <div class="sport-ex-desc">${escapeHtml(ex.desc)}</div>
+                <div class="sport-ex-why">Зачем: ${escapeHtml(ex.why)}</div>
+              </div>
+              <button type="button" class="sport-log-btn" data-exid="${s.ex}" data-exname="${escapeHtml(ex.name)}">Выполнено</button>
+            </div>`;
+          }).join('');
+          container.innerHTML = `<div class="sport-phase-block">
+            <div class="sport-phase-title">
+              <strong>Фаза ${phase.phase} — ${escapeHtml(phase.name)}</strong>
+              <span style="color:var(--text-muted);font-size:0.875rem">Нед. ${phase.weeks[0]}–${phase.weeks[phase.weeks.length-1]}</span>
+            </div>
+            <p style="color:var(--text-muted);font-size:0.875rem;margin:0 0 16px">${escapeHtml(phase.goal)}</p>
+            <div class="sport-ex-list">${exList}</div>
+          </div>`;
+          bindSportLogBtns();
+        };
+      });
+
+      bindSportLogBtns();
+
+      // Checkpoint buttons
+      document.querySelectorAll('.sport-cp-btn').forEach(btn => {
+        btn.onclick = () => {
+          const week = parseInt(btn.dataset.week);
+          const data = loadSportData();
+          if (!data.checkpoints) data.checkpoints = {};
+          data.checkpoints[week] = data.checkpoints[week] ? null : new Date().toISOString().slice(0,10);
+          saveSportData(data);
+          btn.textContent = data.checkpoints[week] ? '✓' : '○';
+          btn.classList.toggle('done', !!data.checkpoints[week]);
+          btn.closest('.sport-checkpoint').classList.toggle('done', !!data.checkpoints[week]);
+        };
+      });
+
+      // Delete session
+      document.querySelectorAll('.sport-del-session').forEach(btn => {
+        btn.onclick = () => {
+          if (!confirm('Удалить эту запись?')) return;
+          const data = loadSportData();
+          data.sessions = (data.sessions||[]).filter(s => s.id !== btn.dataset.id);
+          saveSportData(data);
+          selectSection('sport');
+        };
+      });
+
+      // Log form
+      const logForm = document.getElementById('sport-log-form');
+      if (logForm) logForm.onsubmit = function(e) {
+        e.preventDefault();
+        const data = loadSportData();
+        const date = document.getElementById('sport-log-date').value;
+        const session = {
+          id: Date.now().toString(),
+          date,
+          programId: HANDSTAND_PROGRAM.id,
+          exercises: [],
+          bestWallHold: parseInt(document.getElementById('sport-log-wall').value) || 0,
+          bestFreeHold: parseInt(document.getElementById('sport-log-free').value) || 0,
+          wristComfort: parseInt(document.getElementById('sport-log-wrist').value) || 0,
+          notes: document.getElementById('sport-log-notes').value.trim()
+        };
+        if (!data.sessions) data.sessions = [];
+        data.sessions.push(session);
+        saveSportData(data);
+        selectSection('sport');
+        setTimeout(() => {
+          document.querySelectorAll('#sport-tabs .gtd-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === 'diary'));
+          document.querySelectorAll('[id^="sport-panel-"]').forEach(p => p.classList.toggle('active', p.id === 'sport-panel-diary'));
+        }, 50);
+      };
+
+      // AI key save
+      const aiKeySave = document.getElementById('sport-ai-key-save');
+      if (aiKeySave) aiKeySave.onclick = () => {
+        const key = (document.getElementById('sport-ai-key').value || '').trim();
+        const data = loadSportData();
+        data.aiKey = key;
+        saveSportData(data);
+        aiKeySave.textContent = 'Сохранено ✓';
+        setTimeout(() => aiKeySave.textContent = 'Сохранить', 1500);
+      };
+
+      // AI send
+      const aiSend = document.getElementById('sport-ai-send');
+      if (aiSend) aiSend.onclick = () => sendSportAI();
+
+      document.getElementById('sport-ai-input').onkeydown = function(e) {
+        if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) sendSportAI();
+      };
+    }
+
+    function bindSportLogBtns() {
+      let _currentExId = null, _currentExName = null;
+      document.querySelectorAll('.sport-log-btn').forEach(btn => {
+        btn.onclick = () => {
+          _currentExId = btn.dataset.exid;
+          _currentExName = btn.dataset.exname;
+          document.getElementById('sport-modal-title').textContent = _currentExName;
+          document.getElementById('sport-modal-sets').value = '';
+          document.getElementById('sport-modal-rpe').value = '';
+          document.getElementById('sport-modal-wall').value = '';
+          document.getElementById('sport-modal-free').value = '';
+          document.getElementById('sport-modal-notes').value = '';
+          const modal = document.getElementById('sport-ex-modal');
+          modal.style.display = 'flex';
+
+          document.getElementById('sport-modal-cancel').onclick = () => { modal.style.display = 'none'; };
+          document.getElementById('sport-modal-save').onclick = () => {
+            const data = loadSportData();
+            const today = new Date().toISOString().slice(0,10);
+            if (!data.sessions) data.sessions = [];
+            let session = data.sessions.find(s => s.date === today && s.programId === HANDSTAND_PROGRAM.id);
+            if (!session) {
+              session = { id: Date.now().toString(), date: today, programId: HANDSTAND_PROGRAM.id, exercises: [], bestWallHold: 0, bestFreeHold: 0, wristComfort: 5, notes: '' };
+              data.sessions.push(session);
+            }
+            const wallVal = parseInt(document.getElementById('sport-modal-wall').value) || 0;
+            const freeVal = parseInt(document.getElementById('sport-modal-free').value) || 0;
+            session.exercises.push({
+              exerciseId: _currentExId,
+              sets: document.getElementById('sport-modal-sets').value.trim(),
+              rpe: parseInt(document.getElementById('sport-modal-rpe').value) || null,
+              notes: document.getElementById('sport-modal-notes').value.trim()
+            });
+            if (wallVal > session.bestWallHold) session.bestWallHold = wallVal;
+            if (freeVal > session.bestFreeHold) session.bestFreeHold = freeVal;
+            saveSportData(data);
+            modal.style.display = 'none';
+            btn.textContent = '✓ Записано';
+            btn.style.background = '#38a169';
+            btn.style.color = '#fff';
+            btn.disabled = true;
+          };
+        };
+      });
+    }
+
+    async function sendSportAI() {
+      const data = loadSportData();
+      const key = (data.aiKey || '').trim();
+      if (!key) { alert('Сначала введи Claude API Key в поле выше.'); return; }
+      const input = document.getElementById('sport-ai-input');
+      const userText = (input.value || '').trim();
+      if (!userText) return;
+
+      // Build context from last 10 sessions
+      const sessions = (data.sessions || []).slice().sort((a,b) => (b.date||'').localeCompare(a.date||'')).slice(0,10);
+      const phase = sportCurrentPhase();
+      const prog = HANDSTAND_PROGRAM;
+      const start = new Date(prog.startDate);
+      const weekNum = Math.min(Math.max(1, Math.ceil((new Date() - start) / (7*24*3600*1000))), 16);
+
+      const sessionsSummary = sessions.length ? sessions.map(s => {
+        const exNames = (s.exercises||[]).map(e => prog.exercises[e.exerciseId]?.name || e.exerciseId).join(', ');
+        return `${s.date}: упражнения [${exNames||'—'}], стойка у стены ${s.bestWallHold||0}с, свободная ${s.bestFreeHold||0}с, запястья ${s.wristComfort||'—'}/5, заметки: ${s.notes||'—'}`;
+      }).join('\n') : 'Нет записанных тренировок.';
+
+      const systemPrompt = `Ты опытный тренер по акробатике и гимнастике, специализируешься на стойке на руках.
+Ты помогаешь атлету освоить свободную стойку на руках за 16 недель по структурированной программе.
+
+ТЕКУЩЕЕ СОСТОЯНИЕ:
+- Программа: ${prog.title}
+- Цель: ${prog.goal}
+- Текущая неделя: ${weekNum} из 16
+- Текущая фаза: ${phase.phase} — ${phase.name} (нед. ${phase.weeks[0]}–${phase.weeks[phase.weeks.length-1]})
+- Цель фазы: ${phase.goal}
+
+ПОСЛЕДНИЕ ТРЕНИРОВКИ:
+${sessionsSummary}
+
+Давай конкретные, практические рекомендации. Если видишь проблему — предлагай конкретную корректировку (добавить упражнение, изменить объём, сделать акцент). Отвечай по-русски.`;
+
+      const aiMessages = data.aiMessages || [];
+      aiMessages.push({ role: 'user', content: userText });
+      data.aiMessages = aiMessages.slice(-30);
+      saveSportData(data);
+      input.value = '';
+
+      // Re-render history with user message
+      const historyEl = document.getElementById('sport-ai-history');
+      historyEl.innerHTML = (data.aiMessages||[]).map(m =>
+        `<div class="sport-ai-msg sport-ai-${m.role}">
+          <div class="sport-ai-role">${m.role === 'user' ? 'Ты' : 'AI-тренер'}</div>
+          <div class="sport-ai-text">${escapeHtml(m.content)}</div>
+        </div>`
+      ).join('') + '<div class="sport-ai-msg sport-ai-assistant"><div class="sport-ai-role">AI-тренер</div><div class="sport-ai-text" id="sport-ai-streaming">…</div></div>';
+      historyEl.scrollTop = historyEl.scrollHeight;
+
+      const sendBtn = document.getElementById('sport-ai-send');
+      sendBtn.disabled = true;
+      sendBtn.textContent = '…';
+
+      try {
+        const apiMessages = aiMessages.slice(-10).map(m => ({ role: m.role, content: m.content }));
+        const resp = await fetch('https://api.anthropic.com/v1/messages', {
+          method: 'POST',
+          headers: {
+            'x-api-key': key,
+            'anthropic-version': '2023-06-01',
+            'content-type': 'application/json',
+            'anthropic-dangerous-direct-browser-access': 'true'
+          },
+          body: JSON.stringify({
+            model: 'claude-haiku-4-5-20251001',
+            max_tokens: 1024,
+            system: systemPrompt,
+            messages: apiMessages
+          })
+        });
+        if (!resp.ok) {
+          const err = await resp.json().catch(() => ({}));
+          throw new Error(err.error?.message || 'Ошибка API ' + resp.status);
+        }
+        const result = await resp.json();
+        const assistantText = result.content?.[0]?.text || '(нет ответа)';
+        const freshData = loadSportData();
+        if (!freshData.aiMessages) freshData.aiMessages = [];
+        freshData.aiMessages.push({ role: 'assistant', content: assistantText });
+        freshData.aiMessages = freshData.aiMessages.slice(-30);
+        saveSportData(freshData);
+        document.getElementById('sport-ai-streaming').textContent = assistantText;
+        historyEl.scrollTop = historyEl.scrollHeight;
+      } catch(err) {
+        document.getElementById('sport-ai-streaming').textContent = 'Ошибка: ' + (err.message || 'нет ответа');
+      } finally {
+        sendBtn.disabled = false;
+        sendBtn.textContent = 'Отправить';
+      }
+    }
 
     renderSidebar();
     selectSection('overview');

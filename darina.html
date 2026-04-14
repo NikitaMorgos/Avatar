@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Дарина · Книга детства</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #faf9f7;
+      --sidebar-bg: #f2efe9;
+      --card: #ffffff;
+      --text: #2d2a24;
+      --muted: #7a7570;
+      --accent: #8b5e3c;
+      --accent2: #6d4a2e;
+      --border: #e5e0d8;
+      --warm: #c4a882;
+      --page-bg: #fffef9;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'DM Sans', -apple-system, sans-serif; background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+
+    /* ── AUTH ── */
+    #auth-overlay { position: fixed; inset: 0; background: var(--bg); display: flex; align-items: center; justify-content: center; z-index: 200; }
+    .auth-box { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 44px 40px; width: 340px; text-align: center; }
+    .auth-box h1 { font-family: 'Cormorant Garamond', serif; font-size: 2rem; font-weight: 300; margin-bottom: 4px; }
+    .auth-box p { color: var(--muted); font-size: 0.85rem; margin-bottom: 24px; }
+    .auth-box input { display: block; width: 100%; padding: 9px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.875rem; font-family: inherit; background: var(--bg); color: var(--text); margin-bottom: 9px; }
+    .auth-box input:focus { outline: 2px solid var(--accent); border-color: transparent; }
+    .auth-box button { width: 100%; padding: 9px; background: var(--accent); color: #fff; border: none; border-radius: 6px; font-size: 0.875rem; font-family: inherit; cursor: pointer; margin-top: 2px; }
+    .auth-box button:hover { background: var(--accent2); }
+    #auth-err { color: #c0392b; font-size: 0.8rem; margin-top: 8px; display: none; }
+
+    /* ── TOPBAR ── */
+    .topbar { height: 50px; background: var(--card); border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 18px; gap: 20px; flex-shrink: 0; }
+    .topbar-title { font-family: 'Cormorant Garamond', serif; font-size: 1.1rem; font-weight: 400; white-space: nowrap; }
+    .topbar-title span { color: var(--muted); }
+    .tabs { display: flex; gap: 3px; }
+    .tab { padding: 5px 13px; border: none; border-radius: 5px; font-size: 0.83rem; font-family: inherit; cursor: pointer; background: none; color: var(--muted); transition: all .12s; }
+    .tab:hover { background: var(--sidebar-bg); color: var(--text); }
+    .tab.on { background: var(--accent); color: #fff; }
+    #top-stats { margin-left: auto; font-size: 0.78rem; color: var(--muted); white-space: nowrap; }
+
+    /* ── LAYOUT ── */
+    #app { display: none; flex-direction: column; height: 100vh; }
+    .body { display: flex; flex: 1; overflow: hidden; }
+
+    /* ── SIDEBAR ── */
+    .sidebar { width: 215px; min-width: 215px; background: var(--sidebar-bg); border-right: 1px solid var(--border); overflow-y: auto; display: flex; flex-direction: column; }
+    .sb-add { margin: 10px 10px 6px; padding: 7px; background: var(--accent); color: #fff; border: none; border-radius: 6px; font-size: 0.82rem; font-family: inherit; cursor: pointer; }
+    .sb-add:hover { background: var(--accent2); }
+    .sb-export { margin: 0 10px 10px; padding: 5px; background: none; color: var(--muted); border: 1px solid var(--border); border-radius: 6px; font-size: 0.76rem; font-family: inherit; cursor: pointer; }
+    .sb-export:hover { background: var(--border); }
+    #year-nav { flex: 1; }
+    .yr-btn { width: 100%; padding: 6px 14px; background: none; border: none; text-align: left; font-size: 0.75rem; font-weight: 600; color: var(--muted); cursor: pointer; display: flex; align-items: center; justify-content: space-between; text-transform: uppercase; letter-spacing: .05em; }
+    .yr-btn:hover, .yr-btn.open { color: var(--accent); }
+    .yr-cnt { font-size: 0.68rem; background: var(--border); border-radius: 9px; padding: 1px 6px; }
+    .yr-entries { display: none; }
+    .yr-entries.open { display: block; }
+    .er { padding: 4px 14px 4px 22px; font-size: 0.78rem; cursor: pointer; color: var(--muted); border-left: 2px solid transparent; line-height: 1.35; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .er:hover { background: rgba(0,0,0,.04); color: var(--text); }
+    .er.on { border-left-color: var(--accent); color: var(--text); background: rgba(139,94,60,.07); }
+    .er-icon { margin-right: 4px; }
+
+    /* ── MAIN ── */
+    .main { flex: 1; overflow-y: auto; }
+
+    /* ── EDITOR ── */
+    .editor { padding: 26px 30px; max-width: 680px; }
+    .editor h2 { font-family: 'Cormorant Garamond', serif; font-size: 1.35rem; font-weight: 400; margin-bottom: 18px; }
+    .frow { display: flex; gap: 10px; margin-bottom: 13px; }
+    .fg { display: flex; flex-direction: column; gap: 4px; flex: 1; }
+    .fg label { font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
+    .fg select, .fg input[type=text], .fg textarea { padding: 7px 10px; border: 1px solid var(--border); border-radius: 5px; font-size: 0.875rem; font-family: inherit; background: var(--card); color: var(--text); width: 100%; }
+    .fg select:focus, .fg input[type=text]:focus, .fg textarea:focus { outline: 2px solid var(--accent); border-color: transparent; }
+    .fg textarea { resize: vertical; min-height: 110px; line-height: 1.65; }
+    .photo-area { border: 2px dashed var(--border); border-radius: 7px; padding: 18px; text-align: center; cursor: pointer; min-height: 100px; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 6px; transition: border-color .12s; }
+    .photo-area:hover { border-color: var(--accent); }
+    .photo-area img { max-width: 100%; max-height: 220px; border-radius: 5px; }
+    .photo-hint { color: var(--muted); font-size: 0.78rem; }
+    .actions { display: flex; gap: 8px; margin-top: 18px; flex-wrap: wrap; }
+    .btn-p { padding: 7px 18px; background: var(--accent); color: #fff; border: none; border-radius: 5px; font-family: inherit; font-size: 0.875rem; cursor: pointer; }
+    .btn-p:hover { background: var(--accent2); }
+    .btn-s { padding: 7px 14px; background: none; color: var(--muted); border: 1px solid var(--border); border-radius: 5px; font-family: inherit; font-size: 0.875rem; cursor: pointer; }
+    .btn-s:hover { background: var(--sidebar-bg); }
+    .btn-d { padding: 7px 14px; background: none; color: #c0392b; border: 1px solid #c0392b; border-radius: 5px; font-family: inherit; font-size: 0.875rem; cursor: pointer; }
+    .btn-d:hover { background: #fdecea; }
+    .tag-wrap { display: flex; flex-wrap: wrap; gap: 5px; }
+    .tg { padding: 3px 9px; border-radius: 11px; font-size: 0.72rem; border: 1px solid var(--border); cursor: pointer; background: var(--card); color: var(--muted); }
+    .tg.on { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .empty { padding: 60px 30px; text-align: center; color: var(--muted); }
+    .empty h3 { font-family: 'Cormorant Garamond', serif; font-size: 1.6rem; font-weight: 300; color: var(--text); margin-bottom: 10px; }
+
+    /* ── PREVIEW ── */
+    .preview { padding: 28px; background: #e8e4db; }
+    .prev-bar { display: flex; align-items: center; gap: 12px; margin-bottom: 22px; }
+    .prev-bar h2 { font-size: 0.85rem; font-weight: 600; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); }
+    .pages { display: flex; flex-direction: column; gap: 22px; align-items: center; }
+    .pg { width: 540px; min-height: 756px; background: var(--page-bg); box-shadow: 0 2px 18px rgba(0,0,0,.09); border-radius: 2px; padding: 50px 42px 56px; display: flex; flex-direction: column; position: relative; }
+    .pg-num { position: absolute; bottom: 20px; right: 36px; font-size: 0.67rem; color: #ccc; }
+    /* year opener */
+    .pg-yr { justify-content: flex-start; }
+    .yr-big { font-family: 'Cormorant Garamond', serif; font-size: 5.5rem; font-weight: 300; color: var(--warm); line-height: 1; margin-bottom: 2px; }
+    .yr-age { font-size: 0.85rem; color: var(--muted); margin-bottom: 28px; }
+    .yr-fact { font-size: 0.82rem; color: var(--muted); border-left: 3px solid var(--warm); padding-left: 13px; line-height: 1.75; font-style: italic; max-width: 400px; margin-bottom: 28px; }
+    .yr-photo { margin-top: auto; width: 100%; height: 260px; background: #edeae3; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: #bfb3a3; font-size: 0.78rem; overflow: hidden; }
+    .yr-photo img { width: 100%; height: 100%; object-fit: cover; }
+    /* notes */
+    .pg-notes .nb { margin-bottom: 26px; }
+    .pg-notes .nb:last-child { margin-bottom: 0; }
+    .nd { font-size: 0.67rem; font-weight: 600; text-transform: uppercase; letter-spacing: .07em; color: var(--warm); margin-bottom: 5px; }
+    .nt { font-family: 'Cormorant Garamond', serif; font-size: 1.02rem; line-height: 1.85; white-space: pre-wrap; }
+    /* photo page */
+    .pg-ph .ph-img { width: 100%; flex: 1; min-height: 300px; background: #edeae3; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: #bfb3a3; font-size: 0.78rem; overflow: hidden; margin-bottom: 18px; }
+    .pg-ph .ph-img img { width: 100%; height: 100%; object-fit: cover; border-radius: 4px; }
+    /* quote */
+    .pg-qt { justify-content: center; }
+    .qt-mark { font-family: 'Cormorant Garamond', serif; font-size: 6rem; line-height: .55; color: var(--warm); margin-bottom: 22px; }
+    .qt-text { font-family: 'Cormorant Garamond', serif; font-size: 1.45rem; font-style: italic; line-height: 1.8; }
+    .qt-attr { margin-top: 20px; font-size: 0.78rem; color: var(--muted); }
+    /* drawing */
+    .pg-dr .dr-img { width: 100%; flex: 0 0 340px; background: #fafaf6; border: 1px solid var(--border); border-radius: 4px; display: flex; align-items: center; justify-content: center; color: #bfb3a3; font-size: 0.78rem; overflow: hidden; margin-bottom: 14px; }
+    .pg-dr .dr-img img { max-width: 100%; max-height: 340px; object-fit: contain; }
+    .dr-cap { font-family: 'Cormorant Garamond', serif; font-size: 0.9rem; color: var(--muted); text-align: center; font-style: italic; }
+    /* special */
+    .pg-sp .sp-head { font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--warm); margin-bottom: 14px; }
+
+    /* ── CONCEPT ── */
+    .concept { padding: 30px 36px; max-width: 700px; }
+    .concept h1 { font-family: 'Cormorant Garamond', serif; font-size: 1.9rem; font-weight: 300; margin-bottom: 6px; }
+    .concept .lead { color: var(--muted); font-size: 0.9rem; line-height: 1.75; margin-bottom: 24px; }
+    .concept h2 { font-family: 'Cormorant Garamond', serif; font-size: 1.15rem; font-weight: 500; color: var(--accent); margin: 26px 0 9px; }
+    .concept p { font-size: 0.875rem; line-height: 1.75; margin-bottom: 9px; }
+    .concept ul { margin: 0 0 12px 16px; }
+    .concept li { font-size: 0.85rem; line-height: 1.7; margin-bottom: 3px; }
+    .ctbl { width: 100%; border-collapse: collapse; font-size: 0.82rem; margin: 10px 0 18px; }
+    .ctbl th { text-align: left; padding: 7px 11px; background: var(--sidebar-bg); font-weight: 600; border: 1px solid var(--border); }
+    .ctbl td { padding: 7px 11px; border: 1px solid var(--border); vertical-align: top; }
+
+    /* ── PRINT ── */
+    @media print {
+      body { overflow: visible; height: auto; }
+      .topbar, .sidebar, #auth-overlay, .prev-bar { display: none !important; }
+      .body { display: block; }
+      .main { overflow: visible; }
+      .preview { padding: 0; background: white; }
+      .pages { gap: 0; }
+      .pg { width: 190mm; min-height: 265mm; box-shadow: none; border-radius: 0; padding: 18mm 18mm 22mm 14mm; page-break-after: always; margin: 0 auto; }
+    }
+
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  </style>
+</head>
+<body>
+
+<!-- AUTH -->
+<div id="auth-overlay">
+  <div class="auth-box">
+    <h1>Дарина</h1>
+    <p>Книга детства · личный раздел</p>
+    <input type="email" id="ae" placeholder="Email" autocomplete="email">
+    <input type="password" id="ap" placeholder="Пароль" autocomplete="current-password">
+    <button id="ab">Войти</button>
+    <p id="auth-err">Неверный email или пароль</p>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <div class="topbar">
+    <span class="topbar-title">Дарина <span>· Книга детства</span></span>
+    <div class="tabs">
+      <button class="tab on" data-tab="editor">✏️ Редактор</button>
+      <button class="tab" data-tab="preview">📖 Предпросмотр</button>
+      <button class="tab" data-tab="concept">💡 Концепция</button>
+    </div>
+    <span id="top-stats"></span>
+  </div>
+  <div class="body">
+    <div class="sidebar">
+      <button class="sb-add" id="add-btn">+ Добавить запись</button>
+      <button class="sb-export" id="exp-btn">⬇ Экспорт JSON</button>
+      <div id="year-nav"></div>
+    </div>
+    <div class="main" id="main"></div>
+  </div>
+</div>
+
+<script>
+// ── CREDENTIALS ──────────────────────────────────────────────────────────────
+const CREDS = [
+  { email: 'n.morgos@gmail.com', password: 'Nthvbyfk2020' },
+  { email: 'dyeska@yandex.ru',   password: 'darina' }
+];
+
+// ── CONSTANTS ─────────────────────────────────────────────────────────────────
+const SK = 'darina_book_v1';
+const YEARS = [2011,2012,2013,2014,2015,2016,2017,2018];
+const MONTHS = ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
+const TYPES = [
+  {id:'note',       label:'Заметка',            icon:'✍️'},
+  {id:'note-photo', label:'Заметка + фото',      icon:'📷'},
+  {id:'quote',      label:'Цитата (крупно)',      icon:'💬'},
+  {id:'drawing',    label:'Рисунок',              icon:'🎨'},
+  {id:'year-opener',label:'Год-заставка',         icon:'📅'},
+  {id:'map',        label:'География / карта',    icon:'🗺️'},
+  {id:'vocabulary', label:'Словарик',             icon:'📖'},
+  {id:'music',      label:'Музыка',               icon:'🎵'},
+  {id:'letter',     label:'Письмо',               icon:'💌'},
+  {id:'characters', label:'Персонажи',            icon:'👥'},
+];
+const TAGS = ['еда','животные','путешествия','дома','друзья','музыка','слова','игры','характер'];
+const TICONS = Object.fromEntries(TYPES.map(t => [t.id, t.icon]));
+
+const HIST = {
+  2011: 'Ты родилась в год, когда население Земли достигло 7 миллиардов. Ты — один из первых жителей нового миллиарда.',
+  2012: 'В этом году физики открыли бозон Хиггса — частицу, из которой сделана масса всего вещества. В том числе тебя.',
+  2013: 'Эдвард Сноуден рассказал миру, что за всеми следят. Ты в это время осваивала куда более важное дело — учила разницу между «тебе» и «мне».',
+  2014: 'В Сочи прошла зимняя Олимпиада. Ты ещё не знала, что через несколько лет сама спустишься с тех гор.',
+  2015: 'Мировые переговоры по климату, Париж. Ты уже тогда знала главное: никогда не убирать, если лень.',
+  2016: 'Появился Pokémon Go — люди ловили виртуальных существ. Ты к тому времени три года охотилась за козочками и дельфинами вживую.',
+  2017: 'Вышел iPhone X с распознаванием лица. Ты читала папины эмоции лучше любой нейросети.',
+  2018: 'В России прошёл Чемпионат мира по футболу. А ты первого сентября пошла в первый класс — и началась совсем другая глава.',
+};
+
+// ── SEED DATA ─────────────────────────────────────────────────────────────────
+const SEED = [
+  // Year openers
+  {type:'year-opener',year:2011,month:null,text:'Октябрь 2011 — первые месяцы',caption:'',photo:null,historicFact:''},
+  {type:'year-opener',year:2012,month:null,text:'',caption:'',photo:null,historicFact:''},
+  {type:'year-opener',year:2013,month:null,text:'',caption:'',photo:null,historicFact:''},
+  {type:'year-opener',year:2014,month:null,text:'',caption:'',photo:null,historicFact:''},
+  {type:'year-opener',year:2015,month:null,text:'',caption:'',photo:null,historicFact:''},
+  {type:'year-opener',year:2016,month:null,text:'',caption:'',photo:null,historicFact:''},
+  {type:'year-opener',year:2017,month:null,text:'',caption:'',photo:null,historicFact:''},
+  {type:'year-opener',year:2018,month:null,text:'',caption:'',photo:null,historicFact:''},
+  // 2018
+  {type:'note',year:2018,month:'Июль',text:'"Потуже" — это и чтоб посильней затянуть ремень в кресле, и чтоб покрепче за руку держать, а теперь ещё и чтоб посильней помогать вел везти',tags:['слова']},
+  {type:'note',year:2018,month:'Май',text:'На Красной поляне поход в горы, можем не успеть на подъёмник:\nВасилёк, не бойся, если что мы станем дикарями, научимся листья есть и ветки грызть. Так и заживём',tags:['путешествия','характер']},
+  // 2017
+  {type:'note',year:2017,month:'Июль',text:'Дарюшун в гостях у бабы Тани в Твери. Звонит, увидев фотку в инстаграмме, что бананосушка починилась, и говорит — я там увидела фотографию, вы обязательно мне сушеных бананов оставьте.',tags:['еда','слова']},
+  {type:'note',year:2017,month:'Февраль',text:'Папа, ты куда-то ласковость потерял',tags:['характер']},
+  {type:'note',year:2017,month:'Январь',text:'мы маленькие кошечки\nмы прыгаем в окошечки\nу нас хвосты пушистые\nа лапки наши быстрые',tags:['слова']},
+  // 2016
+  {type:'note',year:2016,month:'Октябрь',text:'Дарюшун про одежду:\nЗдесь пимпочки (на носках колгот, например)\nОни шершавятся (про всё бельё)\nОна надувается (про зимнюю куртку)',tags:['слова']},
+  {type:'note',year:2016,month:'Март',text:'— Эй, не надо так сильно кусякаться\n— Ну это же я от любови кусякаюсь',tags:['характер','слова']},
+  {type:'note',year:2016,month:'Февраль',text:'Пап, ты знаешь, что скоро восьмое Марта. Ты должен принести нам с мамой по сюрпризику. Маме её любимую зелёную гречку, а мне что-нибудь такое сладенькое',tags:['характер','еда']},
+  {type:'note',year:2016,month:'Февраль',text:'— Знаешь почему я иногда злюсь?\n— Потому что я вырасту больно уж взрослой и самой строгой, строже тебя',tags:['характер']},
+  {type:'note',year:2016,month:'Январь',text:'— Котёночек, иди убирайся\n— Я не котёночек, я цветочек\n(а потом отойдя в сторону, тихо: а цветочки не убираются)',tags:['характер','слова']},
+  {type:'note',year:2016,month:'Январь',text:'Мама: тебе нужно вот это (маленькая игрушка)?\nД: да, нужно\nМ: ну, забирай\nД: положи себе, я тебе подарила',tags:['характер']},
+  // 2015
+  {type:'note',year:2015,month:'Август',text:'Дарюшка с мамой качаются на качелях. Дарюшка: папа, скажи своей женщине, чтоб перестала щекотать',tags:['характер']},
+  {type:'music',year:2015,month:'Август',text:'А какая музыка тебе нравится?\n— Только Феофан и ещё Король и Шут и Гоазия',caption:'Первое музыкальное интервью. «Гоазия» — вероятно «Грузия» или что-то услышанное и переиначенное.',tags:['музыка','слова']},
+  {type:'note',year:2015,month:'Апрель',text:'— Надо убрать\n— Не буду убирать\n— Почему это\n— Ленюсь',tags:['характер']},
+  {type:'note',year:2015,month:'Январь',text:'Я думаю мысль. Очень серьёзную мысль. Как крысы вылезали из-под пола. Надо придумать, как их победить.',tags:['характер']},
+  {type:'note',year:2015,month:'Январь',text:'Паап, ложечку медика — каждый вечер перед сном.',tags:['характер']},
+  {type:'note',year:2015,month:'Январь',text:'Лепят все снеговика. О, а из чего будем рот делать? Может из баранки? Даринка — точно из баранки. Берёт баранку и начинает есть. Ой, а как же рот будем делать? Даринка — не, из баранки не получится.',tags:['еда','характер']},
+  {type:'note',year:2015,month:'Январь',text:'Дарюшку вырвало. Несут мыться:\n— У нас проблемы... Боже мой',tags:['характер']},
+  {type:'note',year:2015,month:'Январь',text:'Даринка просит у меня банан — говорю нет, уже поздно. Бежит к маме просит. Мама ко мне отправляет. Даринка ей: не, она жадная, она не даёт мне банан.',tags:['еда','характер']},
+  {type:'note',year:2015,month:'Январь',text:'На Капошваре:\n— Пусть эта квартира будет и наша и баба Танина?\n— Ну пускай.\n— А-бал-деть.',tags:['путешествия','дома']},
+  // 2014
+  {type:'note',year:2014,month:'Ноябрь',text:'Дарина и мама кем-то будут. А кем будет папа?\n— Василиса\n— А он же мальчик\n— Ну тогда он будет Василис',tags:['игры','характер']},
+  {type:'note',year:2014,month:'Сентябрь',text:'— Не кричи, мама, давай я тебе лучше водки налью\n(после того как услышала про водку в сказке у Серго)',tags:['характер','слова']},
+  {type:'note',year:2014,month:'Август',text:'— А как дельфинчика зовут? Мама говорит — Сурфик.\n— Не, говорит Даряква, Сурфик — это такой маленький мышонок.',tags:['животные','слова']},
+  {type:'note',year:2014,month:'Август',text:'Рядом с дельфинарием:\n— Я в тебя брошу бревно, не хочу чтобы ты пел\n(это папе)',tags:['характер']},
+  {type:'note',year:2014,month:'Август',text:'Папа и Даряква садятся на диванчик. Даряква:\n— Так, выпрямим спинку.',tags:['характер']},
+  {type:'note',year:2014,month:'Август',text:'— Мы с папой поругались.\n(Это после того, как папа что-то сказал Дарякве) — и не хочет мириться',tags:['характер']},
+  {type:'note',year:2014,month:'Август',text:'Даряква притирается к папе и просит прокатиться на шее. А мы тебе вечером массаж будем делать — предвосхищает возражения.',tags:['характер']},
+  {type:'note',year:2014,month:'Август',text:'В Болгарии:\n— Мне надо ненадолго отойти, — говорит Даряква и идёт на детскую площадку. Немного катается на лошадке и возвращается.',tags:['путешествия']},
+  {type:'note',year:2014,month:'Август',text:'В Болгарии, сразу на входе в номер:\n— А я ничего такого грязного не трогала. Или: — Я нигде не пачкалась.',tags:['путешествия','характер']},
+  {type:'note',year:2014,month:'Июль',text:'— Не буду слушаться, мне некогда, я режу, — так ответила Дарьква бабушке.',tags:['характер']},
+  {type:'note',year:2014,month:'Июль',text:'«Неважно быть» — неизвестный отрывок, в гостях у Гамми',tags:['слова']},
+  {type:'music',year:2014,month:'Июль',text:'«Тримарталод» — песня про трёх моряков на французском',caption:'Пела сама — придумала или переиначила что-то услышанное.',tags:['музыка','слова']},
+  {type:'note',year:2014,month:'Июль',text:'— А что же делать? (когда возникла какая-то сложность)',tags:['характер']},
+  {type:'note',year:2014,month:'Июль',text:'Даряква увидела гитару:\n— Дай мне, папа. — А кто это «он»? (зажимая струны) — Папа-папа, что я тебе скажу, ой — какать.\n\nПесня Ляписа («Я кормил тебя десертом с вилочки») — кого кормил? Стой, кого кормил? Наверно десерта. Стой, что скажу? Там вечер уже наступил. Играй теперь.',tags:['музыка']},
+  {type:'note',year:2014,month:'Июнь',text:'— Давай ещё как-нибудь сюда приедем',tags:['путешествия','характер']},
+  {type:'note',year:2014,month:'Апрель',text:'Ну давай-ка\nБольшой-пребольшой, один кусочек\nДать кусок сыра, хлеба\nВсе удивятся\nМама всё перепутала',tags:['еда']},
+  {type:'note',year:2014,month:'Март',text:'Лазилка в комнате — это кораблик, на котором все плывут',tags:['игры']},
+  {type:'note',year:2014,month:'Февраль',text:'Дарюха любит немного изогнуться, замереть и манерно построить глазки',tags:['характер']},
+  {type:'note',year:2014,month:'Январь',text:'— Больше всех папа нравится, — сказала Даринка после купания. Очень мимимишно.',tags:['характер']},
+  {type:'note',year:2014,month:'Январь',text:'Огромное разочарование — купили хлеба и пошли кормить козочек, а большая козочка сразу выхватила весь хлеб. Даряква поджала губки и чуть было не разрыдалась. Уткнулась в маму и сказала, что больше не пойдём кормить козочек.',tags:['животные','еда','характер']},
+  {type:'note',year:2014,month:'Январь',text:'Мама научила Дарюху: надо подойти к папе, дёрнуть за штанину и сказать: «Папа, дай йемня».',tags:['еда','слова']},
+  {type:'note',year:2014,month:'Январь',text:'Дарюхе понравились индийские животные — козочки нюхали ручку и лизали, и кепку ещё. А Дарюха к ним бесстрашно подходит и предлагает им сено.',tags:['животные','путешествия']},
+  {type:'note',year:2014,month:'Январь',text:'На таможне индийской:\n— Дядя спросит, а кто это к нам в Индию приехал?\n— А это Даришка',tags:['путешествия']},
+  {type:'note',year:2014,month:'Январь',text:'Дарюхе нравится самодельная песенка «и папа, и мама, и Даринка...» — она всегда просит продолжения. Например «...пойдут гулять» или «...и бегемот стоит»',tags:['музыка','характер']},
+  // 2013
+  {type:'note',year:2013,month:'Декабрь',text:'Дед мороз Дарюхе всю неделю до Нового года клал под ёлку подарочки. А когда её спрашивали, что дед мороз принесёт на Новый год, она просила — хлеба и баранок.',tags:['еда','характер']},
+  {type:'note',year:2013,month:'Декабрь',text:'В гостях у деды Володи — Дарюха перетаскала всех керамических зверей. Они все хоровод водили. Только одну куклу не захотела взять. Дарюхе звери больше людей нра.',tags:['животные','характер']},
+  {type:'note',year:2013,month:'Декабрь',text:'Ребёнку очень сложно понять разницу между «тебе» и «мне».\n«Дать печенюшку тебе»',tags:['слова']},
+  {type:'note',year:2013,month:'Декабрь',text:'Дарюха начинает учить стихи и песенки. Про Крокодила Гену, про Мишку, про Вин Пуха.',tags:['музыка']},
+  {type:'note',year:2013,month:'Ноябрь',text:'Дарюха выучила, какая у неё фамилия — Моргось.',tags:['характер']},
+  {type:'note',year:2013,month:'Ноябрь',text:'Дарюхе стали нравиться истории «про конька». Конёк делает всё то же, что и Даришка. В основном — ходить в кафе.',tags:['еда','характер']},
+  {type:'note',year:2013,month:'Октябрь',text:'— Горшок холодный, надо его погреть.',tags:['характер']},
+  {type:'note',year:2013,month:'Октябрь',text:'Очень быстро у Дарюхи получается играть в игру «Компот — пить, хлеб — есть»',tags:['игры','еда']},
+  {type:'note',year:2013,month:'Октябрь',text:'Если чёто Дарюхе нравится, она просит «есе-есе». Нравится ей в основном вкусная еда.',tags:['еда','слова']},
+  {type:'note',year:2013,month:'Октябрь',text:'Дарюха впервые пошла в ЦИПРП — там её научили каравай водить и в мячики играть.',tags:['игры']},
+  {type:'note',year:2013,month:'Октябрь',text:'Дарюхе показали, как можно играть листьями, ей понравилось кидаться. В Парке Победы, однажды с бабой Таней.',tags:['игры']},
+  {type:'note',year:2013,month:'Сентябрь',text:'Дарюхе очень нравится в кафе — любит там всё заказывать, а потом рассказывать.',tags:['еда','характер']},
+  {type:'note',year:2013,month:'Сентябрь',text:'— Бабушка на меня ругается.\n— А за что ругается?\n— Ругается за горшок',tags:['характер']},
+  {type:'note',year:2013,month:'Сентябрь',text:'Кузнечики чирик-чирик. И сверчки также. Они прячутся в кустах.',tags:['слова']},
+  {type:'note',year:2013,month:'Сентябрь',text:'Дарюха поехала на море, ещё накануне всем говорила, что полетит на самолёте. В аэропортах нравится — там много места и красиво. В этот раз удалось увидеть Даринкин самолёт заранее — он оказался большой и зелёный.',tags:['путешествия']},
+  {type:'note',year:2013,month:'Сентябрь',text:'Дарюха стала прогонять папу — казалось бы, стоит он, никого не трогает, но Дарюха показывает на папу и говорит «папа — уходи», иногда добавляет «на работу», а иногда начинает ругаться и драться.',tags:['характер']},
+  {type:'note',year:2013,month:'Сентябрь',text:'Дарюха побывала на дне рождения Алинки — там ела много хлеба и яблок. А ещё там было две лошадки — одна большая и одна пони. Дарюха сначала наблюдала, а потом согласилась сесть на маленькую пони. Ей понравилось, крепко держалась и проехала полкруга.',tags:['животные','друзья']},
+  {type:'note',year:2013,month:'Август',text:'Дарюха никогда не ела мороженое. Но однажды взяла маленький резиновый мячик, положила его в маленькое ведёрко и сказала — мороженое. Получилось и правда как рожок. Дарюха его минут 10 потом ела.',tags:['еда','игры','характер']},
+  {type:'note',year:2013,month:'Август',text:'Дарюха почему-то боится муху. Она внимательно следит за ней, показывает пальцем и говорит «боится». Вообще, когда Дарюха чего-то боится, она сразу в этом честно признаётся, начинает прижиматься к маме и обнимать её.',tags:['характер']},
+  {type:'note',year:2013,month:'Август',text:'Дарюха очень любит ходить в кафе — там всегда перепадёт что-нить вкусненькое. В «восточной комнате» ей понравилась красивая лампа и много риса. Есть Дарюха может, вроде бы, вообще без остановки, особенно если хлеб и яблоки.',tags:['еда']},
+  {type:'note',year:2013,month:'Август',text:'Дарюха точно знает, что ходить надо «на гофок». И когда неожиданность случается, иногда констатирует «ай-яй-ай».',tags:['слова']},
+  {type:'note',year:2013,month:'Август',text:'«Комары и мошки пляшут по дорожке» — Дарюхе понравился этот танец. Бегает и прыгает вслед за родителями и смеётся. Почти получается топать и хлопать в такт.',tags:['музыка']},
+  {type:'note',year:2013,month:'Август',text:'Даряква надела несколько резиночек на руку, а потом, когда сняла их, заметила отпечатки. Решила, что стоит заплакать, стала говорить «бо-бо» и показывать папе. Папа говорит, что всё нормально — тогда Даряква, отставив руку, побежала к маме жаловаться.',tags:['характер']},
+  {type:'note',year:2013,month:'Август',text:'Даряква обучилась одному приёму: если взять папу за оба уха сразу — он высовывает язык и начинает смешно звучать. С мамой тоже прокатывает — единственное отличие: нельзя с соской в это время быть.',tags:['характер','игры']},
+  // Special entries
+  {type:'vocabulary',year:2016,month:null,
+    text:'пимпочки — бугорки-полоски на носках колготок\nшершавятся — колются, неприятны на ощупь (про бельё)\nнадувается — про пуховик / зимнюю куртку\nкусякаться — кусаться\nсюрпризик — маленький подарок-сюрприз\nгофок — горшок\nесе-есе — ещё-ещё\nбо-бо — больно\nтримарталод — песня про трёх моряков на французском\nневажно быть — неизвестная фраза / песня\nдарьква, даряква — так она называла себя\nбананосушка — сушёные бананы\nай-яй-ай — констатация неожиданности\nйемня — хлеба (от «дай хлебушка»)\nгоазия — Грузия или что-то переиначенное',
+    caption:'Добавляйте сюда новые слова по мере вспоминания',tags:['слова']},
+  {type:'map',year:2014,month:null,
+    text:'Путешествия до школы:\n\n• Москва — дом\n• Тверь — баба Таня\n• Индия — январь 2014 (таможня, козочки, самолёт)\n• Болгария — август 2014\n• Капошвар, Венгрия — 2015\n• Красная поляна, Сочи — май 2018\n• Море (Черноморское) — сентябрь 2013\n\nВсего 6 стран / регионов за первые 7 лет.',
+    caption:'Можно добавить схему-карту с точками',tags:['путешествия']},
+  {type:'music',year:2013,month:null,
+    text:'Музыкальная хронология — заполнить:\n\n2011–2012: колыбельные, что пели дома, что крутилось в машине\n2013: «Комары и мошки пляшут по дорожке», Крокодил Гена, Мишка, Вин Пух\n2014: «Тримарталод», Ляпис Трубецкой («кормил десертом с вилочки»), «и папа и мама и Даринка»\n2015: Феофан, Король и Шут, «Гоазия»\n2016–2018: добавить',
+    caption:'Дополнить совместно — что помним',tags:['музыка']},
+];
+
+// ── STATE ─────────────────────────────────────────────────────────────────────
+let entries = [];
+let curId = null;
+let curTab = 'editor';
+let openYears = new Set([2013]);
+
+// ── AUTH ──────────────────────────────────────────────────────────────────────
+function authed() { return sessionStorage.getItem('darina_ok') === '1'; }
+document.getElementById('ab').onclick = doAuth;
+document.getElementById('ap').addEventListener('keydown', e => { if (e.key === 'Enter') doAuth(); });
+function doAuth() {
+  const em = document.getElementById('ae').value.trim().toLowerCase();
+  const pw = document.getElementById('ap').value.trim();
+  if (CREDS.some(c => c.email.toLowerCase() === em && c.password === pw)) {
+    sessionStorage.setItem('darina_ok', '1');
+    document.getElementById('auth-overlay').style.display = 'none';
+    document.getElementById('app').style.display = 'flex';
+    init();
+  } else {
+    document.getElementById('auth-err').style.display = 'block';
+  }
+}
+
+// ── STORAGE ───────────────────────────────────────────────────────────────────
+function load() {
+  try { const d = localStorage.getItem(SK); if (d) { const p = JSON.parse(d); if (p && p.length) return p; } } catch(e){}
+  return null;
+}
+function save() {
+  try { localStorage.setItem(SK, JSON.stringify(entries)); }
+  catch(e) { alert('Ошибка сохранения. Слишком много фото в базе — попробуй загружать сжатые JPG.'); }
+}
+function uid() { return Math.random().toString(36).slice(2) + Date.now().toString(36); }
+function seed() {
+  entries = SEED.map((e, i) => ({
+    id: uid(), order: i * 10,
+    tags: e.tags || [], photo: e.photo || null, caption: e.caption || '',
+    historicFact: e.historicFact || '', ...e
+  }));
+  save();
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+function init() {
+  const saved = load();
+  if (saved) entries = saved; else seed();
+  renderSidebar();
+  updateStats();
+  switchTab('editor');
+}
+
+// ── TABS ──────────────────────────────────────────────────────────────────────
+document.querySelectorAll('.tab').forEach(b => b.onclick = () => switchTab(b.dataset.tab));
+function switchTab(tab) {
+  curTab = tab;
+  document.querySelectorAll('.tab').forEach(b => b.classList.toggle('on', b.dataset.tab === tab));
+  if (tab === 'editor')  { curId ? renderEditor(curId) : renderEmpty(); }
+  if (tab === 'preview') { renderPreview(); }
+  if (tab === 'concept') { renderConcept(); }
+}
+
+// ── SIDEBAR ───────────────────────────────────────────────────────────────────
+function snip(e) {
+  if (e.type === 'year-opener') return `Заставка ${e.year}`;
+  const t = (e.text || e.caption || '').replace(/\n/g, ' ');
+  return t.length > 38 ? t.slice(0, 38) + '…' : t || '(пусто)';
+}
+function renderSidebar() {
+  const nav = document.getElementById('year-nav');
+  nav.innerHTML = '';
+  YEARS.forEach(yr => {
+    const yrs = entries.filter(e => e.year === yr && e.type !== 'year-opener')
+      .sort((a, b) => MONTHS.indexOf(a.month) - MONTHS.indexOf(b.month));
+    const open = openYears.has(yr);
+    const sec = document.createElement('div');
+    sec.innerHTML = `
+      <button class="yr-btn ${open ? 'open' : ''}" data-yr="${yr}">
+        ${yr} <span class="yr-cnt">${yrs.length}</span>
+      </button>
+      <div class="yr-entries ${open ? 'open' : ''}">
+        ${yrs.map(e => `
+          <div class="er ${e.id === curId ? 'on' : ''}" data-id="${e.id}">
+            <span class="er-icon">${TICONS[e.type] || '·'}</span>${escH(snip(e))}
+          </div>`).join('')}
+      </div>`;
+    sec.querySelector('.yr-btn').onclick = () => {
+      openYears.has(yr) ? openYears.delete(yr) : openYears.add(yr);
+      renderSidebar();
+    };
+    sec.querySelectorAll('.er').forEach(r => r.onclick = () => {
+      curId = r.dataset.id;
+      renderSidebar();
+      if (curTab !== 'editor') switchTab('editor'); else renderEditor(curId);
+    });
+    nav.appendChild(sec);
+  });
+}
+function updateStats() {
+  const n = entries.filter(e => e.type !== 'year-opener').length;
+  const p = entries.filter(e => e.photo).length;
+  document.getElementById('top-stats').textContent = `${n} записей · ${p} с фото`;
+}
+
+// ── ADD ───────────────────────────────────────────────────────────────────────
+document.getElementById('add-btn').onclick = () => {
+  const e = { id: uid(), type: 'note', year: 2013, month: 'Январь', text: '', caption: '', photo: null, historicFact: '', tags: [], order: (entries.length + 1) * 10 };
+  entries.push(e);
+  save(); curId = e.id; openYears.add(e.year);
+  renderSidebar(); updateStats();
+  if (curTab !== 'editor') switchTab('editor'); else renderEditor(curId);
+};
+
+// ── EXPORT ────────────────────────────────────────────────────────────────────
+document.getElementById('exp-btn').onclick = () => {
+  const blob = new Blob([JSON.stringify(entries, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+  a.download = 'darina-book.json'; a.click();
+};
+
+// ── EDITOR ────────────────────────────────────────────────────────────────────
+function renderEmpty() {
+  document.getElementById('main').innerHTML = `<div class="empty">
+    <h3>Книга детства Дарины</h3>
+    <p>Выбери запись в левой панели<br>или нажми «+ Добавить запись»</p>
+    <p style="margin-top:12px;font-size:0.78rem">Всего заметок: ${entries.filter(e=>e.type!=='year-opener').length} · с фото: ${entries.filter(e=>e.photo).length}</p>
+  </div>`;
+}
+function renderEditor(id) {
+  const e = entries.find(x => x.id === id);
+  if (!e) { renderEmpty(); return; }
+  const tOpts = TYPES.map(t => `<option value="${t.id}"${t.id===e.type?' selected':''}>${t.icon} ${t.label}</option>`).join('');
+  const yOpts = YEARS.map(y => `<option value="${y}"${y===e.year?' selected':''}>${y}</option>`).join('');
+  const mOpts = ['', ...MONTHS].map(m => `<option value="${m}"${m===(e.month||'')?'selected':''}>${m||'— не указан —'}</option>`).join('');
+  const hasPh = ['note-photo','drawing'].includes(e.type);
+  const isYr  = e.type === 'year-opener';
+  const phHtml = hasPh ? `
+    <div class="fg" style="margin-bottom:13px">
+      <label>${e.type==='drawing'?'Рисунок':'Фотография'}</label>
+      <div class="photo-area" id="ph-drop" onclick="document.getElementById('ph-file').click()">
+        ${e.photo ? `<img src="${e.photo}" alt="">` : `<div class="photo-hint">Нажми или перетащи файл<br><small>JPG, PNG · хранится локально</small></div>`}
+      </div>
+      <input type="file" id="ph-file" accept="image/*" style="display:none">
+      ${e.photo ? `<button class="btn-s" style="margin-top:5px;font-size:0.76rem" onclick="clearPhoto()">Удалить фото</button>` : ''}
+    </div>
+    <div class="fg" style="margin-bottom:13px">
+      <label>Подпись к ${e.type==='drawing'?'рисунку':'фото'}</label>
+      <input type="text" id="f-cap" value="${escH(e.caption||'')}">
+    </div>` : '';
+  const yrHtml = isYr ? `
+    <div class="fg" style="margin-bottom:13px">
+      <label>Исторический факт года</label>
+      <textarea id="f-hist" style="min-height:68px">${escH(e.historicFact || HIST[e.year] || '')}</textarea>
+    </div>
+    <div class="fg" style="margin-bottom:13px">
+      <label>Фото года (для заставки)</label>
+      <div class="photo-area" id="ph-drop" style="min-height:80px" onclick="document.getElementById('ph-file').click()">
+        ${e.photo ? `<img src="${e.photo}" alt="" style="max-height:140px">` : `<div class="photo-hint">Фото обложки года</div>`}
+      </div>
+      <input type="file" id="ph-file" accept="image/*" style="display:none">
+      ${e.photo ? `<button class="btn-s" style="margin-top:5px;font-size:0.76rem" onclick="clearPhoto()">Удалить</button>` : ''}
+    </div>` : '';
+  const tgHtml = TAGS.map(t => `<span class="tg ${(e.tags||[]).includes(t)?'on':''}" data-t="${t}">${t}</span>`).join('');
+  const label = {note:'Текст заметки',music:'Что слушала / текст',vocabulary:'Содержание словарика','year-opener':'Подзаголовок / заметка к году',map:'Описание географии',letter:'Текст письма',characters:'Описание персонажей'}[e.type] || 'Текст';
+  document.getElementById('main').innerHTML = `
+    <div class="editor">
+      <h2>${TICONS[e.type]||''} ${TYPES.find(t=>t.id===e.type)?.label||'Запись'}</h2>
+      <div class="frow">
+        <div class="fg" style="flex:2">
+          <label>Тип</label>
+          <select id="f-type">${tOpts}</select>
+        </div>
+        <div class="fg" style="max-width:92px">
+          <label>Год</label>
+          <select id="f-year">${yOpts}</select>
+        </div>
+        <div class="fg" style="max-width:130px">
+          <label>Месяц</label>
+          <select id="f-month">${mOpts}</select>
+        </div>
+      </div>
+      ${phHtml}${yrHtml}
+      <div class="fg" style="margin-bottom:13px">
+        <label>${label}</label>
+        <textarea id="f-text">${escH(e.text||'')}</textarea>
+      </div>
+      <div class="fg">
+        <label>Теги</label>
+        <div class="tag-wrap" id="tag-wrap">${tgHtml}</div>
+      </div>
+      <div class="actions">
+        <button class="btn-p" onclick="saveEnt()">Сохранить</button>
+        <button class="btn-s" onclick="dupEnt()">Дублировать</button>
+        <button class="btn-d" onclick="delEnt()">Удалить</button>
+      </div>
+    </div>`;
+  // photo upload
+  const pf = document.getElementById('ph-file');
+  const pd = document.getElementById('ph-drop');
+  if (pf) {
+    pf.onchange = () => { const f = pf.files[0]; if (!f) return; readImg(f); };
+    if (pd) {
+      pd.ondragover = ev => { ev.preventDefault(); pd.style.borderColor='var(--accent)'; };
+      pd.ondragleave = () => { pd.style.borderColor=''; };
+      pd.ondrop = ev => { ev.preventDefault(); pd.style.borderColor=''; const f=ev.dataTransfer.files[0]; if(f&&f.type.startsWith('image/')) readImg(f); };
+    }
+  }
+  // tags
+  document.querySelectorAll('.tg').forEach(ch => ch.onclick = () => {
+    ch.classList.toggle('on');
+    const ent = entries.find(x=>x.id===curId); if (!ent) return;
+    ent.tags = Array.from(document.querySelectorAll('.tg.on')).map(c=>c.dataset.t);
+  });
+  // type change
+  document.getElementById('f-type').onchange = () => {
+    const ent = entries.find(x=>x.id===curId); if (ent) { ent.type=document.getElementById('f-type').value; save(); renderEditor(curId); }
+  };
+}
+function readImg(f) {
+  const r = new FileReader();
+  r.onload = ev => {
+    const e = entries.find(x=>x.id===curId); if (!e) return;
+    e.photo = ev.target.result; save(); renderEditor(curId); updateStats();
+  };
+  r.readAsDataURL(f);
+}
+function escH(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+window.saveEnt = () => {
+  const e = entries.find(x=>x.id===curId); if (!e) return;
+  e.type  = document.getElementById('f-type').value;
+  e.year  = +document.getElementById('f-year').value;
+  e.month = document.getElementById('f-month').value || null;
+  e.text  = document.getElementById('f-text').value;
+  const fc = document.getElementById('f-cap');   if (fc) e.caption = fc.value;
+  const fh = document.getElementById('f-hist');  if (fh) e.historicFact = fh.value;
+  e.tags  = Array.from(document.querySelectorAll('.tg.on')).map(c=>c.dataset.t);
+  save(); openYears.add(e.year); renderSidebar(); updateStats();
+  const b = document.querySelector('.btn-p'); if (b) { b.textContent='✓ Сохранено'; setTimeout(()=>b.textContent='Сохранить',1200); }
+};
+window.clearPhoto = () => {
+  const e = entries.find(x=>x.id===curId); if (e) { e.photo=null; save(); renderEditor(curId); updateStats(); }
+};
+window.delEnt = () => {
+  if (!confirm('Удалить эту запись?')) return;
+  entries = entries.filter(x=>x.id!==curId); curId=null; save(); renderSidebar(); updateStats(); renderEmpty();
+};
+window.dupEnt = () => {
+  const e = entries.find(x=>x.id===curId); if (!e) return;
+  const c = { ...e, id:uid(), order:e.order+1, tags:[...(e.tags||[])] };
+  entries.push(c); save(); curId=c.id; openYears.add(c.year); renderSidebar(); renderEditor(curId);
+};
+
+// ── PREVIEW ───────────────────────────────────────────────────────────────────
+function renderPreview() {
+  const sorted = [...entries].sort((a,b)=>{
+    if (a.year !== b.year) return a.year-b.year;
+    if (a.type==='year-opener' && b.type!=='year-opener') return -1;
+    if (b.type==='year-opener' && a.type!=='year-opener') return 1;
+    return MONTHS.indexOf(a.month)-MONTHS.indexOf(b.month);
+  });
+  const pages = []; let batch = [];
+  const flush = () => { if (batch.length) { pages.push({t:'notes',es:[...batch]}); batch=[]; } };
+  sorted.forEach(e => {
+    if (e.type==='note' && !e.photo) {
+      batch.push(e); if (batch.length>=3) flush();
+    } else {
+      flush();
+      if      (e.type==='year-opener') pages.push({t:'yr',e});
+      else if (e.type==='note-photo')  pages.push({t:'ph',e});
+      else if (e.type==='drawing')     pages.push({t:'dr',e});
+      else if (e.type==='quote')       pages.push({t:'qt',e});
+      else if (['map','vocabulary','music','letter','characters'].includes(e.type)) pages.push({t:'sp',e});
+      else { batch.push(e); }
+    }
+  });
+  flush();
+  const html = pages.map((p,i) => renderPg(p,i+1)).join('');
+  document.getElementById('main').innerHTML = `
+    <div class="preview">
+      <div class="prev-bar">
+        <h2>Предпросмотр книги</h2>
+        <span style="color:var(--muted);font-size:0.78rem">${pages.length} стр · формат 190×265 мм</span>
+        <button class="btn-s" onclick="window.print()" style="margin-left:auto">🖨️ Распечатать</button>
+      </div>
+      <div class="pages">${html}</div>
+    </div>`;
+}
+function ageStr(yr) {
+  const a = yr - 2011;
+  if (a <= 0) return 'первые месяцы';
+  const w = a===1?'год':a<=4?'года':'лет';
+  return `${a} ${w}`;
+}
+function renderPg(p, n) {
+  const num = `<span class="pg-num">${n}</span>`;
+  if (p.t === 'yr') {
+    const e = p.e;
+    const fact = e.historicFact || HIST[e.year] || '';
+    return `<div class="pg pg-yr">
+      <div class="yr-big">${e.year}</div>
+      <div class="yr-age">${ageStr(e.year)}</div>
+      ${fact ? `<div class="yr-fact">${escH(fact)}</div>` : ''}
+      <div class="yr-photo">${e.photo ? `<img src="${e.photo}">` : 'фото года'}</div>
+      ${num}
+    </div>`;
+  }
+  if (p.t === 'notes') {
+    return `<div class="pg pg-notes">
+      ${p.es.map(e=>`<div class="nb">
+        <div class="nd">${e.month||''} ${e.year}</div>
+        <div class="nt">${escH(e.text||'')}</div>
+      </div>`).join('')}
+      ${num}
+    </div>`;
+  }
+  if (p.t === 'ph') {
+    const e = p.e;
+    return `<div class="pg pg-ph">
+      <div class="ph-img">${e.photo?`<img src="${e.photo}">`:'фотография'}</div>
+      <div class="nd">${e.month||''} ${e.year}</div>
+      <div class="nt">${escH(e.text||e.caption||'')}</div>
+      ${num}
+    </div>`;
+  }
+  if (p.t === 'dr') {
+    const e = p.e;
+    return `<div class="pg pg-dr">
+      <div class="nd" style="margin-bottom:12px">${e.month||''} ${e.year}</div>
+      <div class="dr-img">${e.photo?`<img src="${e.photo}">`:'рисунок'}</div>
+      <div class="dr-cap">${escH(e.caption||e.text||'')}</div>
+      ${num}
+    </div>`;
+  }
+  if (p.t === 'qt') {
+    const e = p.e;
+    return `<div class="pg pg-qt">
+      <div class="qt-mark">"</div>
+      <div class="qt-text">${escH(e.text||'')}</div>
+      <div class="qt-attr">${e.month||''} ${e.year}</div>
+      ${num}
+    </div>`;
+  }
+  if (p.t === 'sp') {
+    const e = p.e;
+    return `<div class="pg pg-sp">
+      <div class="sp-head">${TICONS[e.type]||''} ${TYPES.find(t=>t.id===e.type)?.label||''} · ${e.year}</div>
+      <div class="nt">${escH(e.text||'')}</div>
+      ${num}
+    </div>`;
+  }
+  return '';
+}
+
+// ── CONCEPT ───────────────────────────────────────────────────────────────────
+function renderConcept() {
+  document.getElementById('main').innerHTML = `<div class="concept">
+    <h1>Книга детства Дарины</h1>
+    <p class="lead">Бумажная книга о первых семи годах жизни — с октября 2011 по сентябрь 2018 (до первого класса). Текст авторский, без редактуры. Каждая страница — отдельный слой памяти.</p>
+
+    <h2>Формат и печать</h2>
+    <p><strong>Размер:</strong> 190×265 мм (между A4 и A5, «качественный фотоальбом»). Доступен в Mimigram, Printio, Lulu.com. Переплёт — твёрдая обложка.</p>
+    <p><strong>Объём:</strong> ~104–112 страниц (кратно 8). Ориентировочно 65–70 фотографий.</p>
+    <p><strong>Шрифт в книге:</strong> Cormorant Garamond для текста, DM Sans для дат и пометок. Выравнивание — только по левому краю.</p>
+    <p><strong>Поля:</strong> верх 18мм, низ 22мм, внешнее 18мм, внутреннее 14мм (увеличенное под переплёт).</p>
+
+    <h2>Слои контента</h2>
+    <table class="ctbl">
+      <tr><th>Слой</th><th>Описание</th><th>Статус</th></tr>
+      <tr><td>✍️ Текстовые заметки</td><td>Авторские записи без редактуры. ~75 заметок 2011–2018</td><td>✅ Загружено</td></tr>
+      <tr><td>📷 Фотографии</td><td>~65–70 фото, ~10 на год. Добавлять через редактор (тип «Заметка + фото»)</td><td>⬜ Добавить</td></tr>
+      <tr><td>🎨 Рисунки</td><td>Детские рисунки — сканы или фото. Тип «Рисунок»</td><td>⬜ Добавить</td></tr>
+      <tr><td>🗺️ География</td><td>Карта путешествий: Москва, Тверь, Индия, Болгария, Капошвар, Красная поляна. Черновик есть.</td><td>✅ Черновик</td></tr>
+      <tr><td>🏠 Квартиры</td><td>Дома, где жили — таймлайн. Добавить отдельными записями типа «Дома»</td><td>⬜ Добавить</td></tr>
+      <tr><td>📖 Словарик</td><td>Её придуманные слова. Черновик в разделе 2016</td><td>✅ Черновик</td></tr>
+      <tr><td>🎵 Музыка</td><td>Хронология музыкальных вкусов. Черновик есть — нужно дополнить</td><td>✅ Черновик</td></tr>
+      <tr><td>📅 Историк</td><td>Один факт на год — встроен в год-заставки, можно редактировать</td><td>✅ Готово</td></tr>
+    </table>
+
+    <h2>Типы страниц</h2>
+    <table class="ctbl">
+      <tr><th>Тип</th><th>Содержимое</th><th>Страниц</th></tr>
+      <tr><td>📅 Год-заставка</td><td>Большой год, возраст, исторический факт, фото года</td><td>8 (по одной на год)</td></tr>
+      <tr><td>✍️ Заметки</td><td>2–3 текстовые заметки с датой</td><td>~25–30</td></tr>
+      <tr><td>📷 Фото + заметка</td><td>Фото 60% страницы, подпись снизу</td><td>~40–50</td></tr>
+      <tr><td>💬 Цитата крупно</td><td>Одна фраза на всю страницу, большой шрифт</td><td>~5–10</td></tr>
+      <tr><td>🎨 Рисунок</td><td>Рисунок + подпись</td><td>~6–8</td></tr>
+      <tr><td>📖 Словарик</td><td>Её особые слова с объяснениями</td><td>2</td></tr>
+      <tr><td>🎵 Музыка</td><td>Хронология вкусов по годам</td><td>2–3</td></tr>
+      <tr><td>🗺️ Карта</td><td>Путешествия на карте — можно нарисовать вручную и отсканировать</td><td>2</td></tr>
+      <tr><td>💌 Письмо</td><td>Личное письмо дочери — на последних страницах</td><td>1–2</td></tr>
+    </table>
+
+    <h2>Что ещё нужно добавить</h2>
+    <ul>
+      <li>Заметки из 2011–2012 (первые два года, их пока нет)</li>
+      <li>Фотографии — загружать через редактор, тип «Заметка + фото»</li>
+      <li>Рисунки Даришки — тип «Рисунок»</li>
+      <li>Музыкальную хронологию — дополнить черновик</li>
+      <li>Квартиры и дома — добавить тип «География/карта»</li>
+      <li>Письмо дочери — тип «Письмо», поставить в конец</li>
+    </ul>
+
+    <h2>Как работать</h2>
+    <ul>
+      <li>Нажать «+ Добавить запись» → выбрать тип → заполнить → Сохранить</li>
+      <li>Для фото/рисунка: выбрать тип «Заметка + фото» или «Рисунок» → загрузить картинку</li>
+      <li>Предпросмотр → вкладка «Предпросмотр» — показывает поток книги постранично</li>
+      <li>Кнопка «⬇ Экспорт JSON» — скачивает резервную копию всего контента</li>
+      <li>Данные хранятся в браузере (localStorage). Фото хранятся локально — желательно сжимать JPG перед загрузкой</li>
+    </ul>
+    <p style="margin-top:24px;color:var(--muted);font-size:0.78rem">Для переноса данных на другое устройство — используй экспорт/импорт JSON.</p>
+  </div>`;
+}
+
+// ── BOOT ──────────────────────────────────────────────────────────────────────
+if (authed()) {
+  document.getElementById('auth-overlay').style.display = 'none';
+  document.getElementById('app').style.display = 'flex';
+  init();
+}
+</script>
+</body>
+</html>
