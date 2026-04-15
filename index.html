@@ -142,6 +142,55 @@
     .sport-ai-input-row { display:flex;gap:8px;align-items:flex-end; }
     .sport-ai-input-row textarea { flex:1;padding:8px 12px;border:1px solid var(--border);border-radius:6px;font-size:0.875rem;font-family:inherit;resize:vertical; }
 
+    /* Sport — week controls & day cards */
+    .sport-week-controls { display:flex;align-items:center;gap:8px; }
+    .sport-week-nav-btn { width:32px;height:32px;border:1px solid var(--border);border-radius:6px;background:var(--locked-bg);color:var(--text);font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s; }
+    .sport-week-nav-btn:hover:not(:disabled) { background:var(--accent);color:#fff;border-color:var(--accent); }
+    .sport-week-nav-btn:disabled { opacity:0.35;cursor:default; }
+    .sport-week-summary { display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;margin-bottom:10px; }
+    .sport-week-label { font-size:0.875rem;font-weight:600;color:var(--text); }
+    .sport-week-progress { font-size:0.8125rem;color:var(--text-muted); }
+    .sport-days-grid { display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px; }
+    .sport-day-card { border:2px solid var(--border);border-radius:10px;padding:12px 14px;cursor:pointer;transition:all 0.15s;background:var(--card-bg);user-select:none; }
+    .sport-day-card:hover { border-color:var(--accent);box-shadow:0 2px 8px rgba(0,0,0,0.08); }
+    .sport-day-card.selected { border-color:var(--accent);background:color-mix(in srgb,var(--accent) 8%,transparent); }
+    .sport-day-card.done { background:#f0fff4;border-color:#9ae6b4; }
+    .sport-day-card.done.selected { border-color:#38a169;background:#dcf5e5; }
+    .sport-day-card.today { border-color:var(--accent);background:color-mix(in srgb,var(--accent) 6%,transparent); }
+    .sport-day-card.past { opacity:0.65; }
+    .sport-day-label { font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-muted);margin-bottom:2px; }
+    .sport-day-date { font-size:0.9375rem;font-weight:600;color:var(--text);margin-bottom:4px; }
+    .sport-day-status { font-size:0.8rem;color:var(--text-muted); }
+    .sport-day-card.done .sport-day-status { color:#38a169;font-weight:600; }
+    .sport-day-card.today .sport-day-status { color:var(--accent);font-weight:600; }
+    .sport-day-metric { font-size:0.75rem;color:var(--text-muted);margin-top:3px; }
+
+    /* Sport — exercise list */
+    .sport-ex-list-wrap { background:var(--locked-bg);border:1px solid var(--border);border-radius:10px;padding:16px 18px; }
+    .sport-ex-list-header { display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:4px;margin-bottom:14px; }
+    .sport-ex-list-header strong { font-size:0.9375rem;color:var(--text); }
+    .sport-ex-list-header span { font-size:0.8125rem;color:var(--text-muted); }
+    .sport-ex-list { display:flex;flex-direction:column;gap:10px;margin-bottom:16px; }
+    .sport-ex-item { display:flex;gap:12px;background:var(--card-bg);border:1px solid var(--border);border-radius:8px;padding:12px 14px; }
+    .sport-ex-num { flex-shrink:0;width:24px;height:24px;background:var(--accent);color:#fff;border-radius:50%;font-size:0.75rem;font-weight:700;display:flex;align-items:center;justify-content:center;margin-top:1px; }
+    .sport-ex-body { flex:1;min-width:0; }
+    .sport-ex-name { font-size:0.9375rem;font-weight:600;color:var(--text);margin-bottom:2px; }
+    .sport-ex-dose { font-size:0.8125rem;color:var(--accent);font-weight:500;margin-bottom:6px; }
+    .sport-ex-details { font-size:0.8125rem;color:var(--text-muted); }
+    .sport-ex-details summary { cursor:pointer;color:var(--accent);font-size:0.8rem;font-weight:500;margin-bottom:4px;list-style:none; }
+    .sport-ex-details summary::before { content:'▶ '; }
+    .sport-ex-details[open] summary::before { content:'▼ '; }
+    .sport-ex-full-desc { line-height:1.55;margin-bottom:8px; }
+    .sport-ex-breathing { background:color-mix(in srgb,var(--accent) 8%,transparent);border-left:3px solid var(--accent);padding:7px 10px;border-radius:0 6px 6px 0;margin-bottom:6px;line-height:1.5; }
+    .sport-breathing-icon { font-size:1rem; }
+    .sport-ex-why-text { font-style:italic;color:var(--text-muted);font-size:0.8rem;line-height:1.5; }
+
+    /* Sport — complete day button & done banner */
+    .sport-complete-day-wrap { margin-top:4px; }
+    .sport-complete-day-btn { width:100%;padding:12px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-size:1rem;font-weight:600;cursor:pointer;transition:background 0.15s;letter-spacing:0.01em; }
+    .sport-complete-day-btn:hover { background:var(--accent-hover); }
+    .sport-day-done-banner { background:#f0fff4;border:2px solid #9ae6b4;border-radius:8px;padding:12px 16px;text-align:center;font-size:0.9375rem;font-weight:600;color:#276749; }
+
     /* Blocks */
     .block {
       margin-bottom: 16px;
@@ -4814,68 +4863,144 @@
         { week: 12, test: 'Чистый подъём 1 из 3 попыток + ощущение момента баланса' },
         { week: 16, test: 'Свободная стойка 5–10 секунд' }
       ],
+      daysPerWeek: 3,
       exercises: {
-        wrist_rocks:            { name: 'Разминка запястий', phase: [1,2,3,4], desc: 'В упоре лёжа на прямых руках — медленно переносить вес вперёд к пальцам и назад к пяткам ладони. Локти прямые всё время. 10 качаний вперёд-назад + 10 в стороны. Не форсировать, только лёгкое растяжение.', why: 'В стойке всё давление на запястья. Без разминки — боль и травма.' },
-        hollow_body_hold:       { name: 'Hollow body hold', phase: [1,2,3,4], desc: 'Лечь на спину. Прижать поясницу к полу — это главное. Руки за голову, ноги прямые. Поднять плечи (5–10 см) и ноги (15–20 см). Форма вогнутой дуги. Если поясница отрывается — поднять ноги выше. Дышать!', why: 'Это и есть правильное положение тела в стойке. Без него — прогиб и неустойчивость.' },
-        arch_body_hold:         { name: 'Arch body hold', phase: [1],       desc: 'Лечь на живот, руки вперёд. Одновременно поднять руки, грудь и ноги. Ягодицы сжаты, ноги вместе. Противоположность hollow body.', why: 'Тренирует заднюю цепь и чувство тела в воздухе.' },
-        scapular_pushups:       { name: 'Лопаточные отжимания', phase: [1,2], desc: 'Упор лёжа на прямых руках. Локти не сгибать! Только лопатки: провалиться вниз между рук (лопатки сходятся) → протолкнуть тело вверх, разводя лопатки (спина округляется). Амплитуда 5–8 см. Руки прямые всегда.', why: 'Активная лопатка — основа устойчивости плеч в стойке.' },
-        shoulder_shrugs_downdog:{ name: 'Пожимания в собаке', phase: [1,2], desc: 'Поза собаки мордой вниз (перевёрнутая V). Руки и ноги прямые. Поднять плечи к ушам (голова уходит вниз) → опустить плечи максимально (шея вытягивается). 10 медленных повторов.', why: 'Учит активировать плечи в перевёрнутом положении — репетиция стойки.' },
-        pike_compression:       { name: 'Пайк-компрессия', phase: [1,2],   desc: 'Сесть на пол, ноги прямые вместе, носки на себя. Спина прямая (не горбиться!). Наклоняться вперёд, тянуть ГРУДЬ к ногам — не лоб к коленям. В нижней точке задержка 2–3 сек, напрягать живот. Не пружинить.', why: 'Без гибкости в пайке стойка будет с прогнутой спиной и согнутыми ногами.' },
-        chest_to_wall:          { name: 'Стойка грудью к стене', phase: [1,2], desc: 'Лицом к стене, руки в 15–20 см от стены. Забраться ногами по стене. Затем ОТВЕСТИ живот от стены — выровнять тело в одну линию. Стена как ориентир, не опора. Главные ошибки: прогиб в пояснице и голова вперёд.', why: 'Учит правильной позиции тела без балансировки — сначала форма, потом баланс.' },
-        back_to_wall:           { name: 'Стойка спиной к стене', phase: [2,3], desc: 'Встать в 50–60 см от стены, мах в стойку — пятки касаются стены. Тело выровнять: пятки едва касаются, всё остальное — прямая линия. Постепенно уменьшать контакт с стеной.', why: 'Переходный этап: тело уже держит правильную позицию, стена только подстраховывает.' },
-        pirouette_exit:         { name: 'Выход пируэтом', phase: [2,3,4], desc: 'При падении вперёд: согнуть ОДИН локоть (выбери сторону заранее), тело поворачивается в эту сторону, ноги описывают дугу и приземляются сбоку. Тренировать сначала медленно из низкого положения.', why: 'Страх упасть — главный враг баланса. Когда умеешь выходить — перестаёшь бояться.' },
-        cartwheel_exit:         { name: 'Выход колесом', phase: [2,3,4],   desc: 'При падении вперёд: широко развести ноги и приземлиться поочерёдно — одна нога впереди, другая сзади. Это колесо из стойки. Сначала потренировать отдельно само колесо.', why: 'Второй безопасный выход. Иметь два — полная уверенность при попытках баланса.' },
-        wall_pushoff:           { name: 'Отталкивание от стены', phase: [2,3], desc: 'В стойке спиной к стене. Мягко оттолкнуть одну пятку от стены, удержать баланс 1–3 сек, вернуть. Потом другую ногу. Когда получается — обе ноги вместе.', why: 'Первый контакт с реальным балансом. Самый важный переходный навык.' },
-        kickup:                 { name: 'Подъём в стойку (kick-up)', phase: [3,4], desc: 'Руки на полу, одна нога толчковая (спереди), другая маховая (сзади, прямая). Смотреть на пол между руками. МОЩНЫЙ МАХ задней ногой строго вертикально — жёсткой и прямой. Толчковая догоняет. Не прыгать руками — именно мах ногой.', why: 'Стабильный подъём = можно тренировать баланс. Без него каждая попытка — лотерея.' },
-        tuck_handstand:         { name: 'Стойка в группировке', phase: [3,4], desc: 'После kick-up не выпрямлять ноги — держать колени у груди. Центр тяжести ниже = баланс легче. Потом медленно раскрыть одну ногу вверх → поймать баланс → раскрыть вторую.', why: 'Промежуточная форма. Позволяет тренировать баланс на руках без требования полной гибкости.' },
-        pike_box_hold:          { name: 'Пайк с ногами на возвышении', phase: [2,3], desc: 'Ноги (голени/ступни) на стуле 50–70 см, руки на полу под плечами, руки прямые. Тело под углом — таз выше плеч. Держать 30 сек. Плечи активно тянуть от ушей.', why: 'Нагрузка на плечи как в стойке — без балансировки. Мост между планкой и стойкой.' },
-        finger_pressure_drill:  { name: 'Контроль пальцами', phase: [3,4], desc: 'В стойке у стены: сознательно управлять балансом пальцами. Тело падает вперёд — давить подушечками пальцев сильнее. Тело падает назад — переносить вес на пятки ладоней. Намеренно отклоняться и возвращаться. Движения 1–2 см.', why: 'Единственный реальный инструмент баланса в стойке. Всё остальное вторично.' }
+        wrist_rocks: {
+          name: 'Разминка запястий', phase: [1,2,3,4],
+          desc: 'В упоре лёжа на прямых руках — медленно переносить вес вперёд к пальцам и назад к пяткам ладони. Локти прямые всё время. 10 качаний вперёд-назад + 10 в стороны. Не форсировать.',
+          breathing: 'Дышать свободно и ровно на протяжении всего упражнения. Это разминка — никакой задержки дыхания.',
+          why: 'В стойке всё давление на запястья. Без разминки — боль и травма.'
+        },
+        hollow_body_hold: {
+          name: 'Hollow body hold', phase: [1,2,3,4],
+          desc: 'Лечь на спину. Прижать поясницу к полу — это главное. Руки за голову, ноги прямые. Поднять плечи (5–10 см) и ноги (15–20 см). Форма вогнутой дуги. Если поясница отрывается — поднять ноги выше.',
+          breathing: 'Выдох при подъёме в позицию (тело складывается). Затем — ровное дыхание в удержании: вдох носом 3–4 сек, выдох ртом 3–4 сек. Никогда не задерживай дыхание — это ключ к правильной работе мышц.',
+          why: 'Это и есть правильное положение тела в стойке. Без него — прогиб и неустойчивость.'
+        },
+        arch_body_hold: {
+          name: 'Arch body hold', phase: [1],
+          desc: 'Лечь на живот, руки вперёд. Одновременно поднять руки, грудь и ноги. Ягодицы сжаты, ноги вместе. Противоположность hollow body.',
+          breathing: 'Вдох при подъёме тела в позицию. В удержании — ровное дыхание: вдох носом, выдох ртом. Выдох при возврате в исходное.',
+          why: 'Тренирует заднюю цепь и чувство тела в воздухе.'
+        },
+        scapular_pushups: {
+          name: 'Лопаточные отжимания', phase: [1,2],
+          desc: 'Упор лёжа на прямых руках. Локти не сгибать! Только лопатки: провалиться вниз между рук (лопатки сходятся) → протолкнуть тело вверх, разводя лопатки (спина округляется). Амплитуда 5–8 см.',
+          breathing: 'Вдох при опускании (лопатки сходятся). Выдох при подъёме (лопатки максимально разводятся, спина округляется). Один цикл дыхания = одно повторение.',
+          why: 'Активная лопатка — основа устойчивости плеч в стойке.'
+        },
+        shoulder_shrugs_downdog: {
+          name: 'Пожимания в собаке', phase: [1,2],
+          desc: 'Поза собаки мордой вниз (перевёрнутая V). Руки и ноги прямые. Поднять плечи к ушам (голова уходит вниз) → опустить плечи максимально (шея вытягивается). 10 медленных повторов.',
+          breathing: 'Вдох при подъёме плеч к ушам. Выдох при опускании плеч — шея вытягивается, уши удаляются от плеч. Дыши размеренно, движение следует за дыханием.',
+          why: 'Учит активировать плечи в перевёрнутом положении — репетиция стойки.'
+        },
+        pike_compression: {
+          name: 'Пайк-компрессия', phase: [1,2],
+          desc: 'Сесть на пол, ноги прямые вместе, носки на себя. Спина прямая (не горбиться!). Наклоняться вперёд, тянуть ГРУДЬ к ногам — не лоб к коленям. В нижней точке задержка 2–3 сек, напрягать живот.',
+          breathing: 'Выдох при наклоне вперёд — тело складывается на выдохе, это помогает. В нижней точке: 2–3 сек задержка на выдохе, живот напряжён. Вдох при возврате в вертикаль.',
+          why: 'Без гибкости в пайке стойка будет с прогнутой спиной и согнутыми ногами.'
+        },
+        chest_to_wall: {
+          name: 'Стойка грудью к стене', phase: [1,2],
+          desc: 'Лицом к стене, руки в 15–20 см от стены. Забраться ногами по стене. Затем ОТВЕСТИ живот от стены — выровнять тело в одну линию. Стена как ориентир, не опора.',
+          breathing: 'В стойке — ровное непрерывное дыхание: вдох носом 3–4 сек, выдох 3–4 сек. Никогда не задерживай дыхание в стойке! Задержка = напряжение всего тела = потеря контроля.',
+          why: 'Учит правильной позиции тела без балансировки — сначала форма, потом баланс.'
+        },
+        back_to_wall: {
+          name: 'Стойка спиной к стене', phase: [2,3],
+          desc: 'Встать в 50–60 см от стены, мах в стойку — пятки касаются стены. Тело выровнять: пятки едва касаются, всё остальное — прямая линия. Постепенно уменьшать контакт с стеной.',
+          breathing: 'Ровное дыхание в стойке — то же правило что в chest-to-wall: вдох 3–4 сек, выдох 3–4 сек. Если поймал себя на задержке — это сигнал паники, сделай сознательный вдох.',
+          why: 'Переходный этап: тело уже держит правильную позицию, стена только подстраховывает.'
+        },
+        pirouette_exit: {
+          name: 'Выход пируэтом', phase: [2,3,4],
+          desc: 'При падении вперёд: согнуть ОДИН локоть (выбери сторону заранее), тело поворачивается в эту сторону, ноги описывают дугу и приземляются сбоку. Тренировать медленно из низкого положения.',
+          breathing: 'В момент выхода — короткий выдох при повороте: он помогает расслабить тело. При отработке медленно: выдох на движении, вдох после приземления. Не задерживай дыхание в ожидании падения.',
+          why: 'Страх упасть — главный враг баланса. Когда умеешь выходить — перестаёшь бояться.'
+        },
+        cartwheel_exit: {
+          name: 'Выход колесом', phase: [2,3,4],
+          desc: 'При падении вперёд: широко развести ноги и приземлиться поочерёдно — одна нога впереди, другая сзади. Это колесо из стойки. Сначала потренировать отдельно само колесо.',
+          breathing: 'Выдох при выполнении колеса — это естественное движение при вращении. Вдох после приземления. Не думай о дыхании специально: тело само скажет.',
+          why: 'Второй безопасный выход. Иметь два — полная уверенность при попытках баланса.'
+        },
+        wall_pushoff: {
+          name: 'Отталкивание от стены', phase: [2,3],
+          desc: 'В стойке спиной к стене. Мягко оттолкнуть одну пятку от стены, удержать баланс 1–3 сек, вернуть. Потом другую ногу. Когда получается — обе ноги вместе.',
+          breathing: 'В момент отталкивания — выдох. В секунды балансировки без стены — продолжай дышать ровно, не задерживай. Задержка дыхания = напряжение рук = потеря пальцевого контроля.',
+          why: 'Первый контакт с реальным балансом. Самый важный переходный навык.'
+        },
+        kickup: {
+          name: 'Подъём в стойку (kick-up)', phase: [3,4],
+          desc: 'Руки на полу, одна нога толчковая (спереди), другая маховая (сзади, прямая). Смотреть на пол между руками. МОЩНЫЙ МАХ задней ногой строго вертикально — жёсткой и прямой. Толчковая догоняет.',
+          breathing: 'Выдох — мощный, на маховом движении ноги: он создаёт дополнительный импульс. Как только встал в стойку — сразу начинай ровное дыхание. Не задерживай в стойке ни секунды.',
+          why: 'Стабильный подъём = можно тренировать баланс. Без него каждая попытка — лотерея.'
+        },
+        tuck_handstand: {
+          name: 'Стойка в группировке', phase: [3,4],
+          desc: 'После kick-up не выпрямлять ноги — держать колени у груди. Центр тяжести ниже = баланс легче. Потом медленно раскрыть одну ногу вверх → поймать баланс → раскрыть вторую.',
+          breathing: 'Ровное дыхание в группировке: вдох 2–3 сек, выдох 2–3 сек. При раскрытии ноги — вдох при подъёме, выдох при удержании. Дыхание помогает контролировать движение ноги без рывка.',
+          why: 'Промежуточная форма. Позволяет тренировать баланс на руках без требования полной гибкости.'
+        },
+        pike_box_hold: {
+          name: 'Пайк с ногами на возвышении', phase: [2,3],
+          desc: 'Ноги (голени/ступни) на стуле 50–70 см, руки на полу под плечами, руки прямые. Тело под углом — таз выше плеч. Держать 30 сек. Плечи активно тянуть от ушей.',
+          breathing: 'Ровное дыхание в удержании: вдох носом 3–4 сек, выдох ртом 3–4 сек. Это позиция близкая к стойке — тренируй дыхание здесь, оно перенесётся в стойку.',
+          why: 'Нагрузка на плечи как в стойке — без балансировки. Мост между планкой и стойкой.'
+        },
+        finger_pressure_drill: {
+          name: 'Контроль пальцами', phase: [3,4],
+          desc: 'В стойке у стены: сознательно управлять балансом пальцами. Тело падает вперёд — давить подушечками пальцев. Тело падает назад — переносить вес на пятки ладоней. Намеренные качания 1–2 см.',
+          breathing: 'Ровное непрерывное дыхание — это главный индикатор спокойствия в стойке. Если дышишь равномерно, пальцы работают точнее. Задержка дыхания = паника = срыв. Дыхание и баланс неразделимы.',
+          why: 'Единственный реальный инструмент баланса в стойке. Всё остальное вторично.'
+        }
       },
       phases: [
         {
-          phase: 1, name: 'Фундамент', weeks: [1,2,3,4],
+          phase: 1, name: 'Фундамент', weeks: [1,2,3,4], daysPerWeek: 3, minutesPerDay: 25,
           goal: 'Запястья, плечи, полый корпус, первая стойка у стены',
           session: [
-            { ex: 'wrist_rocks',             note: 'каждую сессию, 3 мин' },
-            { ex: 'hollow_body_hold',         note: '3×30 сек → к нед.4 45 сек' },
-            { ex: 'arch_body_hold',           note: '3×20 сек' },
-            { ex: 'chest_to_wall',            note: '5×20 сек → к нед.4 45 сек' },
-            { ex: 'shoulder_shrugs_downdog',  note: '3×10 повторов' },
-            { ex: 'scapular_pushups',         note: '3×12' },
-            { ex: 'pike_compression',         note: '3×8, 3 сек задержка' }
+            { ex: 'wrist_rocks',             note: '3 мин — каждую сессию' },
+            { ex: 'hollow_body_hold',         note: '3 × 30 сек → к нед.4 45 сек' },
+            { ex: 'arch_body_hold',           note: '3 × 20 сек' },
+            { ex: 'chest_to_wall',            note: '5 × 20 сек → к нед.4 45 сек' },
+            { ex: 'shoulder_shrugs_downdog',  note: '3 × 10 повторов' },
+            { ex: 'scapular_pushups',         note: '3 × 12' },
+            { ex: 'pike_compression',         note: '3 × 8, 3 сек задержка' }
           ]
         },
         {
-          phase: 2, name: 'Контроль в стойке', weeks: [5,6,7,8],
+          phase: 2, name: 'Контроль в стойке', weeks: [5,6,7,8], daysPerWeek: 3, minutesPerDay: 30,
           goal: 'Правильная позиция, безопасные выходы, первый баланс',
           session: [
             { ex: 'wrist_rocks',             note: '2 мин' },
-            { ex: 'hollow_body_hold',         note: '2×45 сек' },
-            { ex: 'back_to_wall',             note: '5×30 сек → к нед.8 60 сек' },
-            { ex: 'pirouette_exit',           note: '3×5 в обе стороны' },
-            { ex: 'cartwheel_exit',           note: '3×5' },
-            { ex: 'pike_box_hold',            note: '3×30 сек' },
-            { ex: 'wall_pushoff',             note: '3×5 — сначала одна нога' }
+            { ex: 'hollow_body_hold',         note: '2 × 45 сек' },
+            { ex: 'back_to_wall',             note: '5 × 30 сек → к нед.8 60 сек' },
+            { ex: 'pirouette_exit',           note: '3 × 5 в обе стороны' },
+            { ex: 'cartwheel_exit',           note: '3 × 5' },
+            { ex: 'pike_box_hold',            note: '3 × 30 сек' },
+            { ex: 'wall_pushoff',             note: '3 × 5 — сначала одна нога' }
           ]
         },
         {
-          phase: 3, name: 'Подъём и первые секунды', weeks: [9,10,11,12],
+          phase: 3, name: 'Подъём и первые секунды', weeks: [9,10,11,12], daysPerWeek: 3, minutesPerDay: 30,
           goal: 'Стабильный kick-up, первые моменты свободного баланса',
           session: [
             { ex: 'wrist_rocks',            note: '2 мин' },
-            { ex: 'hollow_body_hold',        note: '2×45 сек' },
+            { ex: 'hollow_body_hold',        note: '2 × 45 сек' },
             { ex: 'kickup',                  note: '15–20 попыток у стены' },
-            { ex: 'tuck_handstand',          note: '5×10 сек → раскрыть одну ногу' },
+            { ex: 'tuck_handstand',          note: '5 × 10 сек → раскрыть одну ногу' },
             { ex: 'wall_pushoff',            note: 'обе ноги одновременно' },
-            { ex: 'finger_pressure_drill',   note: '3×30 сек — намеренные качания' }
+            { ex: 'finger_pressure_drill',   note: '3 × 30 сек — намеренные качания' }
           ]
         },
         {
-          phase: 4, name: 'Свободная стойка', weeks: [13,14,15,16],
+          phase: 4, name: 'Свободная стойка', weeks: [13,14,15,16], daysPerWeek: 3, minutesPerDay: 30,
           goal: '5–10 секунд без опоры',
           session: [
             { ex: 'wrist_rocks',           note: '2 мин' },
-            { ex: 'hollow_body_hold',       note: '2×45 сек' },
+            { ex: 'hollow_body_hold',       note: '2 × 45 сек' },
             { ex: 'kickup',                 note: 'зона 1–2 м от стены, без опоры' },
             { ex: 'tuck_handstand',         note: 'tuck → прямая → удержание' },
             { ex: 'finger_pressure_drill',  note: 'активно при каждой попытке' }
@@ -4895,67 +5020,152 @@
       try { localStorage.setItem(SPORT_DATA_KEY, JSON.stringify(data)); } catch(e) {}
     }
 
-    function sportCurrentPhase() {
+    let _sportViewWeek = null;
+
+    function sportWeekNum() {
       const start = new Date(HANDSTAND_PROGRAM.startDate);
       const now = new Date();
-      const weekNum = Math.max(1, Math.ceil((now - start) / (7*24*3600*1000)));
-      return HANDSTAND_PROGRAM.phases.find(p => p.weeks.includes(Math.min(weekNum, 16))) || HANDSTAND_PROGRAM.phases[0];
+      return Math.min(Math.max(1, Math.ceil((now - start) / (7*24*3600*1000))), 16);
+    }
+    function sportCurrentPhase() {
+      return HANDSTAND_PROGRAM.phases.find(p => p.weeks.includes(sportWeekNum())) || HANDSTAND_PROGRAM.phases[0];
+    }
+    function addDays(dateStr, n) {
+      const d = new Date(dateStr); d.setDate(d.getDate() + n); return d.toISOString().slice(0,10);
+    }
+    function sportDayDates(weekN) {
+      const base = addDays(HANDSTAND_PROGRAM.startDate, (weekN - 1) * 7);
+      return [base, addDays(base, 2), addDays(base, 4)];
+    }
+    function fmtShortDate(dateStr) {
+      const d = new Date(dateStr);
+      const days = ['Вс','Пн','Вт','Ср','Чт','Пт','Сб'];
+      const months = ['янв','фев','мар','апр','май','июн','июл','авг','сен','окт','ноя','дек'];
+      return `${days[d.getDay()]} ${d.getDate()} ${months[d.getMonth()]}`;
+    }
+
+    function renderSportWeekGrid(weekN, data) {
+      const prog = HANDSTAND_PROGRAM;
+      const phase = prog.phases.find(p => p.weeks.includes(weekN)) || prog.phases[0];
+      const dates = sportDayDates(weekN);
+      const today = new Date().toISOString().slice(0,10);
+      const completed = data.completedDays || {};
+      const doneCount = dates.filter(d => completed[d]).length;
+
+      const cards = dates.map((date, i) => {
+        const done = completed[date];
+        const isToday = date === today;
+        const isPast = date < today && !isToday;
+        const cls = done ? 'done' : isToday ? 'today' : isPast ? 'past' : '';
+        const statusText = done ? '✓ Выполнено' : isToday ? '● Сегодня' : isPast ? '– Пропущено' : '○';
+        return `<div class="sport-day-card ${cls}" data-date="${date}" data-daynum="${i+1}">
+          <div class="sport-day-label">День ${i+1}</div>
+          <div class="sport-day-date">${fmtShortDate(date)}</div>
+          <div class="sport-day-status">${statusText}</div>
+          ${done && done.wallHold ? `<div class="sport-day-metric">стена ${done.wallHold}с</div>` : ''}
+          ${done && done.freeHold ? `<div class="sport-day-metric">без опоры ${done.freeHold}с</div>` : ''}
+        </div>`;
+      }).join('');
+
+      return `<div class="sport-week-summary">
+        <span class="sport-week-label">Фаза ${phase.phase}: ${escapeHtml(phase.name)} · нед. ${phase.weeks[0]}–${phase.weeks[phase.weeks.length-1]}</span>
+        <span class="sport-week-progress">${doneCount} из ${phase.daysPerWeek} дней · ⏱ ~${phase.minutesPerDay} мин/день</span>
+      </div>
+      <div class="sport-days-grid" id="sport-days-grid">${cards}</div>`;
+    }
+
+    function renderSportExList(phase, selectedDate, data, dayNum) {
+      const prog = HANDSTAND_PROGRAM;
+      const completed = data.completedDays || {};
+      const isDone = !!(completed[selectedDate]);
+
+      const exItems = phase.session.map((s, i) => {
+        const ex = prog.exercises[s.ex];
+        return `<div class="sport-ex-item">
+          <div class="sport-ex-num">${i + 1}</div>
+          <div class="sport-ex-body">
+            <div class="sport-ex-name">${escapeHtml(ex.name)}</div>
+            <div class="sport-ex-dose">${escapeHtml(s.note)}</div>
+            <details class="sport-ex-details">
+              <summary>Как делать + дыхание</summary>
+              <div class="sport-ex-full-desc">${escapeHtml(ex.desc)}</div>
+              <div class="sport-ex-breathing"><span class="sport-breathing-icon">🌬</span> <strong>Дыхание:</strong> ${escapeHtml(ex.breathing)}</div>
+              <div class="sport-ex-why-text">💡 <strong>Зачем:</strong> ${escapeHtml(ex.why)}</div>
+            </details>
+          </div>
+        </div>`;
+      }).join('');
+
+      const doneBlock = isDone
+        ? `<div class="sport-day-done-banner">✓ День ${dayNum} выполнен · ${fmtShortDate(selectedDate)}</div>`
+        : `<div class="sport-complete-day-wrap">
+            <details class="sport-complete-extras" style="margin-bottom:10px">
+              <summary style="cursor:pointer;font-size:0.875rem;color:var(--text-muted)">+ Дополнительно (необязательно)</summary>
+              <div style="padding:10px 0 0;display:flex;gap:10px;flex-wrap:wrap">
+                <label style="font-size:0.8rem;display:flex;flex-direction:column;gap:3px">Hold у стены (сек)<input type="number" id="sport-cd-wall" placeholder="0" min="0" style="width:90px;padding:5px;border:1px solid var(--border);border-radius:4px;margin-top:2px"></label>
+                <label style="font-size:0.8rem;display:flex;flex-direction:column;gap:3px">Без опоры (сек)<input type="number" id="sport-cd-free" placeholder="0" min="0" style="width:90px;padding:5px;border:1px solid var(--border);border-radius:4px;margin-top:2px"></label>
+                <label style="font-size:0.8rem;display:flex;flex-direction:column;gap:3px">Запястья (1–5)<input type="number" id="sport-cd-wrist" placeholder="5" min="1" max="5" style="width:70px;padding:5px;border:1px solid var(--border);border-radius:4px;margin-top:2px"></label>
+                <label style="font-size:0.8rem;display:flex;flex-direction:column;gap:3px;flex:1;min-width:140px">Заметка<input type="text" id="sport-cd-notes" placeholder="ощущения…" style="padding:5px;border:1px solid var(--border);border-radius:4px;margin-top:2px;width:100%"></label>
+              </div>
+            </details>
+            <button type="button" class="sport-complete-day-btn" data-date="${selectedDate}" data-daynum="${dayNum}">✓ День ${dayNum} выполнен — отметить</button>
+          </div>`;
+
+      return `<div class="sport-ex-list-wrap" id="sport-ex-list-wrap">
+        <div class="sport-ex-list-header">
+          <strong>Комплекс — День ${dayNum} · ${fmtShortDate(selectedDate)}</strong>
+          <span>${phase.session.length} упражнений · ~${phase.minutesPerDay} мин</span>
+        </div>
+        <div class="sport-ex-list">${exItems}</div>
+        ${doneBlock}
+      </div>`;
     }
 
     function loadSportContent() {
       const data = loadSportData();
-      const phase = sportCurrentPhase();
+      const prog = HANDSTAND_PROGRAM;
+      const curWeek = sportWeekNum();
+      if (_sportViewWeek === null) _sportViewWeek = curWeek;
+      const viewWeek = Math.min(Math.max(1, _sportViewWeek), 16);
+      const phase = prog.phases.find(p => p.weeks.includes(viewWeek)) || prog.phases[0];
       const fmtDate = d => { if(!d) return '—'; const m=/^(\d{4})-(\d{2})-(\d{2})/.exec(d); return m?`${m[3]}.${m[2]}.${m[1]}`:d; };
 
-      // --- Вкладка: Программа ---
-      const prog = HANDSTAND_PROGRAM;
-      const start = new Date(prog.startDate);
-      const now = new Date();
-      const weekNum = Math.max(1, Math.ceil((now - start) / (7*24*3600*1000)));
-      const weekDisplay = Math.min(weekNum, 16);
+      const today = new Date().toISOString().slice(0,10);
+      const dates = sportDayDates(viewWeek);
+      const activeDate = dates.includes(today) ? today : dates[0];
+      const activeDayNum = dates.indexOf(activeDate) + 1;
+
+      const weekGridHtml = renderSportWeekGrid(viewWeek, data);
+      const exListHtml = renderSportExList(phase, activeDate, data, activeDayNum);
 
       const checkpointsHtml = prog.checkpoints.map(cp => {
         const done = data.checkpoints && data.checkpoints[cp.week];
-        return `<div class="sport-checkpoint ${done ? 'done' : weekDisplay >= cp.week - 3 ? 'near' : ''}">
+        return `<div class="sport-checkpoint ${done ? 'done' : curWeek >= cp.week - 3 ? 'near' : ''}">
           <span class="sport-cp-week">Нед.${cp.week}</span>
           <span class="sport-cp-test">${escapeHtml(cp.test)}</span>
-          <button type="button" class="sport-cp-btn ${done ? 'done' : ''}" data-week="${cp.week}" title="${done ? 'Выполнено' : 'Отметить выполненным'}">${done ? '✓' : '○'}</button>
+          <button type="button" class="sport-cp-btn ${done ? 'done' : ''}" data-week="${cp.week}">${done ? '✓' : '○'}</button>
         </div>`;
       }).join('');
 
-      const todayExercises = phase.session.map(s => {
-        const ex = prog.exercises[s.ex];
-        return `<div class="sport-ex-row" data-exid="${s.ex}">
-          <div class="sport-ex-info">
-            <strong>${escapeHtml(ex.name)}</strong>
-            <span class="sport-ex-note">${escapeHtml(s.note)}</span>
-            <div class="sport-ex-desc">${escapeHtml(ex.desc)}</div>
-            <div class="sport-ex-why">Зачем: ${escapeHtml(ex.why)}</div>
-          </div>
-          <button type="button" class="sport-log-btn" data-exid="${s.ex}" data-exname="${escapeHtml(ex.name)}">Выполнено</button>
-        </div>`;
-      }).join('');
-
-      const phasesNav = prog.phases.map(p =>
-        `<button type="button" class="sport-phase-btn ${p.phase === phase.phase ? 'active' : ''}" data-phase="${p.phase}">Фаза ${p.phase}: ${escapeHtml(p.name)}</button>`
-      ).join('');
-
-      // --- Вкладка: Дневник ---
-      const sessions = (data.sessions || []).slice().sort((a,b) => (b.date||'').localeCompare(a.date||'')).slice(0,50);
-      const diaryRows = sessions.length ? sessions.map(s => {
-        const exNames = (s.exercises||[]).map(e => prog.exercises[e.exerciseId]?.name || e.exerciseId).join(', ');
+      // Diary: use completedDays instead of sessions
+      const completedDays = data.completedDays || {};
+      const completedArr = Object.entries(completedDays)
+        .map(([date, d]) => ({date, ...d}))
+        .sort((a,b) => b.date.localeCompare(a.date))
+        .slice(0, 40);
+      const diaryRows = completedArr.length ? completedArr.map(d => {
         return `<tr>
-          <td>${fmtDate(s.date)}</td>
-          <td style="max-width:280px;font-size:0.85rem">${escapeHtml(exNames.slice(0,80))}</td>
-          <td>${s.bestWallHold ? s.bestWallHold+'с' : '—'}</td>
-          <td>${s.bestFreeHold ? s.bestFreeHold+'с' : '—'}</td>
-          <td>${s.wristComfort ? s.wristComfort+'/5' : '—'}</td>
-          <td style="max-width:200px;font-size:0.85rem">${escapeHtml((s.notes||'').slice(0,80))}</td>
-          <td><button type="button" class="sport-del-session" data-id="${s.id}" style="color:var(--text-muted);background:none;border:none;cursor:pointer;font-size:0.8rem">✕</button></td>
+          <td>${fmtDate(d.date)}</td>
+          <td>Нед.${d.week || '?'} · День ${d.dayNum || '?'}</td>
+          <td>${d.wallHold ? d.wallHold+'с' : '—'}</td>
+          <td>${d.freeHold ? d.freeHold+'с' : '—'}</td>
+          <td>${d.wristComfort ? d.wristComfort+'/5' : '—'}</td>
+          <td style="max-width:200px;font-size:0.85rem">${escapeHtml((d.notes||'').slice(0,80))}</td>
+          <td><button type="button" class="sport-del-day" data-date="${d.date}" style="color:var(--text-muted);background:none;border:none;cursor:pointer;font-size:0.8rem">✕</button></td>
         </tr>`;
-      }).join('') : `<tr><td colspan="7" class="empty">Нет записей. После тренировки нажми «Выполнено» у любого упражнения.</td></tr>`;
+      }).join('') : `<tr><td colspan="7" class="empty">Нет выполненных дней. Отмечай комплексы в разделе «Программа».</td></tr>`;
 
-      // --- Вкладка: AI-тренер ---
+      // AI
       const aiKey = data.aiKey || '';
       const aiMessages = (data.aiMessages || []).slice(-20);
       const aiHistoryHtml = aiMessages.length ? aiMessages.map(m =>
@@ -4980,23 +5190,17 @@
               <h2 style="margin:0 0 4px">${escapeHtml(prog.title)}</h2>
               <p style="margin:0;color:var(--text-muted);font-size:0.875rem">${escapeHtml(prog.goal)}</p>
             </div>
-            <div class="sport-week-badge">Неделя ${weekDisplay} / 16</div>
-          </div>
-
-          <div class="sport-phase-nav" id="sport-phase-nav">${phasesNav}</div>
-
-          <div id="sport-phase-content">
-            <div class="sport-phase-block">
-              <div class="sport-phase-title">
-                <strong>Фаза ${phase.phase} — ${escapeHtml(phase.name)}</strong>
-                <span style="color:var(--text-muted);font-size:0.875rem">Нед. ${phase.weeks[0]}–${phase.weeks[phase.weeks.length-1]}</span>
-              </div>
-              <p style="color:var(--text-muted);font-size:0.875rem;margin:0 0 16px">${escapeHtml(phase.goal)}</p>
-              <div class="sport-ex-list">${todayExercises}</div>
+            <div class="sport-week-controls">
+              <button type="button" id="sport-prev-week" class="sport-week-nav-btn" ${viewWeek <= 1 ? 'disabled' : ''}>←</button>
+              <span class="sport-week-badge">Неделя ${viewWeek} / 16</span>
+              <button type="button" id="sport-next-week" class="sport-week-nav-btn" ${viewWeek >= 16 ? 'disabled' : ''}>→</button>
             </div>
           </div>
 
-          <h3 style="margin:28px 0 12px;font-size:0.8rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-muted)">Контрольные точки</h3>
+          <div id="sport-week-grid-container">${weekGridHtml}</div>
+          <div id="sport-ex-list-container">${exListHtml}</div>
+
+          <h3 style="margin:32px 0 10px;font-size:0.8rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-muted)">Чекпоинты программы</h3>
           <div class="sport-checkpoints">${checkpointsHtml}</div>
         </div>
 
@@ -5100,39 +5304,31 @@
         };
       });
 
-      // Phase nav
-      document.querySelectorAll('#sport-phase-nav .sport-phase-btn').forEach(btn => {
-        btn.onclick = () => {
-          const phaseNum = parseInt(btn.dataset.phase);
-          const phase = HANDSTAND_PROGRAM.phases.find(p => p.phase === phaseNum);
-          if (!phase) return;
-          document.querySelectorAll('#sport-phase-nav .sport-phase-btn').forEach(b => b.classList.toggle('active', parseInt(b.dataset.phase) === phaseNum));
-          const container = document.getElementById('sport-phase-content');
-          const exList = phase.session.map(s => {
-            const ex = HANDSTAND_PROGRAM.exercises[s.ex];
-            return `<div class="sport-ex-row" data-exid="${s.ex}">
-              <div class="sport-ex-info">
-                <strong>${escapeHtml(ex.name)}</strong>
-                <span class="sport-ex-note">${escapeHtml(s.note)}</span>
-                <div class="sport-ex-desc">${escapeHtml(ex.desc)}</div>
-                <div class="sport-ex-why">Зачем: ${escapeHtml(ex.why)}</div>
-              </div>
-              <button type="button" class="sport-log-btn" data-exid="${s.ex}" data-exname="${escapeHtml(ex.name)}">Выполнено</button>
-            </div>`;
-          }).join('');
-          container.innerHTML = `<div class="sport-phase-block">
-            <div class="sport-phase-title">
-              <strong>Фаза ${phase.phase} — ${escapeHtml(phase.name)}</strong>
-              <span style="color:var(--text-muted);font-size:0.875rem">Нед. ${phase.weeks[0]}–${phase.weeks[phase.weeks.length-1]}</span>
-            </div>
-            <p style="color:var(--text-muted);font-size:0.875rem;margin:0 0 16px">${escapeHtml(phase.goal)}</p>
-            <div class="sport-ex-list">${exList}</div>
-          </div>`;
-          bindSportLogBtns();
-        };
-      });
+      // Week navigation ← →
+      const prevWeekBtn = document.getElementById('sport-prev-week');
+      const nextWeekBtn = document.getElementById('sport-next-week');
+      function refreshProgramPanel() {
+        const data = loadSportData();
+        const viewWeek = Math.min(Math.max(1, _sportViewWeek), 16);
+        const phase = HANDSTAND_PROGRAM.phases.find(p => p.weeks.includes(viewWeek)) || HANDSTAND_PROGRAM.phases[0];
+        const today = new Date().toISOString().slice(0,10);
+        const dates = sportDayDates(viewWeek);
+        const activeDate = dates.includes(today) ? today : dates[0];
+        const activeDayNum = dates.indexOf(activeDate) + 1;
+        document.getElementById('sport-week-grid-container').innerHTML = renderSportWeekGrid(viewWeek, data);
+        document.getElementById('sport-ex-list-container').innerHTML = renderSportExList(phase, activeDate, data, activeDayNum);
+        document.querySelector('.sport-week-badge').textContent = `Неделя ${viewWeek} / 16`;
+        if (prevWeekBtn) prevWeekBtn.disabled = viewWeek <= 1;
+        if (nextWeekBtn) nextWeekBtn.disabled = viewWeek >= 16;
+        bindSportDayCards();
+        bindSportCompleteDay();
+      }
+      if (prevWeekBtn) prevWeekBtn.onclick = () => { _sportViewWeek = Math.max(1, (_sportViewWeek||1) - 1); refreshProgramPanel(); };
+      if (nextWeekBtn) nextWeekBtn.onclick = () => { _sportViewWeek = Math.min(16, (_sportViewWeek||1) + 1); refreshProgramPanel(); };
 
-      bindSportLogBtns();
+      // Day card click → show exercise list for that day
+      bindSportDayCards();
+      bindSportCompleteDay();
 
       // Checkpoint buttons
       document.querySelectorAll('.sport-cp-btn').forEach(btn => {
@@ -5148,35 +5344,42 @@
         };
       });
 
-      // Delete session
-      document.querySelectorAll('.sport-del-session').forEach(btn => {
+      // Delete day from diary
+      document.querySelectorAll('.sport-del-day').forEach(btn => {
         btn.onclick = () => {
           if (!confirm('Удалить эту запись?')) return;
           const data = loadSportData();
-          data.sessions = (data.sessions||[]).filter(s => s.id !== btn.dataset.id);
+          if (data.completedDays) delete data.completedDays[btn.dataset.date];
           saveSportData(data);
           selectSection('sport');
+          setTimeout(() => {
+            document.querySelectorAll('#sport-tabs .gtd-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === 'diary'));
+            document.querySelectorAll('[id^="sport-panel-"]').forEach(p => p.classList.toggle('active', p.id === 'sport-panel-diary'));
+          }, 50);
         };
       });
 
-      // Log form
+      // Log form (manual entry)
       const logForm = document.getElementById('sport-log-form');
       if (logForm) logForm.onsubmit = function(e) {
         e.preventDefault();
-        const data = loadSportData();
         const date = document.getElementById('sport-log-date').value;
-        const session = {
-          id: Date.now().toString(),
-          date,
-          programId: HANDSTAND_PROGRAM.id,
-          exercises: [],
-          bestWallHold: parseInt(document.getElementById('sport-log-wall').value) || 0,
-          bestFreeHold: parseInt(document.getElementById('sport-log-free').value) || 0,
+        if (!date) { alert('Укажи дату'); return; }
+        const viewWeek = _sportViewWeek || sportWeekNum();
+        let week = viewWeek, dayNum = 1;
+        for (let w = 1; w <= 16; w++) {
+          const idx = sportDayDates(w).indexOf(date);
+          if (idx >= 0) { week = w; dayNum = idx + 1; break; }
+        }
+        const data = loadSportData();
+        if (!data.completedDays) data.completedDays = {};
+        data.completedDays[date] = {
+          week, dayNum,
+          wallHold: parseInt(document.getElementById('sport-log-wall').value) || 0,
+          freeHold: parseInt(document.getElementById('sport-log-free').value) || 0,
           wristComfort: parseInt(document.getElementById('sport-log-wrist').value) || 0,
           notes: document.getElementById('sport-log-notes').value.trim()
         };
-        if (!data.sessions) data.sessions = [];
-        data.sessions.push(session);
         saveSportData(data);
         selectSection('sport');
         setTimeout(() => {
@@ -5199,56 +5402,71 @@
       // AI send
       const aiSend = document.getElementById('sport-ai-send');
       if (aiSend) aiSend.onclick = () => sendSportAI();
-
-      document.getElementById('sport-ai-input').onkeydown = function(e) {
+      const aiInput = document.getElementById('sport-ai-input');
+      if (aiInput) aiInput.onkeydown = function(e) {
         if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) sendSportAI();
       };
     }
 
-    function bindSportLogBtns() {
-      let _currentExId = null, _currentExName = null;
-      document.querySelectorAll('.sport-log-btn').forEach(btn => {
-        btn.onclick = () => {
-          _currentExId = btn.dataset.exid;
-          _currentExName = btn.dataset.exname;
-          document.getElementById('sport-modal-title').textContent = _currentExName;
-          document.getElementById('sport-modal-sets').value = '';
-          document.getElementById('sport-modal-rpe').value = '';
-          document.getElementById('sport-modal-wall').value = '';
-          document.getElementById('sport-modal-free').value = '';
-          document.getElementById('sport-modal-notes').value = '';
-          const modal = document.getElementById('sport-ex-modal');
-          modal.style.display = 'flex';
-
-          document.getElementById('sport-modal-cancel').onclick = () => { modal.style.display = 'none'; };
-          document.getElementById('sport-modal-save').onclick = () => {
-            const data = loadSportData();
-            const today = new Date().toISOString().slice(0,10);
-            if (!data.sessions) data.sessions = [];
-            let session = data.sessions.find(s => s.date === today && s.programId === HANDSTAND_PROGRAM.id);
-            if (!session) {
-              session = { id: Date.now().toString(), date: today, programId: HANDSTAND_PROGRAM.id, exercises: [], bestWallHold: 0, bestFreeHold: 0, wristComfort: 5, notes: '' };
-              data.sessions.push(session);
-            }
-            const wallVal = parseInt(document.getElementById('sport-modal-wall').value) || 0;
-            const freeVal = parseInt(document.getElementById('sport-modal-free').value) || 0;
-            session.exercises.push({
-              exerciseId: _currentExId,
-              sets: document.getElementById('sport-modal-sets').value.trim(),
-              rpe: parseInt(document.getElementById('sport-modal-rpe').value) || null,
-              notes: document.getElementById('sport-modal-notes').value.trim()
-            });
-            if (wallVal > session.bestWallHold) session.bestWallHold = wallVal;
-            if (freeVal > session.bestFreeHold) session.bestFreeHold = freeVal;
-            saveSportData(data);
-            modal.style.display = 'none';
-            btn.textContent = '✓ Записано';
-            btn.style.background = '#38a169';
-            btn.style.color = '#fff';
-            btn.disabled = true;
-          };
+    function bindSportDayCards() {
+      document.querySelectorAll('#sport-days-grid .sport-day-card').forEach(card => {
+        card.style.cursor = 'pointer';
+        card.onclick = () => {
+          document.querySelectorAll('#sport-days-grid .sport-day-card').forEach(c => c.classList.remove('selected'));
+          card.classList.add('selected');
+          const date = card.dataset.date;
+          const dayNum = parseInt(card.dataset.daynum);
+          const viewWeek = _sportViewWeek || sportWeekNum();
+          const phase = HANDSTAND_PROGRAM.phases.find(p => p.weeks.includes(viewWeek)) || HANDSTAND_PROGRAM.phases[0];
+          const data = loadSportData();
+          document.getElementById('sport-ex-list-container').innerHTML = renderSportExList(phase, date, data, dayNum);
+          bindSportCompleteDay();
         };
       });
+    }
+
+    function bindSportCompleteDay() {
+      const btn = document.querySelector('.sport-complete-day-btn');
+      if (!btn) return;
+      btn.onclick = () => {
+        const date = btn.dataset.date;
+        const dayNum = parseInt(btn.dataset.daynum);
+        const viewWeek = _sportViewWeek || sportWeekNum();
+        let week = viewWeek;
+        for (let w = 1; w <= 16; w++) {
+          if (sportDayDates(w).includes(date)) { week = w; break; }
+        }
+        const data = loadSportData();
+        if (!data.completedDays) data.completedDays = {};
+        data.completedDays[date] = {
+          week, dayNum,
+          wallHold: parseInt(document.getElementById('sport-cd-wall')?.value) || 0,
+          freeHold: parseInt(document.getElementById('sport-cd-free')?.value) || 0,
+          wristComfort: parseInt(document.getElementById('sport-cd-wrist')?.value) || 0,
+          notes: (document.getElementById('sport-cd-notes')?.value || '').trim()
+        };
+        saveSportData(data);
+        // Update grid card
+        const card = document.querySelector(`#sport-days-grid .sport-day-card[data-date="${date}"]`);
+        if (card) {
+          card.classList.add('done');
+          card.querySelector('.sport-day-status').textContent = '✓ Выполнено';
+        }
+        // Replace complete button with done banner
+        const wrap = document.getElementById('sport-ex-list-container');
+        const doneDiv = wrap.querySelector('.sport-complete-day-wrap');
+        if (doneDiv) {
+          doneDiv.outerHTML = `<div class="sport-day-done-banner">✓ День ${dayNum} выполнен · ${fmtShortDate(date)}</div>`;
+        }
+        // Update week summary
+        const viewW = _sportViewWeek || sportWeekNum();
+        const phaseForWeek = HANDSTAND_PROGRAM.phases.find(p => p.weeks.includes(viewW)) || HANDSTAND_PROGRAM.phases[0];
+        const freshData = loadSportData();
+        const dates = sportDayDates(viewW);
+        const doneCount = dates.filter(d => freshData.completedDays && freshData.completedDays[d]).length;
+        const summaryEl = document.querySelector('.sport-week-progress');
+        if (summaryEl) summaryEl.textContent = `${doneCount} из ${phaseForWeek.daysPerWeek} дней · ⏱ ~${phaseForWeek.minutesPerDay} мин/день`;
+      };
     }
 
     async function sendSportAI() {
