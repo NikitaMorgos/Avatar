@@ -99,14 +99,28 @@
     .prev-bar { display: flex; align-items: center; gap: 12px; margin-bottom: 22px; }
     .prev-bar h2 { font-size: 0.85rem; font-weight: 600; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); }
     .pages { display: flex; flex-direction: column; gap: 22px; align-items: center; }
-    .pg { width: 540px; min-height: 756px; background: var(--page-bg); box-shadow: 0 2px 18px rgba(0,0,0,.09); border-radius: 2px; padding: 50px 42px 56px; display: flex; flex-direction: column; position: relative; }
-    .pg-num { position: absolute; bottom: 20px; right: 36px; font-size: 0.67rem; color: #ccc; }
+    .pg { width: 440px; min-height: 624px; background: var(--page-bg); box-shadow: 0 2px 18px rgba(0,0,0,.09); border-radius: 2px; padding: 40px 36px 48px; display: flex; flex-direction: column; position: relative; }
+    .pg-num { position: absolute; bottom: 16px; right: 30px; font-size: 0.67rem; color: #ccc; }
+    /* cover */
+    .pg-cover { background: #2b2318; justify-content: flex-end; overflow: hidden; padding: 0; }
+    .cv-bg-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: .55; }
+    .cv-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(30,20,10,.85) 40%, rgba(30,20,10,.25)); }
+    .cv-content { position: relative; z-index: 1; padding: 36px; margin-top: auto; }
+    .cv-title { font-family: 'Cormorant Garamond', serif; font-size: 3.2rem; font-weight: 300; color: #fff; line-height: 1.1; margin-bottom: 10px; white-space: pre-wrap; }
+    .cv-sub { font-family: 'Cormorant Garamond', serif; font-size: 1.05rem; color: rgba(255,255,255,.72); font-style: italic; white-space: pre-wrap; margin-bottom: 18px; }
+    .cv-author { font-size: 0.72rem; color: rgba(255,255,255,.5); letter-spacing: .1em; text-transform: uppercase; margin-top: auto; padding-top: 28px; }
+    .pg-cover-back { background: #2b2318; justify-content: center; align-items: center; }
+    .cv-back-text { font-family: 'Cormorant Garamond', serif; font-size: 1rem; color: rgba(255,255,255,.6); text-align: center; line-height: 1.8; white-space: pre-wrap; }
+    /* endpaper */
+    .pg-endpaper { background: #f5ede0; justify-content: center; align-items: center; }
+    .ep-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: .3; }
+    .ep-text { position: relative; z-index: 1; font-family: 'Cormorant Garamond', serif; font-size: 1.1rem; color: #7a6148; text-align: center; line-height: 2; font-style: italic; white-space: pre-wrap; }
     /* year opener */
     .pg-yr { justify-content: flex-start; }
-    .yr-big { font-family: 'Cormorant Garamond', serif; font-size: 5.5rem; font-weight: 300; color: var(--warm); line-height: 1; margin-bottom: 2px; }
-    .yr-age { font-size: 0.85rem; color: var(--muted); margin-bottom: 28px; }
-    .yr-fact { font-size: 0.82rem; color: var(--muted); border-left: 3px solid var(--warm); padding-left: 13px; line-height: 1.75; font-style: italic; max-width: 400px; margin-bottom: 28px; }
-    .yr-photo { margin-top: auto; width: 100%; height: 260px; background: #edeae3; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: #bfb3a3; font-size: 0.78rem; overflow: hidden; }
+    .yr-big { font-family: 'Cormorant Garamond', serif; font-size: 5rem; font-weight: 300; color: var(--warm); line-height: 1; margin-bottom: 2px; }
+    .yr-age { font-size: 0.85rem; color: var(--muted); margin-bottom: 24px; }
+    .yr-fact { font-size: 0.82rem; color: var(--muted); border-left: 3px solid var(--warm); padding-left: 13px; line-height: 1.75; font-style: italic; max-width: 360px; margin-bottom: 24px; }
+    .yr-photo { margin-top: auto; width: 100%; height: 210px; background: #edeae3; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: #bfb3a3; font-size: 0.78rem; overflow: hidden; }
     .yr-photo img { width: 100%; height: 100%; object-fit: cover; }
     /* notes */
     .pg-notes .nb { margin-bottom: 26px; }
@@ -114,7 +128,7 @@
     .nd { font-size: 0.67rem; font-weight: 600; text-transform: uppercase; letter-spacing: .07em; color: var(--warm); margin-bottom: 5px; }
     .nt { font-family: 'Cormorant Garamond', serif; font-size: 1.02rem; line-height: 1.85; white-space: pre-wrap; }
     /* photo page */
-    .pg-ph .ph-img { width: 100%; flex: 1; min-height: 300px; background: #edeae3; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: #bfb3a3; font-size: 0.78rem; overflow: hidden; margin-bottom: 18px; }
+    .pg-ph .ph-img { width: 100%; flex: 1; min-height: 260px; background: #edeae3; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: #bfb3a3; font-size: 0.78rem; overflow: hidden; margin-bottom: 18px; }
     .pg-ph .ph-img img { width: 100%; height: 100%; object-fit: cover; border-radius: 4px; }
     /* quote */
     .pg-qt { justify-content: center; }
@@ -122,11 +136,18 @@
     .qt-text { font-family: 'Cormorant Garamond', serif; font-size: 1.45rem; font-style: italic; line-height: 1.8; }
     .qt-attr { margin-top: 20px; font-size: 0.78rem; color: var(--muted); }
     /* drawing */
-    .pg-dr .dr-img { width: 100%; flex: 0 0 340px; background: #fafaf6; border: 1px solid var(--border); border-radius: 4px; display: flex; align-items: center; justify-content: center; color: #bfb3a3; font-size: 0.78rem; overflow: hidden; margin-bottom: 14px; }
-    .pg-dr .dr-img img { max-width: 100%; max-height: 340px; object-fit: contain; }
+    .pg-dr .dr-img { width: 100%; flex: 0 0 290px; background: #fafaf6; border: 1px solid var(--border); border-radius: 4px; display: flex; align-items: center; justify-content: center; color: #bfb3a3; font-size: 0.78rem; overflow: hidden; margin-bottom: 14px; }
+    .pg-dr .dr-img img { max-width: 100%; max-height: 290px; object-fit: contain; }
     .dr-cap { font-family: 'Cormorant Garamond', serif; font-size: 0.9rem; color: var(--muted); text-align: center; font-style: italic; }
     /* special */
     .pg-sp .sp-head { font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--warm); margin-bottom: 14px; }
+    /* interview pages */
+    .pg-interview { }
+    .iv-pg-head { font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: .07em; color: var(--warm); margin-bottom: 16px; }
+    .iv-pg-cont { color: var(--muted); }
+    .iv-pg-body { font-family: 'Cormorant Garamond', serif; font-size: 0.92rem; line-height: 1.8; white-space: pre-wrap; overflow: hidden; flex: 1; }
+    /* year opener opener-row in sidebar */
+    .er-opener { background: var(--sidebar-bg); font-style: italic; color: var(--accent); }
 
     /* ── CONCEPT ── */
     .concept { padding: 30px 36px; max-width: 700px; }
@@ -166,7 +187,8 @@
       .main { overflow: visible; }
       .preview { padding: 0; background: white; }
       .pages { gap: 0; }
-      .pg { width: 190mm; min-height: 265mm; box-shadow: none; border-radius: 0; padding: 18mm 18mm 22mm 14mm; page-break-after: always; margin: 0 auto; }
+      .pg { width: 148mm; min-height: 210mm; box-shadow: none; border-radius: 0; padding: 14mm 13mm 18mm 12mm; page-break-after: always; margin: 0 auto; }
+      .pg-cover, .pg-cover-back { page-break-after: always; }
     }
 
     ::-webkit-scrollbar { width: 5px; }
@@ -219,7 +241,7 @@ const CREDS = [
 
 // ── CONSTANTS ─────────────────────────────────────────────────────────────────
 const SK = 'darina_book_v1';
-const YEARS = [2011,2012,2013,2014,2015,2016,2017,2018,2026];
+const YEARS = [0, 2011,2012,2013,2014,2015,2016,2017,2018,2026,9999];
 const MONTHS = ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
 const TYPES = [
   {id:'note',       label:'Заметка',            icon:'✍️'},
@@ -233,7 +255,15 @@ const TYPES = [
   {id:'letter',     label:'Письмо',               icon:'💌'},
   {id:'characters', label:'Персонажи',            icon:'👥'},
   {id:'interview-transcript', label:'Интервью',   icon:'🎙️'},
+  {id:'cover',      label:'Обложка',              icon:'📘'},
+  {id:'endpaper',   label:'Форзац',               icon:'📄'},
 ];
+function yearLabel(yr) {
+  if (yr === 0)    return 'Обложка / Форзац';
+  if (yr === 9999) return 'Финал';
+  if (yr === 2026) return '2026 · Интервью';
+  return String(yr);
+}
 const TAGS = ['еда','животные','путешествия','дома','друзья','музыка','слова','игры','характер'];
 const TICONS = Object.fromEntries(TYPES.map(t => [t.id, t.icon]));
 
@@ -250,6 +280,11 @@ const HIST = {
 
 // ── SEED DATA ─────────────────────────────────────────────────────────────────
 const SEED = [
+  // Обложка и форзацы (год 0 = начало, год 9999 = конец)
+  {type:'cover',    year:0,    month:null,     text:'Дарина\n\nКнига детства\n2011—2018', caption:'Никита Моргось · 2026', photo:null, historicFact:'', tags:[]},
+  {type:'endpaper', year:0,    month:'front',  text:'', caption:'', photo:null, historicFact:'', tags:[]},
+  {type:'endpaper', year:9999, month:'back',   text:'Дарина, ты была потрясающим ребёнком.\nМы тебя любим.', caption:'', photo:null, historicFact:'', tags:[]},
+  {type:'cover',    year:9999, month:'back',   text:'', caption:'', photo:null, historicFact:'', tags:[]},
   // Year openers
   {type:'year-opener',year:2011,month:null,text:'Октябрь 2011 — первые месяцы',caption:'',photo:null,historicFact:''},
   {type:'year-opener',year:2012,month:null,text:'',caption:'',photo:null,historicFact:''},
@@ -349,7 +384,7 @@ const SEED = [
 let entries = [];
 let curId = null;
 let curTab = 'editor';
-let openYears = new Set([2013]);
+let openYears = new Set([0, 2013]);
 
 // ── AUTH ──────────────────────────────────────────────────────────────────────
 function authed() { return sessionStorage.getItem('darina_ok') === '1'; }
@@ -384,13 +419,43 @@ function seed() {
     tags: e.tags || [], photo: e.photo || null, caption: e.caption || '',
     historicFact: e.historicFact || '', ...e
   }));
+  // Auto-add interview transcript as a book entry (type defined later but called at boot)
+  entries.push({
+    id: uid(), type: 'interview-transcript', year: 2026, month: 'Апрель',
+    text: typeof TRANSCRIPT !== 'undefined' ? TRANSCRIPT : '',
+    caption: 'Голосовое интервью · апрель 2026',
+    photo: null, historicFact: '', tags: ['характер'], order: 9990
+  });
+  save();
+}
+function ensureInterviewEntry() {
+  if (!entries.find(e => e.type === 'interview-transcript')) {
+    entries.push({
+      id: uid(), type: 'interview-transcript', year: 2026, month: 'Апрель',
+      text: TRANSCRIPT, caption: 'Голосовое интервью · апрель 2026',
+      photo: null, historicFact: '', tags: ['характер'], order: 9990
+    });
+  }
+  // Ensure covers and endpapers
+  if (!entries.find(e => e.type === 'cover' && e.year === 0)) {
+    entries.unshift({id:uid(),type:'cover',year:0,month:null,text:'Дарина\n\nКнига детства\n2011—2018',caption:'Никита Моргось · 2026',photo:null,historicFact:'',tags:[],order:-20});
+  }
+  if (!entries.find(e => e.type === 'endpaper' && e.month === 'front')) {
+    entries.splice(1,0,{id:uid(),type:'endpaper',year:0,month:'front',text:'',caption:'',photo:null,historicFact:'',tags:[],order:-10});
+  }
+  if (!entries.find(e => e.type === 'endpaper' && e.month === 'back')) {
+    entries.push({id:uid(),type:'endpaper',year:9999,month:'back',text:'Дарина, ты была потрясающим ребёнком.\nМы тебя любим.',caption:'',photo:null,historicFact:'',tags:[],order:9995});
+  }
+  if (!entries.find(e => e.type === 'cover' && e.year === 9999)) {
+    entries.push({id:uid(),type:'cover',year:9999,month:'back',text:'',caption:'',photo:null,historicFact:'',tags:[],order:9999});
+  }
   save();
 }
 
 // ── INIT ──────────────────────────────────────────────────────────────────────
 function init() {
   const saved = load();
-  if (saved) entries = saved; else seed();
+  if (saved) { entries = saved; ensureInterviewEntry(); } else seed();
   renderSidebar();
   updateStats();
   switchTab('editor');
@@ -409,7 +474,9 @@ function switchTab(tab) {
 
 // ── SIDEBAR ───────────────────────────────────────────────────────────────────
 function snip(e) {
-  if (e.type === 'year-opener') return `Заставка ${e.year}`;
+  if (e.type === 'year-opener') return `📅 Заставка ${e.year}`;
+  if (e.type === 'cover')    return e.year === 0 ? '📘 Обложка (передняя)' : '📘 Обложка (задняя)';
+  if (e.type === 'endpaper') return e.month === 'front' ? '📄 Форзац (передний)' : '📄 Форзац (задний)';
   const t = (e.text || e.caption || '').replace(/\n/g, ' ');
   return t.length > 38 ? t.slice(0, 38) + '…' : t || '(пусто)';
 }
@@ -417,15 +484,21 @@ function renderSidebar() {
   const nav = document.getElementById('year-nav');
   nav.innerHTML = '';
   YEARS.forEach(yr => {
+    const opener = entries.find(e => e.year === yr && e.type === 'year-opener');
     const yrs = entries.filter(e => e.year === yr && e.type !== 'year-opener')
       .sort((a, b) => MONTHS.indexOf(a.month) - MONTHS.indexOf(b.month));
     const open = openYears.has(yr);
     const sec = document.createElement('div');
+    const openerHtml = (opener && yr >= 2011 && yr <= 2018) ? `
+      <div class="er er-opener ${opener.id === curId ? 'on' : ''}" data-id="${opener.id}">
+        <span class="er-icon">📅</span>Заставка года
+      </div>` : '';
     sec.innerHTML = `
       <button class="yr-btn ${open ? 'open' : ''}" data-yr="${yr}">
-        ${yr} <span class="yr-cnt">${yrs.length}</span>
+        ${escH(yearLabel(yr))} <span class="yr-cnt">${yrs.length}</span>
       </button>
       <div class="yr-entries ${open ? 'open' : ''}">
+        ${openerHtml}
         ${yrs.map(e => `
           <div class="er ${e.id === curId ? 'on' : ''}" data-id="${e.id}">
             <span class="er-icon">${TICONS[e.type] || '·'}</span>${escH(snip(e))}
@@ -444,7 +517,8 @@ function renderSidebar() {
   });
 }
 function updateStats() {
-  const n = entries.filter(e => e.type !== 'year-opener').length;
+  const skip = ['year-opener','cover','endpaper'];
+  const n = entries.filter(e => !skip.includes(e.type)).length;
   const p = entries.filter(e => e.photo).length;
   document.getElementById('top-stats').textContent = `${n} записей · ${p} с фото`;
 }
@@ -476,14 +550,20 @@ function renderEmpty() {
 function renderEditor(id) {
   const e = entries.find(x => x.id === id);
   if (!e) { renderEmpty(); return; }
+
+  // Special interview-transcript editor
+  if (e.type === 'interview-transcript') {
+    renderInterviewEditor(e); return;
+  }
+
   const tOpts = TYPES.map(t => `<option value="${t.id}"${t.id===e.type?' selected':''}>${t.icon} ${t.label}</option>`).join('');
-  const yOpts = YEARS.map(y => `<option value="${y}"${y===e.year?' selected':''}>${y}</option>`).join('');
+  const yOpts = YEARS.map(y => `<option value="${y}"${y===e.year?' selected':''}>${escH(yearLabel(y))}</option>`).join('');
   const mOpts = ['', ...MONTHS].map(m => `<option value="${m}"${m===(e.month||'')?'selected':''}>${m||'— не указан —'}</option>`).join('');
-  const hasPh = ['note-photo','drawing'].includes(e.type);
+  const hasPh = ['note-photo','drawing','cover','endpaper','year-opener'].includes(e.type);
   const isYr  = e.type === 'year-opener';
   const phHtml = hasPh ? `
     <div class="fg" style="margin-bottom:13px">
-      <label>${e.type==='drawing'?'Рисунок':'Фотография'}</label>
+      <label>${e.type==='drawing'?'Рисунок':e.type==='cover'?'Фото обложки':e.type==='endpaper'?'Изображение форзаца':e.type==='year-opener'?'Фото года':'Фотография'}</label>
       <div class="photo-area" id="ph-drop" onclick="document.getElementById('ph-file').click()">
         ${e.photo ? `<img src="${e.photo}" alt="">` : `<div class="photo-hint">Нажми или перетащи файл<br><small>JPG, PNG · хранится локально</small></div>`}
       </div>
@@ -491,24 +571,17 @@ function renderEditor(id) {
       ${e.photo ? `<button class="btn-s" style="margin-top:5px;font-size:0.76rem" onclick="clearPhoto()">Удалить фото</button>` : ''}
     </div>
     <div class="fg" style="margin-bottom:13px">
-      <label>Подпись к ${e.type==='drawing'?'рисунку':'фото'}</label>
+      <label>Подпись</label>
       <input type="text" id="f-cap" value="${escH(e.caption||'')}">
     </div>` : '';
   const yrHtml = isYr ? `
-    <div class="fg" style="margin-bottom:13px">
-      <label>Исторический факт года</label>
-      <textarea id="f-hist" style="min-height:68px">${escH(e.historicFact || HIST[e.year] || '')}</textarea>
-    </div>
-    <div class="fg" style="margin-bottom:13px">
-      <label>Фото года (для заставки)</label>
-      <div class="photo-area" id="ph-drop" style="min-height:80px" onclick="document.getElementById('ph-file').click()">
-        ${e.photo ? `<img src="${e.photo}" alt="" style="max-height:140px">` : `<div class="photo-hint">Фото обложки года</div>`}
-      </div>
-      <input type="file" id="ph-file" accept="image/*" style="display:none">
-      ${e.photo ? `<button class="btn-s" style="margin-top:5px;font-size:0.76rem" onclick="clearPhoto()">Удалить</button>` : ''}
+    <div class="fg" style="margin-bottom:13px;background:var(--card-bg);border:1px solid var(--accent);border-radius:8px;padding:12px 14px">
+      <label style="color:var(--accent);font-weight:600">✏️ Врезка историка</label>
+      <textarea id="f-hist" style="min-height:80px;font-size:0.9rem">${escH(e.historicFact || HIST[e.year] || '')}</textarea>
+      <div style="font-size:0.75rem;color:var(--muted);margin-top:4px">Интересный факт этого года — появится на заставке</div>
     </div>` : '';
   const tgHtml = TAGS.map(t => `<span class="tg ${(e.tags||[]).includes(t)?'on':''}" data-t="${t}">${t}</span>`).join('');
-  const label = {note:'Текст заметки',music:'Что слушала / текст',vocabulary:'Содержание словарика','year-opener':'Подзаголовок / заметка к году',map:'Описание географии',letter:'Текст письма',characters:'Описание персонажей'}[e.type] || 'Текст';
+  const label = {note:'Текст заметки',music:'Что слушала / текст',vocabulary:'Содержание словарика','year-opener':'Подзаголовок / заметка к году',map:'Описание географии',letter:'Текст письма',characters:'Описание персонажей',cover:'Текст обложки',endpaper:'Надпись / посвящение'}[e.type] || 'Текст';
   document.getElementById('main').innerHTML = `
     <div class="editor">
       <h2>${TICONS[e.type]||''} ${TYPES.find(t=>t.id===e.type)?.label||'Запись'}</h2>
@@ -517,8 +590,8 @@ function renderEditor(id) {
           <label>Тип</label>
           <select id="f-type">${tOpts}</select>
         </div>
-        <div class="fg" style="max-width:92px">
-          <label>Год</label>
+        <div class="fg" style="max-width:130px">
+          <label>Раздел</label>
           <select id="f-year">${yOpts}</select>
         </div>
         <div class="fg" style="max-width:130px">
@@ -526,7 +599,7 @@ function renderEditor(id) {
           <select id="f-month">${mOpts}</select>
         </div>
       </div>
-      ${phHtml}${yrHtml}
+      ${yrHtml}${phHtml}
       <div class="fg" style="margin-bottom:13px">
         <label>${label}</label>
         <textarea id="f-text">${escH(e.text||'')}</textarea>
@@ -563,6 +636,54 @@ function renderEditor(id) {
     const ent = entries.find(x=>x.id===curId); if (ent) { ent.type=document.getElementById('f-type').value; save(); renderEditor(curId); }
   };
 }
+function renderInterviewEditor(e) {
+  const ans = loadAnswers();
+  const cats = [...new Set(QUESTIONS.map(q => q.cat))];
+  const blocks = cats.map(cat => {
+    const qs = QUESTIONS.filter(q => q.cat === cat);
+    return `<div class="iv-cat" style="margin-bottom:20px">
+      <div style="font-weight:700;font-size:0.82rem;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);margin-bottom:10px">${escH(cat)}</div>
+      ${qs.map(q => `
+        <div class="iv-qa" style="margin-bottom:14px;background:var(--card-bg);border:1px solid var(--border);border-radius:8px;padding:12px 14px">
+          <div style="font-size:0.87rem;font-weight:600;margin-bottom:7px;color:var(--text)">${q.id}. ${escH(q.q)}</div>
+          <textarea class="iv-ans" data-qid="${q.id}" style="min-height:64px;font-size:0.86rem;width:100%;box-sizing:border-box">${escH(ans[q.id]||'')}</textarea>
+        </div>`).join('')}
+    </div>`;
+  }).join('');
+  document.getElementById('main').innerHTML = `
+    <div class="editor">
+      <h2>🎙️ Интервью с Дариной · апрель 2026</h2>
+      <div style="font-size:0.82rem;color:var(--muted);margin-bottom:16px">14 лет · ${QUESTIONS.length} вопросов · ответы хранятся локально</div>
+      <div style="background:var(--card-bg);border:1px solid var(--accent);border-radius:8px;padding:10px 14px;margin-bottom:18px;font-size:0.84rem">
+        <strong>Текст в книгу:</strong> полная расшифровка сохранена в блоке «Интервью» — 
+        <a href="#" onclick="switchTab('interview');return false" style="color:var(--accent)">редактировать во вкладке Интервью →</a>
+      </div>
+      ${blocks}
+      <div class="actions">
+        <button class="btn-p" onclick="saveIvAnswers()">💾 Сохранить ответы</button>
+        <button class="btn-s" onclick="rebuildTranscript()">🔄 Обновить текст в книге</button>
+        <button class="btn-d" onclick="delEnt()">Удалить блок</button>
+      </div>
+    </div>`;
+  document.querySelectorAll('.iv-ans').forEach(ta => {
+    ta.oninput = () => {
+      const a = loadAnswers(); a[+ta.dataset.qid] = ta.value; saveAnswers(a);
+    };
+  });
+}
+window.saveIvAnswers = () => {
+  const a = loadAnswers();
+  document.querySelectorAll('.iv-ans').forEach(ta => { a[+ta.dataset.qid] = ta.value; });
+  saveAnswers(a);
+  alert('Ответы сохранены');
+};
+window.rebuildTranscript = () => {
+  const a = loadAnswers();
+  const e = entries.find(x => x.id === curId); if (!e) return;
+  const lines = QUESTIONS.map(q => `${q.id}. ${q.q}\n— ${a[q.id]||'(нет ответа)'}`).join('\n\n');
+  e.text = `Интервью с Дариной · апрель 2026 · 14 лет\n\n────────────────────────────────\n\n${lines}`;
+  save(); alert('Текст обновлён');
+};
 function readImg(f) {
   const r = new FileReader();
   r.onload = ev => {
@@ -600,14 +721,26 @@ window.dupEnt = () => {
 
 // ── PREVIEW ───────────────────────────────────────────────────────────────────
 function renderPreview() {
-  const sorted = [...entries].sort((a,b)=>{
+  // Separate front/back matter from content
+  const frontCovers  = entries.filter(e => (e.type==='cover'||e.type==='endpaper') && e.year===0)
+    .sort((a,b) => a.type==='cover' ? -1 : 1);
+  const backCovers   = entries.filter(e => (e.type==='cover'||e.type==='endpaper') && e.year===9999)
+    .sort((a,b) => a.type==='cover' ? 1 : -1);
+  const content      = entries.filter(e => e.type!=='cover' && e.type!=='endpaper');
+
+  const sorted = [...content].sort((a,b)=>{
     if (a.year !== b.year) return a.year-b.year;
     if (a.type==='year-opener' && b.type!=='year-opener') return -1;
     if (b.type==='year-opener' && a.type!=='year-opener') return 1;
     return MONTHS.indexOf(a.month)-MONTHS.indexOf(b.month);
   });
+
   const pages = []; let batch = [];
   const flush = () => { if (batch.length) { pages.push({t:'notes',es:[...batch]}); batch=[]; } };
+
+  // Front matter
+  frontCovers.forEach(e => pages.push({t:e.type==='cover'?'cover':'endpaper', e}));
+
   sorted.forEach(e => {
     if (e.type==='note' && !e.photo) {
       batch.push(e); if (batch.length>=3) flush();
@@ -617,21 +750,38 @@ function renderPreview() {
       else if (e.type==='note-photo')  pages.push({t:'ph',e});
       else if (e.type==='drawing')     pages.push({t:'dr',e});
       else if (e.type==='quote')       pages.push({t:'qt',e});
-      else if (e.type === 'interview-transcript') pages.push({t:'interview',e});
+      else if (e.type==='interview-transcript') {
+        // Split interview into multiple pages
+        const chunks = splitText(e.text||'', 1600);
+        chunks.forEach((chunk,ci) => pages.push({t:'interview',e,chunk,ci,total:chunks.length}));
+      }
       else { batch.push(e); }
     }
   });
   flush();
+
+  // Back matter
+  backCovers.forEach(e => pages.push({t:e.type==='endpaper'?'endpaper':'cover', e, back:true}));
+
   const html = pages.map((p,i) => renderPg(p,i+1)).join('');
   document.getElementById('main').innerHTML = `
     <div class="preview">
       <div class="prev-bar">
         <h2>Предпросмотр книги</h2>
-        <span style="color:var(--muted);font-size:0.78rem">${pages.length} стр · формат 190×265 мм</span>
+        <span style="color:var(--muted);font-size:0.78rem">${pages.length} стр · формат А5 (148×210 мм)</span>
         <button class="btn-s" onclick="window.print()" style="margin-left:auto">🖨️ Распечатать</button>
       </div>
       <div class="pages">${html}</div>
     </div>`;
+}
+function splitText(text, chunkSize) {
+  const lines = text.split('\n'); const chunks = []; let cur = '';
+  for (const line of lines) {
+    if ((cur + line).length > chunkSize && cur) { chunks.push(cur.trim()); cur = ''; }
+    cur += line + '\n';
+  }
+  if (cur.trim()) chunks.push(cur.trim());
+  return chunks.length ? chunks : [''];
 }
 function ageStr(yr) {
   const a = yr - 2011;
@@ -641,6 +791,41 @@ function ageStr(yr) {
 }
 function renderPg(p, n) {
   const num = `<span class="pg-num">${n}</span>`;
+
+  // Cover page
+  if (p.t === 'cover') {
+    const e = p.e;
+    const lines = (e.text||'').split('\n').filter(Boolean);
+    const title = lines[0]||'';
+    const subtitle = lines.slice(1).join('\n');
+    if (p.back) {
+      return `<div class="pg pg-cover-back">
+        <div class="cv-back-text">${escH(e.text||'')}</div>
+        ${num}
+      </div>`;
+    }
+    return `<div class="pg pg-cover">
+      ${e.photo ? `<img src="${e.photo}" class="cv-bg-img" alt="">` : ''}
+      <div class="cv-overlay"></div>
+      <div class="cv-content">
+        <div class="cv-title">${escH(title)}</div>
+        ${subtitle ? `<div class="cv-sub">${escH(subtitle)}</div>` : ''}
+        ${e.caption ? `<div class="cv-author">${escH(e.caption)}</div>` : ''}
+      </div>
+      ${num}
+    </div>`;
+  }
+
+  // Endpaper
+  if (p.t === 'endpaper') {
+    const e = p.e;
+    return `<div class="pg pg-endpaper">
+      ${e.photo ? `<img src="${e.photo}" class="ep-img" alt="">` : ''}
+      ${e.text ? `<div class="ep-text">${escH(e.text)}</div>` : ''}
+      ${num}
+    </div>`;
+  }
+
   if (p.t === 'yr') {
     const e = p.e;
     const fact = e.historicFact || HIST[e.year] || '';
@@ -655,7 +840,7 @@ function renderPg(p, n) {
   if (p.t === 'notes') {
     return `<div class="pg pg-notes">
       ${p.es.map(e=>`<div class="nb">
-        <div class="nd">${e.month||''} ${e.year}</div>
+        <div class="nd">${e.year}</div>
         <div class="nt">${escH(e.text||'')}</div>
       </div>`).join('')}
       ${num}
@@ -665,7 +850,7 @@ function renderPg(p, n) {
     const e = p.e;
     return `<div class="pg pg-ph">
       <div class="ph-img">${e.photo?`<img src="${e.photo}">`:'фотография'}</div>
-      <div class="nd">${e.month||''} ${e.year}</div>
+      <div class="nd">${e.year}</div>
       <div class="nt">${escH(e.text||e.caption||'')}</div>
       ${num}
     </div>`;
@@ -673,7 +858,7 @@ function renderPg(p, n) {
   if (p.t === 'dr') {
     const e = p.e;
     return `<div class="pg pg-dr">
-      <div class="nd" style="margin-bottom:12px">${e.month||''} ${e.year}</div>
+      <div class="nd" style="margin-bottom:12px">${e.year}</div>
       <div class="dr-img">${e.photo?`<img src="${e.photo}">`:'рисунок'}</div>
       <div class="dr-cap">${escH(e.caption||e.text||'')}</div>
       ${num}
@@ -684,7 +869,7 @@ function renderPg(p, n) {
     return `<div class="pg pg-qt">
       <div class="qt-mark">"</div>
       <div class="qt-text">${escH(e.text||'')}</div>
-      <div class="qt-attr">${e.month||''} ${e.year}</div>
+      <div class="qt-attr">${e.year}</div>
       ${num}
     </div>`;
   }
@@ -698,9 +883,11 @@ function renderPg(p, n) {
   }
   if (p.t === 'interview') {
     const e = p.e;
-    return `<div class="pg pg-sp">
-      <div class="sp-head">🎙️ Интервью · апрель 2026 · Дарине 14 лет</div>
-      <div class="nt" style="font-size:0.88rem;line-height:1.75;white-space:pre-wrap;overflow:hidden;max-height:620px">${escH((e.text||'').slice(0,2200))}${(e.text||'').length>2200?'\n\n…(продолжение)':''}</div>
+    const isFirst = p.ci === 0;
+    const pageLabel = p.total > 1 ? ` (${p.ci+1}/${p.total})` : '';
+    return `<div class="pg pg-interview">
+      ${isFirst ? `<div class="iv-pg-head">🎙️ Интервью · апрель 2026 · Дарине 14 лет${pageLabel}</div>` : `<div class="iv-pg-head iv-pg-cont">Интервью${pageLabel}</div>`}
+      <div class="iv-pg-body">${escH(p.chunk||'')}</div>
       ${num}
     </div>`;
   }
@@ -984,22 +1171,17 @@ window.exportAnswers = () => {
 window.addTranscriptToBook = () => {
   const existing = entries.find(e => e.type === 'interview-transcript');
   if (existing) {
-    if (!confirm('Запись интервью уже есть в книге. Перезаписать?')) return;
+    if (!confirm('Запись интервью уже есть в книге. Перезаписать текст расшифровкой?')) return;
     existing.text = TRANSCRIPT;
     existing.caption = 'Голосовое интервью · апрель 2026';
     save();
+    alert('Текст обновлён');
   } else {
-    const e = {
-      id: uid(), type: 'interview-transcript', year: 2026, month: 'Апрель',
-      text: TRANSCRIPT, caption: 'Голосовое интервью · апрель 2026',
-      photo: null, historicFact: '', tags: ['характер'], order: 9999
-    };
-    entries.push(e);
-    save();
+    ensureInterviewEntry();
+    alert('Интервью добавлено в книгу (раздел 2026)');
   }
   openYears.add(2026);
   renderSidebar(); updateStats();
-  alert('Интервью добавлено в книгу (раздел 2026)');
 };
 
 // ── CONCEPT ───────────────────────────────────────────────────────────────────
