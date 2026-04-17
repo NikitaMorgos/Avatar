@@ -1003,7 +1003,17 @@
     </div>
   </details>
 
-  <p style='margin-top:20px;color:var(--text-muted);font-size:13px'>Файлы: <code>Dropbox/Public/Cursor/Family/Истории-сыну/</code></p>
+  <div style='margin-top:24px;border:1px solid var(--border);border-radius:8px;padding:14px 16px;font-size:13px'>
+    <p style='margin:0 0 8px;font-weight:600'>📎 Как прикрепить фото к истории</p>
+    <ol style='margin:0;padding:0 0 0 16px;line-height:1.8;color:var(--text-muted)'>
+      <li>Положить фото в <code>Avatar/Family/Истории-сыну/photos/</code></li>
+      <li>Назвать файл как историю: <code>gnomik.jpg</code>, <code>krutobol.jpg</code> и т.д.</li>
+      <li>Скопировать в <code>Avatar/assets/stories/</code></li>
+      <li>Запустить <code>git add assets/stories/ИМЯ.jpg &amp;&amp; git commit &amp;&amp; git push</code></li>
+    </ol>
+    <p style='margin:8px 0 0;color:var(--text-muted)'>Фото появится над текстом истории автоматически.</p>
+  </div>
+  <p style='margin-top:12px;color:var(--text-muted);font-size:13px'>Файлы: <code>Avatar/Family/Истории-сыну/</code></p>
 ` },
       {
         id: 'diary',
@@ -1261,11 +1271,18 @@
             }
           };
         } else {
-          main.innerHTML = '<h1 class="page-title">Спорт</h1><p class="page-meta">Загрузка…</p><div class="block"></div>';
+          let sportHtml = '';
+          try { sportHtml = loadSportContent(); } catch(e) { console.error('loadSportContent error:', e); sportHtml = `<p style="color:red">Ошибка загрузки: ${e.message}</p>`; }
           main.innerHTML = `
             <h1 class="page-title">Спорт</h1>
             <p class="page-meta">Тренировочный дневник · Программы · AI-тренер</p>
-            <div class="block">${loadSportContent()}</div>
+            <div class="block">
+              <div class="sport-prog-switcher">
+                <button type="button" class="sport-prog-switch-btn ${_sportActiveProg === 'handstand' ? 'active' : ''}" data-prog="handstand">🤸 Стойка на руках</button>
+                <button type="button" class="sport-prog-switch-btn ${_sportActiveProg === 'wcs' ? 'active' : ''}" data-prog="wcs">💃 WCS Техника</button>
+              </div>
+              <div id="sport-content-area">${sportHtml}</div>
+            </div>
           `;
           bindSport();
         }
@@ -5568,7 +5585,7 @@
 
     function loadSportContent() {
       if (_sportActiveProg === 'wcs') {
-        return _sportProgSwitcherHtml() + loadWcsContent();
+        return loadWcsContent();
       }
 
       const data = loadSportData();
@@ -5624,7 +5641,7 @@
         </div>`
       ).join('') : '<p style="color:var(--text-muted);font-size:0.875rem">История пуста. Задай вопрос тренеру — он видит твои последние тренировки.</p>';
 
-      return _sportProgSwitcherHtml() + `
+      return `
         <div class="gtd-tabs" id="sport-tabs">
           <button type="button" class="gtd-tab active" data-tab="program">Программа</button>
           <button type="button" class="gtd-tab" data-tab="diary">Дневник</button>
@@ -5744,13 +5761,24 @@
     }
 
     function bindSport() {
-      // Program switcher (always present regardless of active prog)
+      // Program switcher — hardcoded in selectSection, just bind clicks
       document.querySelectorAll('.sport-prog-switch-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.prog === _sportActiveProg);
         btn.onclick = () => {
           _sportActiveProg = btn.dataset.prog;
-          selectSection('sport');
+          // Refresh only inner content area — no full page reload
+          let html = '';
+          try { html = loadSportContent(); } catch(e) { html = `<p style="color:red">${e.message}</p>`; }
+          document.getElementById('sport-content-area').innerHTML = html;
+          document.querySelectorAll('.sport-prog-switch-btn')
+            .forEach(b => b.classList.toggle('active', b.dataset.prog === _sportActiveProg));
+          bindSportInner();
         };
       });
+      bindSportInner();
+    }
+
+    function bindSportInner() {
 
       // Route to WCS binding if WCS is active
       if (_sportActiveProg === 'wcs') {
