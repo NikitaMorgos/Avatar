@@ -404,7 +404,7 @@ const SEED = [
 let entries = [];
 let curId = null;
 let curTab = 'editor';
-let openYears = new Set([0, 2013]);
+let openYears = new Set([0, 'locs', 2013]);
 
 // ── AUTH ──────────────────────────────────────────────────────────────────────
 function authed() { return sessionStorage.getItem('darina_ok') === '1'; }
@@ -458,16 +458,31 @@ function ensureInterviewEntry() {
   }
   // Ensure covers and endpapers
   if (!entries.find(e => e.type === 'cover' && e.year === 0)) {
-    entries.unshift({id:uid(),type:'cover',year:0,month:null,text:'Дарина\n\nКнига детства\n2011—2018',caption:'Никита Моргось · 2026',photo:null,historicFact:'',tags:[],order:-20});
+    entries.unshift({id:uid(),type:'cover',year:0,month:null,text:'Дарина\n\nКнига детства\n2011—2018',caption:'Никита Моргось · 2026',photo:null,historicFact:'',subtitle:'',tags:[],order:-20});
   }
   if (!entries.find(e => e.type === 'endpaper' && e.month === 'front')) {
-    entries.splice(1,0,{id:uid(),type:'endpaper',year:0,month:'front',text:'',caption:'',photo:null,historicFact:'',tags:[],order:-10});
+    entries.splice(1,0,{id:uid(),type:'endpaper',year:0,month:'front',text:'',caption:'',photo:null,historicFact:'',subtitle:'',tags:[],order:-10});
   }
   if (!entries.find(e => e.type === 'endpaper' && e.month === 'back')) {
-    entries.push({id:uid(),type:'endpaper',year:9999,month:'back',text:'Дарина, ты была потрясающим ребёнком.\nМы тебя любим.',caption:'',photo:null,historicFact:'',tags:[],order:9995});
+    entries.push({id:uid(),type:'endpaper',year:9999,month:'back',text:'Дарина, ты была потрясающим ребёнком.\nМы тебя любим.',caption:'',photo:null,historicFact:'',subtitle:'',tags:[],order:9995});
   }
   if (!entries.find(e => e.type === 'cover' && e.year === 9999)) {
-    entries.push({id:uid(),type:'cover',year:9999,month:'back',text:'',caption:'',photo:null,historicFact:'',tags:[],order:9999});
+    entries.push({id:uid(),type:'cover',year:9999,month:'back',text:'',caption:'',photo:null,historicFact:'',subtitle:'',tags:[],order:9999});
+  }
+  // Ensure location entries (migration for existing saved data)
+  if (!entries.find(e => e.type === 'location')) {
+    const locs = [
+      {caption:'Москва, ул. Садовая',      subtitle:'Первая квартира · 2011–2013', year:2011, month:null,    text:'Здесь ты появилась на свет и провела первые два года жизни. Маленькая квартира, большие окна и бесконечные вечера с папой и мамой.', tags:['дома']},
+      {caption:'Москва, ул. Новослободская',subtitle:'Квартира детства · 2013–2018', year:2013, month:null,    text:'Здесь ты росла, учила слова, рисовала, прыгала на диване и кусяла папу «от любови». Самая важная квартира — та, которую ты помнишь.', tags:['дома']},
+      {caption:'Индия, Гоа',               subtitle:'Первое большое путешествие',   year:2014, month:'Январь', text:'Козочки, море, таможня и самолёт. Первая страна дальнего зарубежья — тебе было 2 года.', tags:['путешествия']},
+      {caption:'Болгария',                  subtitle:'Лето 2014',                    year:2014, month:'Август', text:'Чёрное море, другая страна, первый раз так далеко на машине.', tags:['путешествия']},
+      {caption:'Капошвар, Венгрия',         subtitle:'2015',                         year:2015, month:null,    text:'Маленький тихий город. Дельфины, зоопарк, чужой язык.', tags:['путешествия']},
+      {caption:'Тверь',                     subtitle:'У бабы Тани',                  year:2017, month:'Июль',  text:'Каждое лето — Тверь. Баба Таня, огород, бананосушка и звонок по инстаграму.', tags:['дома','путешествия']},
+      {caption:'Красная поляна, Сочи',      subtitle:'Горы · май 2018',              year:2018, month:'Май',   text:'Первый поход в горы. «Если не успеем на подъёмник — станем дикарями». Сочи, снег в мае, ты и горы.', tags:['путешествия']},
+    ];
+    locs.forEach((l, i) => entries.push({
+      id: uid(), type: 'location', photo: null, historicFact: '', order: 5000 + i * 10, ...l
+    }));
   }
   save();
 }
@@ -504,9 +519,45 @@ function snip(e) {
 function renderSidebar() {
   const nav = document.getElementById('year-nav');
   nav.innerHTML = '';
+
+  // ── Dedicated Locations section ──────────────────────────────────────────
+  const locs = entries.filter(e => e.type === 'location')
+    .sort((a, b) => a.year - b.year || MONTHS.indexOf(a.month) - MONTHS.indexOf(b.month));
+  const locsOpen = openYears.has('locs');
+  const locSec = document.createElement('div');
+  locSec.innerHTML = `
+    <button class="yr-btn ${locsOpen ? 'open' : ''}" data-yr="locs" style="color:var(--warm)">
+      📍 Локации <span class="yr-cnt">${locs.length}</span>
+    </button>
+    <div class="yr-entries ${locsOpen ? 'open' : ''}">
+      ${locs.map(e => `
+        <div class="er ${e.id === curId ? 'on' : ''}" data-id="${e.id}">
+          <span class="er-icon">📍</span>${escH(e.caption || '(без названия)')}
+        </div>`).join('')}
+      <div class="er er-add" data-action="add-loc" style="opacity:.6;font-style:italic">
+        <span class="er-icon">＋</span>Добавить локацию
+      </div>
+    </div>`;
+  locSec.querySelector('.yr-btn').onclick = () => {
+    locsOpen ? openYears.delete('locs') : openYears.add('locs');
+    renderSidebar();
+  };
+  locSec.querySelectorAll('.er[data-id]').forEach(r => r.onclick = () => {
+    curId = r.dataset.id; renderSidebar();
+    if (curTab !== 'editor') switchTab('editor'); else renderEditor(curId);
+  });
+  const addLocBtn = locSec.querySelector('[data-action="add-loc"]');
+  if (addLocBtn) addLocBtn.onclick = () => {
+    const e = {id:uid(),type:'location',year:2013,month:null,caption:'',subtitle:'',text:'',photo:null,historicFact:'',tags:['путешествия'],order:(entries.length+1)*10};
+    entries.push(e); save(); curId=e.id; openYears.add('locs'); renderSidebar();
+    if (curTab !== 'editor') switchTab('editor'); else renderEditor(curId);
+  };
+  nav.appendChild(locSec);
+
+  // ── Year groups ──────────────────────────────────────────────────────────
   YEARS.forEach(yr => {
     const opener = entries.find(e => e.year === yr && e.type === 'year-opener');
-    const yrs = entries.filter(e => e.year === yr && e.type !== 'year-opener')
+    const yrs = entries.filter(e => e.year === yr && e.type !== 'year-opener' && e.type !== 'location')
       .sort((a, b) => MONTHS.indexOf(a.month) - MONTHS.indexOf(b.month));
     const open = openYears.has(yr);
     const sec = document.createElement('div');
