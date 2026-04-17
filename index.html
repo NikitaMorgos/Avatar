@@ -191,6 +191,48 @@
     .sport-complete-day-btn:hover { background:var(--accent-hover); }
     .sport-day-done-banner { background:#f0fff4;border:2px solid #9ae6b4;border-radius:8px;padding:12px 16px;text-align:center;font-size:0.9375rem;font-weight:600;color:#276749; }
 
+    /* Sport — program switcher */
+    .sport-prog-switcher { display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap; }
+    .sport-prog-switch-btn { padding:8px 20px;border-radius:20px;border:2px solid var(--border);background:var(--locked-bg);color:var(--text);font-size:0.875rem;font-weight:500;cursor:pointer;transition:all 0.15s; }
+    .sport-prog-switch-btn.active { background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600; }
+    .sport-prog-switch-btn:hover:not(.active) { border-color:var(--accent);color:var(--accent); }
+
+    /* WCS — lesson nav */
+    .wcs-lesson-nav { display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px; }
+    .wcs-lesson-card { flex:0 0 auto;min-width:160px;max-width:240px;border:2px solid var(--border);border-radius:10px;padding:10px 14px;cursor:pointer;background:var(--card-bg);transition:all 0.15s; }
+    .wcs-lesson-card:hover { border-color:var(--accent); }
+    .wcs-lesson-card.active { border-color:var(--accent);background:color-mix(in srgb,var(--accent) 8%,transparent); }
+    .wcs-lesson-card.done { border-color:#9ae6b4;background:#f0fff4; }
+    .wcs-lesson-num { font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-muted);margin-bottom:3px; }
+    .wcs-lesson-title { font-size:0.8125rem;font-weight:600;color:var(--text);line-height:1.3;margin-bottom:4px; }
+    .wcs-lesson-meta { font-size:0.72rem;color:var(--text-muted); }
+
+    /* WCS — mode toggle */
+    .wcs-mode-toggle { display:flex;border:2px solid var(--border);border-radius:8px;overflow:hidden;width:fit-content;margin-bottom:16px; }
+    .wcs-mode-btn { padding:8px 22px;border:none;background:var(--locked-bg);color:var(--text-muted);font-size:0.875rem;font-weight:500;cursor:pointer;transition:all 0.15s; }
+    .wcs-mode-btn.active { background:var(--accent);color:#fff;font-weight:600; }
+
+    /* WCS — key idea */
+    .wcs-key-idea { background:color-mix(in srgb,var(--accent) 7%,transparent);border-left:4px solid var(--accent);border-radius:0 8px 8px 0;padding:12px 16px;margin-bottom:16px;font-size:0.9rem;line-height:1.6; }
+    .wcs-key-idea strong { display:block;margin-bottom:4px;font-size:0.72rem;text-transform:uppercase;letter-spacing:0.07em;color:var(--accent); }
+
+    /* WCS — concepts grid */
+    .wcs-concepts { margin-bottom:20px; }
+    .wcs-concepts-label { font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--text-muted);margin-bottom:8px; }
+    .wcs-concepts-grid { display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:6px; }
+    .wcs-concept-item { background:var(--card-bg);border:1px solid var(--border);border-radius:6px;padding:8px 10px; }
+    .wcs-concept-term { font-size:0.8rem;font-weight:600;color:var(--text);margin-bottom:2px; }
+    .wcs-concept-def { font-size:0.76rem;color:var(--text-muted);line-height:1.45; }
+
+    /* WCS — focus line */
+    .wcs-ex-focus { background:color-mix(in srgb,#f6ad55 12%,transparent);border-left:3px solid #e07a10;padding:6px 10px;border-radius:0 5px 5px 0;margin:6px 0;font-size:0.8rem;line-height:1.45; }
+    .wcs-ex-focus strong { color:#9c4a00;font-size:0.72rem;text-transform:uppercase;letter-spacing:0.05em; }
+
+    /* WCS — complete & done */
+    .wcs-complete-btn { width:100%;padding:12px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-size:1rem;font-weight:600;cursor:pointer;transition:background 0.15s;letter-spacing:0.01em;margin-top:4px; }
+    .wcs-complete-btn:hover { background:var(--accent-hover); }
+    .wcs-lesson-done { background:#f0fff4;border:2px solid #9ae6b4;border-radius:8px;padding:10px 16px;text-align:center;font-size:0.9rem;font-weight:600;color:#276749;margin-top:12px; }
+
     /* Blocks */
     .block {
       margin-bottom: 16px;
@@ -745,6 +787,8 @@
     .s-list{margin:0;padding:0 0 0 16px}
     .s-list li{margin-bottom:6px;line-height:1.65}
     .s-question{background:#f0f7ff;border-left:3px solid var(--accent);padding:9px 13px;border-radius:0 6px 6px 0;margin-top:10px;font-style:italic;font-size:14px}
+    .s-photo{margin-bottom:16px}
+    .s-photo img{width:100%;max-width:480px;border-radius:8px;display:block}
   </style>
 
   <h2 style='margin-top:0'>Истории сыну</h2>
@@ -755,6 +799,7 @@
     <div class='s-body'>
       <div class='s-section s-text'>
         <h3>📖 История</h3>
+        <div class='s-photo' id='photo-gnomik'><img src='./assets/stories/gnomik.jpg' alt='Гномик Гоша' onerror="document.getElementById('photo-gnomik').style.display='none'"></div>
         <p>Мне было лет двенадцать. Сестре Даше — три или четыре.</p>
         <div class='s-dialog'>
           <p>— А сестре сколько было?</p><p>— Четыре. Примерно.</p><p>— Допустим.</p>
@@ -795,6 +840,7 @@
     <div class='s-body'>
       <div class='s-section s-text'>
         <h3>📖 История</h3>
+        <div class='s-photo' id='photo-krutobol'><img src='./assets/stories/krutobol.jpg' alt='Крутобол' onerror="document.getElementById('photo-krutobol').style.display='none'"></div>
         <p>Мы изобрели игру. Нам было лет десять, и нам было скучно. Назвали её крутобол.</p>
         <p>Сначала нашли шест. Длинный, железный — такой, на которых вешают флаги. Метров пять, наверное, или шесть. Притащили на нашу детскую площадку, выкопали яму, залили цементом. Цемент взяли на соседней стройке — там он просто лежал, никем не охранялся. Вкопали шест. Он держался.</p>
         <p>На верхушку привязали верёвку, на конце — авоська с мячом. На слове «авоська» мы с Мирончи немного зависли.</p>
@@ -838,6 +884,7 @@
     <div class='s-body'>
       <div class='s-section s-text'>
         <h3>📖 История</h3>
+        <div class='s-photo' id='photo-ozhog'><img src='./assets/stories/ozhog.jpg' alt='Ожог' onerror="document.getElementById('photo-ozhog').style.display='none'"></div>
         <p>Мирончи угадал эту историю раньше, чем я начал рассказывать.</p>
         <div class='s-dialog'>
           <p>— Второе слово — «гудрон». А как именно?</p><p>— На тебя попал кусок горячего гудрона.</p><p>— Правильно.</p>
@@ -880,6 +927,7 @@
     <div class='s-body'>
       <div class='s-section s-text'>
         <h3>📖 История</h3>
+        <div class='s-photo' id='photo-pudra'><img src='./assets/stories/pudra.jpg' alt='Пудра' onerror="document.getElementById('photo-pudra').style.display='none'"></div>
         <p>Это была последняя история на ту ночь. Мирончи уже засыпал, рядом лежала мама. Я рассказывал.</p>
         <p>Однажды мы с сестрой Дашей нашли у мамы косметичку. В ней — пудреница. Круглая белая коробочка. Внутри пудра и большая плоская помпушка.</p>
         <div class='s-dialog'>
@@ -918,6 +966,7 @@
     <div class='s-body'>
       <div class='s-section s-text'>
         <h3>📖 История</h3>
+        <div class='s-photo' id='photo-transformator'><img src='./assets/stories/transformator.jpg' alt='Трансформатор' onerror="document.getElementById('photo-transformator').style.display='none'"></div>
         <div class='s-dialog'>
           <p>— Слово — «трансформатор».</p><p>— Мне кажется, дебильный трансформатор.</p>
         </div>
@@ -5009,6 +5058,101 @@
       ]
     };
 
+    // ─── WCS PROGRAM ─────────────────────────────────────────────────────────
+    const WCS_DATA_KEY = 'wcs_data_v1';
+
+    const WCS_PROGRAM = {
+      id: 'wcs_tn_novint_2026',
+      title: 'WCS Техника',
+      subtitle: 'T&N Novice / Intermediate',
+      goal: 'Освоить технику West Coast Swing через серию видео-уроков Thibault & Nicole',
+      lessons: [
+        {
+          num: 1,
+          id: 'lesson_01_pitching',
+          title: 'Body Positioning — Техника Питчинга',
+          duration: '7:40',
+          keyIdea: 'Питчинг — осознанный наклон корпуса вперёд/назад, который создаёт stretch и compression в паре. Правильный питч делает танец плавным и эластичным вместо механического.',
+          concepts: [
+            { term: 'Pitch forward',    def: 'Наклон корпуса вперёд перед шагом' },
+            { term: 'Back pitch / tilt', def: 'Наклон назад — создаёт counter и натяжение' },
+            { term: 'Stretch',          def: 'Натяжение между партнёрами — pull' },
+            { term: 'Compression',      def: 'Сжатие — ощущение когда партнёры сближаются' },
+            { term: 'Free side',        def: 'Сторона без веса — помогает создать наклон' },
+            { term: 'Even count',       def: 'Чётный счёт — основная точка для pitch (4&, 6&)' }
+          ],
+          solo: [
+            {
+              id: 'wall_pitch_drill',
+              name: 'Drill у стены: Pitch → Compress → Release',
+              dose: '5–10 мин · ежедневно',
+              desc: 'Встань лицом к стене на расстоянии вытянутой руки, руки упираются в стену (имитация grip с партнёром). Медленно наклони корпус вперёд — pitch forward — ощути давление на стену (compression). Отпусти и потяни назад — stretch. Медленно, осознанно. Сначала изолируй верхнее тело, потом подключай всё тело целиком.',
+              focus: 'Давление в ладони = то, что чувствует партнёр. Это и есть compression.',
+              why: 'Рекомендован прямо в видео. Единственный drill, который создаёт реальную физику compression/stretch без партнёра.'
+            },
+            {
+              id: 'upper_body_wave',
+              name: 'Волна верхнего тела (изоляция)',
+              dose: '3–5 мин',
+              desc: 'Стоя свободно, руки вдоль тела. Наклоняй последовательно сверху вниз: (1) грудь — chest, (2) рёбра — ribcage, (3) бёдра — hips. Это forward pitch как волна. Потом обратно той же волной. Медленно, каждая часть отдельно. Не вся спина сразу — именно волна.',
+              focus: 'Грудь начинает ПЕРВОЙ. Бёдра — последними. Это не сгиб в пояснице.',
+              why: 'Разбивает ключевую фразу урока "first upper body, then transfer upper body, then transfer" на осязаемые изолированные части.'
+            },
+            {
+              id: 'slot_walk_pitch',
+              name: 'Ходьба по слоту с питчингом',
+              dose: '5–7 мин · с музыкой',
+              desc: 'Иди вдоль воображаемой линии — slot WCS. Шаг вперёд: forward pitch ДО переноса веса. Шаг назад: back tilt. Считай вслух: "1 — pitch, 2 — compress, 3 — release". Сначала без музыки на счёт, потом включи WCS-трек ~70–80 bpm.',
+              focus: 'Pitch ДО переноса веса, не одновременно. Волна тела опережает ногу.',
+              why: 'Переносит wall drill в реальное движение по слоту. Тренирует timing на even count с музыкой.'
+            }
+          ],
+          partner: [
+            {
+              id: 'mirror_game',
+              name: 'Mirror Game — Зеркало',
+              dose: '3–5 мин',
+              desc: 'Встаньте лицом друг к другу, возьмитесь за руки (hand-to-hand grip). Один наклоняется вперёд — другой зеркально уходит назад. Slow motion, без счёта и музыки. Почувствуй: твой pitch создаёт натяжение в руке партнёра.',
+              focus: 'Движение идёт через руку — не через глаза. Попробуй с закрытыми глазами.',
+              why: 'Базовое понимание stretch/compression через собственное тело. Прямо из видео Тибо и Николь.'
+            },
+            {
+              id: 'without_then_with',
+              name: 'Паттерн без питча → с питчем',
+              dose: '10 мин',
+              desc: 'Выбери простой паттерн: push break или starter step. 4 раза БЕЗ питча — нарочно деревянно, без наклона. Запомни ощущение. Затем добавь forward pitch в начало каждого паттерна. Сравни качество соединения.',
+              focus: 'Лидер: решает когда и куда. Follower: остаётся по центру тела лидера, не уходит в сторону.',
+              why: 'Контраст — лучший учитель. После деревянного варианта смысл питча понятен мгновенно.'
+            },
+            {
+              id: 'slow_motion_count',
+              name: 'Slow Motion со счётом вслух',
+              dose: '10–15 мин',
+              desc: 'Делай паттерн очень медленно. Один из вас считает вслух: "forward pitch… compress… upper body… transfer… release". Проверяй три вещи: (1) compression ощущается в руке? (2) движение идёт волной сверху вниз? (3) follower остаётся по центру?',
+              focus: 'Нет compression — значит pitch неправильный или отсутствует. Останови и исправь.',
+              why: 'Медленный темп позволяет исправить последовательность до автоматизма. Важна не скорость, а волна.'
+            }
+          ],
+          checkpoints: [
+            'Чувствую разницу между танцем с pitch и без',
+            'Compression ощущается в руке партнёра при pitch',
+            'Движение идёт волной: chest → ribs → hips (не вся спина сразу)',
+            'Wall drill 5 мин — последовательность не теряется',
+            'Могу объяснить что такое pitch партнёру за 30 секунд'
+          ]
+        }
+        // Следующие уроки добавятся по мере разбора видео серии
+      ]
+    };
+
+    function loadWcsData() {
+      try { const r = localStorage.getItem(WCS_DATA_KEY); if (r) return JSON.parse(r); } catch(e) {}
+      return { sessions: [], checkpoints: {} };
+    }
+    function saveWcsData(d) {
+      try { localStorage.setItem(WCS_DATA_KEY, JSON.stringify(d)); } catch(e) {}
+    }
+
     function loadSportData() {
       try {
         const raw = localStorage.getItem(SPORT_DATA_KEY);
@@ -5021,6 +5165,9 @@
     }
 
     let _sportViewWeek = null;
+    let _sportActiveProg = 'handstand'; // 'handstand' | 'wcs'
+    let _wcsViewLesson   = 0;
+    let _wcsMode         = 'solo';      // 'solo' | 'partner'
 
     function sportWeekNum() {
       const start = new Date(HANDSTAND_PROGRAM.startDate);
@@ -5044,6 +5191,184 @@
       return `${days[d.getDay()]} ${d.getDate()} ${months[d.getMonth()]}`;
     }
 
+    // ─── WCS RENDER ──────────────────────────────────────────────────────────
+    function renderWcsLessonContent(lesson, mode, data) {
+      const exercises  = mode === 'solo' ? lesson.solo : lesson.partner;
+      const cpDone     = data.checkpoints[lesson.id] || [];
+      const sessions   = (data.sessions || []).filter(s => s.lessonId === lesson.id && s.mode === mode);
+      const lastDate   = sessions.length ? sessions[sessions.length - 1].date : null;
+      const modeLabel  = mode === 'solo' ? 'Solo' : 'С партнёром';
+      const modeIcon   = mode === 'solo' ? '🧍' : '🤝';
+
+      const conceptsHtml = lesson.concepts.map(c =>
+        `<div class="wcs-concept-item">
+          <div class="wcs-concept-term">${escapeHtml(c.term)}</div>
+          <div class="wcs-concept-def">${escapeHtml(c.def)}</div>
+        </div>`
+      ).join('');
+
+      const exHtml = exercises.map((ex, i) =>
+        `<div class="sport-ex-item">
+          <div class="sport-ex-num">${i + 1}</div>
+          <div class="sport-ex-body">
+            <div class="sport-ex-name">${escapeHtml(ex.name)}</div>
+            <div class="sport-ex-dose">${escapeHtml(ex.dose)}</div>
+            <div class="wcs-ex-focus"><strong>Фокус:&nbsp;</strong>${escapeHtml(ex.focus)}</div>
+            <details class="sport-ex-details">
+              <summary>Как делать</summary>
+              <div class="sport-ex-full-desc">${escapeHtml(ex.desc)}</div>
+              <div class="sport-ex-why-text">💡 <strong>Зачем:</strong> ${escapeHtml(ex.why)}</div>
+            </details>
+          </div>
+        </div>`
+      ).join('');
+
+      const checkpointsHtml = lesson.checkpoints.map((cp, i) => {
+        const done = cpDone.includes(i);
+        return `<div class="sport-checkpoint ${done ? 'done' : ''}">
+          <span class="sport-cp-week">${i + 1}</span>
+          <span class="sport-cp-test">${escapeHtml(cp)}</span>
+          <button type="button" class="sport-cp-btn wcs-cp-btn ${done ? 'done' : ''}"
+            data-lesson="${lesson.id}" data-cp="${i}">${done ? '✓' : '○'}</button>
+        </div>`;
+      }).join('');
+
+      const allCpDone = cpDone.length >= lesson.checkpoints.length;
+
+      return `
+        <div class="wcs-key-idea">
+          <strong>Ключевая идея урока ${lesson.num}</strong>
+          ${escapeHtml(lesson.keyIdea)}
+        </div>
+
+        <div class="wcs-concepts">
+          <div class="wcs-concepts-label">Словарь терминов</div>
+          <div class="wcs-concepts-grid">${conceptsHtml}</div>
+        </div>
+
+        <div class="sport-ex-list-wrap">
+          <div class="sport-ex-list-header">
+            <strong>${modeIcon} ${modeLabel} — ${exercises.length} упражнения</strong>
+            <span>${lastDate ? 'последнее: ' + lastDate : 'ещё не практиковалось'}</span>
+          </div>
+          <div class="sport-ex-list">${exHtml}</div>
+          <div class="sport-complete-day-wrap" style="margin-top:12px">
+            <details class="sport-complete-extras" style="margin-bottom:10px">
+              <summary style="cursor:pointer;font-size:0.875rem;color:var(--text-muted)">+ Заметка (необязательно)</summary>
+              <div style="padding:10px 0 0;display:flex;gap:8px;flex-wrap:wrap">
+                <label style="font-size:0.8rem;display:flex;flex-direction:column;gap:3px">
+                  Время (мин)
+                  <input type="number" id="wcs-session-duration" placeholder="30" min="1"
+                    style="width:90px;padding:5px;border:1px solid var(--border);border-radius:4px;margin-top:2px">
+                </label>
+                <label style="font-size:0.8rem;display:flex;flex-direction:column;gap:3px;flex:1;min-width:160px">
+                  Заметка
+                  <input type="text" id="wcs-session-notes" placeholder="что получилось, ощущения…"
+                    style="padding:5px;border:1px solid var(--border);border-radius:4px;margin-top:2px;width:100%">
+                </label>
+              </div>
+            </details>
+            <button type="button" class="wcs-complete-btn"
+              data-lesson="${lesson.id}" data-mode="${mode}">
+              ✓ Отметить ${modeLabel}-сессию выполненной
+            </button>
+          </div>
+        </div>
+
+        <h3 style="margin:28px 0 10px;font-size:0.8rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-muted)">
+          Чекпоинты урока ${lesson.num}
+        </h3>
+        <div class="sport-checkpoints">${checkpointsHtml}</div>
+        ${allCpDone ? '<div class="wcs-lesson-done">✓ Все чекпоинты пройдены — урок освоен!</div>' : ''}
+      `;
+    }
+
+    function _wcsLessonNavHtml(prog, data) {
+      return prog.lessons.map((l, idx) => {
+        const sessions     = (data.sessions || []).filter(s => s.lessonId === l.id);
+        const soloCount    = sessions.filter(s => s.mode === 'solo').length;
+        const partnerCount = sessions.filter(s => s.mode === 'partner').length;
+        const cpDone       = (data.checkpoints[l.id] || []).length;
+        const allCpDone    = cpDone >= l.checkpoints.length;
+        const isActive     = idx === _wcsViewLesson;
+        const soloStar     = soloCount    ? `★×${soloCount}`    : '○';
+        const partnerStar  = partnerCount ? `★×${partnerCount}` : '○';
+        return `<div class="wcs-lesson-card ${isActive ? 'active' : ''} ${allCpDone ? 'done' : ''}" data-lesson="${idx}">
+          <div class="wcs-lesson-num">Урок ${l.num} · ${l.duration}</div>
+          <div class="wcs-lesson-title">${escapeHtml(l.title)}</div>
+          <div class="wcs-lesson-meta">Solo ${soloStar} · Пара ${partnerStar}</div>
+        </div>`;
+      }).join('');
+    }
+
+    function loadWcsContent() {
+      const data   = loadWcsData();
+      const prog   = WCS_PROGRAM;
+      const lesson = prog.lessons[_wcsViewLesson] || prog.lessons[0];
+      const mode   = _wcsMode;
+
+      // Diary rows
+      const sessions = data.sessions || [];
+      const diaryRows = sessions.length
+        ? [...sessions].reverse().slice(0, 40).map((s, ri) => {
+            const realIdx = sessions.length - 1 - ri;
+            const l = prog.lessons.find(l => l.id === s.lessonId);
+            return `<tr>
+              <td>${s.date}</td>
+              <td>${l ? 'Урок ' + l.num : s.lessonId}</td>
+              <td>${s.mode === 'solo' ? '🧍 Solo' : '🤝 С партнёром'}</td>
+              <td>${s.duration ? s.duration + ' мин' : '—'}</td>
+              <td style="font-size:0.85rem;max-width:200px">${escapeHtml((s.notes || '').slice(0, 80))}</td>
+              <td><button type="button" class="wcs-del-session" data-idx="${realIdx}"
+                style="color:var(--text-muted);background:none;border:none;cursor:pointer;font-size:0.8rem">✕</button></td>
+            </tr>`;
+          }).join('')
+        : `<tr><td colspan="6" class="empty">Нет сессий — отмечай тренировки в разделе «Программа».</td></tr>`;
+
+      return `
+        <div class="gtd-tabs" id="wcs-tabs">
+          <button type="button" class="gtd-tab active" data-tab="program">Программа</button>
+          <button type="button" class="gtd-tab" data-tab="diary">Дневник</button>
+        </div>
+
+        <!-- WCS Программа -->
+        <div id="wcs-panel-program" class="gtd-panel active">
+          <div class="sport-prog-header">
+            <div>
+              <h2 style="margin:0 0 2px">${escapeHtml(prog.title)}</h2>
+              <p style="margin:0;color:var(--text-muted);font-size:0.875rem">${escapeHtml(prog.subtitle)}</p>
+            </div>
+          </div>
+
+          <div class="wcs-lesson-nav" id="wcs-lesson-nav">
+            ${_wcsLessonNavHtml(prog, data)}
+          </div>
+
+          <div class="wcs-mode-toggle">
+            <button type="button" class="wcs-mode-btn ${mode === 'solo' ? 'active' : ''}" data-mode="solo">🧍 Solo</button>
+            <button type="button" class="wcs-mode-btn ${mode === 'partner' ? 'active' : ''}" data-mode="partner">🤝 С партнёром</button>
+          </div>
+
+          <div id="wcs-lesson-content">
+            ${renderWcsLessonContent(lesson, mode, data)}
+          </div>
+        </div>
+
+        <!-- WCS Дневник -->
+        <div id="wcs-panel-diary" class="gtd-panel">
+          <div class="gtd-table-wrap">
+            <table class="gtd-table">
+              <thead>
+                <tr><th>Дата</th><th>Урок</th><th>Режим</th><th>Время</th><th>Заметки</th><th></th></tr>
+              </thead>
+              <tbody id="wcs-diary-tbody">${diaryRows}</tbody>
+            </table>
+          </div>
+        </div>
+      `;
+    }
+
+    // ─── WCS RENDER ──────────────────────────────────────────────────────────
     function renderSportWeekGrid(weekN, data) {
       const prog = HANDSTAND_PROGRAM;
       const phase = prog.phases.find(p => p.weeks.includes(weekN)) || prog.phases[0];
@@ -5121,7 +5446,131 @@
       </div>`;
     }
 
+    // ─── WCS BINDING ─────────────────────────────────────────────────────────
+    function bindWcsLessonContent() {
+      // Complete session button
+      document.querySelectorAll('.wcs-complete-btn').forEach(btn => {
+        btn.onclick = () => {
+          const data = loadWcsData();
+          if (!data.sessions) data.sessions = [];
+          data.sessions.push({
+            date:     new Date().toISOString().slice(0, 10),
+            lessonId: btn.dataset.lesson,
+            mode:     btn.dataset.mode,
+            duration: parseInt(document.getElementById('wcs-session-duration')?.value) || 0,
+            notes:    (document.getElementById('wcs-session-notes')?.value || '').trim()
+          });
+          saveWcsData(data);
+          const lesson = WCS_PROGRAM.lessons[_wcsViewLesson] || WCS_PROGRAM.lessons[0];
+          document.getElementById('wcs-lesson-content').innerHTML =
+            renderWcsLessonContent(lesson, _wcsMode, data);
+          // Refresh lesson nav badges
+          document.getElementById('wcs-lesson-nav').innerHTML =
+            _wcsLessonNavHtml(WCS_PROGRAM, data);
+          document.querySelectorAll('.wcs-lesson-card').forEach((card, idx) => {
+            card.onclick = () => { _wcsViewLesson = idx; refreshWcsProgram(); };
+          });
+          bindWcsLessonContent();
+        };
+      });
+
+      // Checkpoint buttons
+      document.querySelectorAll('.wcs-cp-btn').forEach(btn => {
+        btn.onclick = () => {
+          const data = loadWcsData();
+          if (!data.checkpoints)           data.checkpoints = {};
+          if (!data.checkpoints[btn.dataset.lesson]) data.checkpoints[btn.dataset.lesson] = [];
+          const arr = data.checkpoints[btn.dataset.lesson];
+          const cpIdx = parseInt(btn.dataset.cp);
+          const pos   = arr.indexOf(cpIdx);
+          if (pos >= 0) arr.splice(pos, 1); else arr.push(cpIdx);
+          saveWcsData(data);
+          const lesson = WCS_PROGRAM.lessons[_wcsViewLesson] || WCS_PROGRAM.lessons[0];
+          document.getElementById('wcs-lesson-content').innerHTML =
+            renderWcsLessonContent(lesson, _wcsMode, data);
+          document.getElementById('wcs-lesson-nav').innerHTML =
+            _wcsLessonNavHtml(WCS_PROGRAM, data);
+          document.querySelectorAll('.wcs-lesson-card').forEach((card, idx) => {
+            card.onclick = () => { _wcsViewLesson = idx; refreshWcsProgram(); };
+          });
+          bindWcsLessonContent();
+        };
+      });
+    }
+
+    function refreshWcsProgram() {
+      const data   = loadWcsData();
+      const lesson = WCS_PROGRAM.lessons[_wcsViewLesson] || WCS_PROGRAM.lessons[0];
+      document.querySelectorAll('.wcs-lesson-card').forEach((card, idx) => {
+        card.classList.toggle('active', idx === _wcsViewLesson);
+      });
+      document.getElementById('wcs-lesson-content').innerHTML =
+        renderWcsLessonContent(lesson, _wcsMode, data);
+      bindWcsLessonContent();
+    }
+
+    function bindWcs() {
+      // Tabs
+      document.querySelectorAll('#wcs-tabs .gtd-tab').forEach(tab => {
+        tab.onclick = () => {
+          const id = tab.dataset.tab;
+          document.querySelectorAll('#wcs-tabs .gtd-tab')
+            .forEach(t => t.classList.toggle('active', t.dataset.tab === id));
+          document.querySelectorAll('[id^="wcs-panel-"]')
+            .forEach(p => p.classList.toggle('active', p.id === 'wcs-panel-' + id));
+        };
+      });
+
+      // Lesson cards
+      document.querySelectorAll('.wcs-lesson-card').forEach((card, idx) => {
+        card.onclick = () => { _wcsViewLesson = idx; refreshWcsProgram(); };
+      });
+
+      // Mode toggle
+      document.querySelectorAll('.wcs-mode-btn').forEach(btn => {
+        btn.onclick = () => {
+          _wcsMode = btn.dataset.mode;
+          document.querySelectorAll('.wcs-mode-btn')
+            .forEach(b => b.classList.toggle('active', b.dataset.mode === _wcsMode));
+          const lesson = WCS_PROGRAM.lessons[_wcsViewLesson] || WCS_PROGRAM.lessons[0];
+          document.getElementById('wcs-lesson-content').innerHTML =
+            renderWcsLessonContent(lesson, _wcsMode, loadWcsData());
+          bindWcsLessonContent();
+        };
+      });
+
+      // Delete session from diary
+      document.querySelectorAll('.wcs-del-session').forEach(btn => {
+        btn.onclick = () => {
+          if (!confirm('Удалить эту запись?')) return;
+          const data = loadWcsData();
+          if (data.sessions) data.sessions.splice(parseInt(btn.dataset.idx), 1);
+          saveWcsData(data);
+          selectSection('sport');
+          setTimeout(() => {
+            document.querySelectorAll('#wcs-tabs .gtd-tab')
+              .forEach(t => t.classList.toggle('active', t.dataset.tab === 'diary'));
+            document.querySelectorAll('[id^="wcs-panel-"]')
+              .forEach(p => p.classList.toggle('active', p.id === 'wcs-panel-diary'));
+          }, 50);
+        };
+      });
+
+      bindWcsLessonContent();
+    }
+
+    function _sportProgSwitcherHtml() {
+      return `<div class="sport-prog-switcher">
+        <button type="button" class="sport-prog-switch-btn ${_sportActiveProg === 'handstand' ? 'active' : ''}" data-prog="handstand">🤸 Стойка на руках</button>
+        <button type="button" class="sport-prog-switch-btn ${_sportActiveProg === 'wcs' ? 'active' : ''}" data-prog="wcs">💃 WCS Техника</button>
+      </div>`;
+    }
+
     function loadSportContent() {
+      if (_sportActiveProg === 'wcs') {
+        return _sportProgSwitcherHtml() + loadWcsContent();
+      }
+
       const data = loadSportData();
       const prog = HANDSTAND_PROGRAM;
       const curWeek = sportWeekNum();
@@ -5175,7 +5624,7 @@
         </div>`
       ).join('') : '<p style="color:var(--text-muted);font-size:0.875rem">История пуста. Задай вопрос тренеру — он видит твои последние тренировки.</p>';
 
-      return `
+      return _sportProgSwitcherHtml() + `
         <div class="gtd-tabs" id="sport-tabs">
           <button type="button" class="gtd-tab active" data-tab="program">Программа</button>
           <button type="button" class="gtd-tab" data-tab="diary">Дневник</button>
@@ -5295,6 +5744,20 @@
     }
 
     function bindSport() {
+      // Program switcher (always present regardless of active prog)
+      document.querySelectorAll('.sport-prog-switch-btn').forEach(btn => {
+        btn.onclick = () => {
+          _sportActiveProg = btn.dataset.prog;
+          selectSection('sport');
+        };
+      });
+
+      // Route to WCS binding if WCS is active
+      if (_sportActiveProg === 'wcs') {
+        bindWcs();
+        return;
+      }
+
       // Tabs
       document.querySelectorAll('#sport-tabs .gtd-tab').forEach(tab => {
         tab.onclick = () => {
