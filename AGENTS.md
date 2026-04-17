@@ -36,6 +36,10 @@ Avatar/
 ├── docs/            # Спеки и документация по модулям
 ├── tasks/           # Задачи (task management, см. ниже)
 ├── scripts/         # Утилиты
+├── assets/          # Статика для GitHub Pages
+│   └── stories/     # Иллюстрации к Stories for Mironchi
+├── Family/          # Семейные проекты (приватно, раздел Семья на сайте)
+│   └── Истории-сыну/  # Stories for Mironchi — см. AGENTS.md внутри
 ├── .env             # Секреты (BOT_TOKEN, CHANNEL_ID, PROXY, …)
 └── requirements.txt
 ```
