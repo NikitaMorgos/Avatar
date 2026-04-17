@@ -141,6 +141,17 @@
     .dr-cap { font-family: 'Cormorant Garamond', serif; font-size: 0.9rem; color: var(--muted); text-align: center; font-style: italic; }
     /* special */
     .pg-sp .sp-head { font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--warm); margin-bottom: 14px; }
+    /* location pages */
+    .pg-loc { padding: 0; overflow: hidden; }
+    .loc-img { width: 100%; height: 52%; background: #e8e0d4; display: flex; align-items: center; justify-content: center; flex-shrink: 0; overflow: hidden; }
+    .loc-img img { width: 100%; height: 100%; object-fit: cover; }
+    .loc-img-ph { color: #bfb3a3; font-size: 0.82rem; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+    .loc-body { padding: 24px 30px 36px; display: flex; flex-direction: column; flex: 1; }
+    .loc-pin { font-size: 1.1rem; margin-bottom: 6px; }
+    .loc-title { font-family: 'Cormorant Garamond', serif; font-size: 1.55rem; font-weight: 400; line-height: 1.2; margin-bottom: 5px; }
+    .loc-sub { font-size: 0.78rem; color: var(--warm); font-weight: 600; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 12px; }
+    .loc-desc { font-family: 'Cormorant Garamond', serif; font-size: 0.95rem; line-height: 1.75; color: var(--text); white-space: pre-wrap; flex: 1; }
+    .loc-year { margin-top: auto; font-size: 0.68rem; color: var(--muted); letter-spacing: .05em; padding-top: 10px; }
     /* interview pages */
     .pg-interview { }
     .iv-pg-head { font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: .07em; color: var(--warm); margin-bottom: 16px; }
@@ -250,6 +261,7 @@ const TYPES = [
   {id:'drawing',    label:'Рисунок',              icon:'🎨'},
   {id:'year-opener',label:'Год-заставка',         icon:'📅'},
   {id:'map',        label:'География / карта',    icon:'🗺️'},
+  {id:'location',   label:'Локация',              icon:'📍'},
   {id:'vocabulary', label:'Словарик',             icon:'📖'},
   {id:'music',      label:'Музыка',               icon:'🎵'},
   {id:'letter',     label:'Письмо',               icon:'💌'},
@@ -375,6 +387,14 @@ const SEED = [
   {type:'map',year:2014,month:null,
     text:'Путешествия до школы:\n\n• Москва — дом\n• Тверь — баба Таня\n• Индия — январь 2014 (таможня, козочки, самолёт)\n• Болгария — август 2014\n• Капошвар, Венгрия — 2015\n• Красная поляна, Сочи — май 2018\n• Море (Черноморское) — сентябрь 2013\n\nВсего 6 стран / регионов за первые 7 лет.',
     caption:'Можно добавить схему-карту с точками',tags:['путешествия']},
+  // Locations
+  {type:'location',year:2011,month:null,caption:'Москва, ул. Садовая',subtitle:'Первая квартира · 2011–2013',text:'Здесь ты появилась на свет и провела первые два года жизни. Маленькая квартира, большие окна и бесконечные вечера с папой и мамой.',photo:null,tags:['дома']},
+  {type:'location',year:2013,month:null,caption:'Москва, ул. Новослободская',subtitle:'Квартира детства · 2013–2018',text:'Здесь ты росла, учила слова, рисовала, прыгала на диване и кусяла папу «от любови». Самая важная квартира — та, которую ты помнишь.',photo:null,tags:['дома']},
+  {type:'location',year:2014,month:'Январь',caption:'Индия, Гоа',subtitle:'Первое большое путешествие',text:'Козочки, море, таможня и самолёт. Первая страна дальнего зарубежья — тебе было 2 года.',photo:null,tags:['путешествия']},
+  {type:'location',year:2014,month:'Август',caption:'Болгария',subtitle:'Лето 2014',text:'Чёрное море, другая страна, первый раз так далеко на машине.',photo:null,tags:['путешествия']},
+  {type:'location',year:2015,month:null,caption:'Капошвар, Венгрия',subtitle:'2015',text:'Маленький тихий город. Дельфины, зоопарк, чужой язык.',photo:null,tags:['путешествия']},
+  {type:'location',year:2017,month:'Июль',caption:'Тверь',subtitle:'У бабы Тани',text:'Каждое лето — Тверь. Баба Таня, огород, бананосушка и звонок по инстаграму.',photo:null,tags:['дома','путешествия']},
+  {type:'location',year:2018,month:'Май',caption:'Красная поляна, Сочи',subtitle:'Горы · май 2018',text:'Первый поход в горы. «Если не успеем на подъёмник — станем дикарями». Сочи, снег в мае, ты и горы.',photo:null,tags:['путешествия']},
   {type:'music',year:2013,month:null,
     text:'Музыкальная хронология — заполнить:\n\n2011–2012: колыбельные, что пели дома, что крутилось в машине\n2013: «Комары и мошки пляшут по дорожке», Крокодил Гена, Мишка, Вин Пух\n2014: «Тримарталод», Ляпис Трубецкой («кормил десертом с вилочки»), «и папа и мама и Даринка»\n2015: Феофан, Король и Шут, «Гоазия»\n2016–2018: добавить',
     caption:'Дополнить совместно — что помним',tags:['музыка']},
@@ -417,7 +437,7 @@ function seed() {
   entries = SEED.map((e, i) => ({
     id: uid(), order: i * 10,
     tags: e.tags || [], photo: e.photo || null, caption: e.caption || '',
-    historicFact: e.historicFact || '', ...e
+    subtitle: e.subtitle || '', historicFact: e.historicFact || '', ...e
   }));
   // Auto-add interview transcript as a book entry (type defined later but called at boot)
   entries.push({
@@ -477,6 +497,7 @@ function snip(e) {
   if (e.type === 'year-opener') return `📅 Заставка ${e.year}`;
   if (e.type === 'cover')    return e.year === 0 ? '📘 Обложка (передняя)' : '📘 Обложка (задняя)';
   if (e.type === 'endpaper') return e.month === 'front' ? '📄 Форзац (передний)' : '📄 Форзац (задний)';
+  if (e.type === 'location') return `📍 ${e.caption || '(без названия)'}`;
   const t = (e.text || e.caption || '').replace(/\n/g, ' ');
   return t.length > 38 ? t.slice(0, 38) + '…' : t || '(пусто)';
 }
@@ -561,6 +582,7 @@ function renderEditor(id) {
   const mOpts = ['', ...MONTHS].map(m => `<option value="${m}"${m===(e.month||'')?'selected':''}>${m||'— не указан —'}</option>`).join('');
   const hasPh = ['note-photo','drawing','cover','endpaper','year-opener'].includes(e.type);
   const isYr  = e.type === 'year-opener';
+  const isLoc = e.type === 'location';
   const phHtml = hasPh ? `
     <div class="fg" style="margin-bottom:13px">
       <label>${e.type==='drawing'?'Рисунок':e.type==='cover'?'Фото обложки':e.type==='endpaper'?'Изображение форзаца':e.type==='year-opener'?'Фото года':'Фотография'}</label>
@@ -574,6 +596,23 @@ function renderEditor(id) {
       <label>Подпись</label>
       <input type="text" id="f-cap" value="${escH(e.caption||'')}">
     </div>` : '';
+  const locHtml = isLoc ? `
+    <div class="fg" style="margin-bottom:13px">
+      <label>Название локации</label>
+      <input type="text" id="f-cap" value="${escH(e.caption||'')}" placeholder="напр. «Москва, ул. Садовая»">
+    </div>
+    <div class="fg" style="margin-bottom:13px">
+      <label>Подзаголовок</label>
+      <input type="text" id="f-subtitle" value="${escH(e.subtitle||'')}" placeholder="напр. «Первая квартира · 2011–2013»">
+    </div>
+    <div class="fg" style="margin-bottom:13px">
+      <label>Фотография места</label>
+      <div class="photo-area" id="ph-drop" onclick="document.getElementById('ph-file').click()">
+        ${e.photo ? `<img src="${e.photo}" alt="">` : `<div class="photo-hint">Нажми или перетащи файл<br><small>JPG, PNG</small></div>`}
+      </div>
+      <input type="file" id="ph-file" accept="image/*" style="display:none">
+      ${e.photo ? `<button class="btn-s" style="margin-top:5px;font-size:0.76rem" onclick="clearPhoto()">Удалить фото</button>` : ''}
+    </div>` : '';
   const yrHtml = isYr ? `
     <div class="fg" style="margin-bottom:13px;background:var(--card-bg);border:1px solid var(--accent);border-radius:8px;padding:12px 14px">
       <label style="color:var(--accent);font-weight:600">✏️ Врезка историка</label>
@@ -581,7 +620,7 @@ function renderEditor(id) {
       <div style="font-size:0.75rem;color:var(--muted);margin-top:4px">Интересный факт этого года — появится на заставке</div>
     </div>` : '';
   const tgHtml = TAGS.map(t => `<span class="tg ${(e.tags||[]).includes(t)?'on':''}" data-t="${t}">${t}</span>`).join('');
-  const label = {note:'Текст заметки',music:'Что слушала / текст',vocabulary:'Содержание словарика','year-opener':'Подзаголовок / заметка к году',map:'Описание географии',letter:'Текст письма',characters:'Описание персонажей',cover:'Текст обложки',endpaper:'Надпись / посвящение'}[e.type] || 'Текст';
+  const label = {note:'Текст заметки',music:'Что слушала / текст',vocabulary:'Содержание словарика','year-opener':'Подзаголовок / заметка к году',map:'Описание географии',letter:'Текст письма',characters:'Описание персонажей',cover:'Текст обложки',endpaper:'Надпись / посвящение',location:'Описание места'}[e.type] || 'Текст';
   document.getElementById('main').innerHTML = `
     <div class="editor">
       <h2>${TICONS[e.type]||''} ${TYPES.find(t=>t.id===e.type)?.label||'Запись'}</h2>
@@ -599,7 +638,7 @@ function renderEditor(id) {
           <select id="f-month">${mOpts}</select>
         </div>
       </div>
-      ${yrHtml}${phHtml}
+      ${yrHtml}${locHtml}${phHtml}
       <div class="fg" style="margin-bottom:13px">
         <label>${label}</label>
         <textarea id="f-text">${escH(e.text||'')}</textarea>
@@ -700,8 +739,9 @@ window.saveEnt = () => {
   e.year  = +document.getElementById('f-year').value;
   e.month = document.getElementById('f-month').value || null;
   e.text  = document.getElementById('f-text').value;
-  const fc = document.getElementById('f-cap');   if (fc) e.caption = fc.value;
-  const fh = document.getElementById('f-hist');  if (fh) e.historicFact = fh.value;
+  const fc = document.getElementById('f-cap');      if (fc) e.caption  = fc.value;
+  const fs = document.getElementById('f-subtitle'); if (fs) e.subtitle = fs.value;
+  const fh = document.getElementById('f-hist');     if (fh) e.historicFact = fh.value;
   e.tags  = Array.from(document.querySelectorAll('.tg.on')).map(c=>c.dataset.t);
   save(); openYears.add(e.year); renderSidebar(); updateStats();
   const b = document.querySelector('.btn-p'); if (b) { b.textContent='✓ Сохранено'; setTimeout(()=>b.textContent='Сохранить',1200); }
@@ -750,6 +790,7 @@ function renderPreview() {
       else if (e.type==='note-photo')  pages.push({t:'ph',e});
       else if (e.type==='drawing')     pages.push({t:'dr',e});
       else if (e.type==='quote')       pages.push({t:'qt',e});
+      else if (e.type==='location')    pages.push({t:'loc',e});
       else if (e.type==='interview-transcript') {
         // Split interview into multiple pages
         const chunks = splitText(e.text||'', 1600);
@@ -878,6 +919,20 @@ function renderPg(p, n) {
     return `<div class="pg pg-sp">
       <div class="sp-head">${TICONS[e.type]||''} ${TYPES.find(t=>t.id===e.type)?.label||''} · ${e.year}</div>
       <div class="nt">${escH(e.text||'')}</div>
+      ${num}
+    </div>`;
+  }
+  if (p.t === 'loc') {
+    const e = p.e;
+    return `<div class="pg pg-loc">
+      <div class="loc-img">${e.photo ? `<img src="${e.photo}" alt="">` : '<div class="loc-img-ph">📍 фото места</div>'}</div>
+      <div class="loc-body">
+        <div class="loc-pin">📍</div>
+        <div class="loc-title">${escH(e.caption||'Локация')}</div>
+        ${e.subtitle ? `<div class="loc-sub">${escH(e.subtitle)}</div>` : ''}
+        ${e.text ? `<div class="loc-desc">${escH(e.text)}</div>` : ''}
+        <div class="loc-year">${e.year}</div>
+      </div>
       ${num}
     </div>`;
   }
