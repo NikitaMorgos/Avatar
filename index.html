@@ -6111,7 +6111,7 @@ ${sessionsSummary}
         const capEl = document.getElementById('pcap-' + id);
         const btn = document.getElementById('pbtn-' + id);
         if (stored && img) { img.src = stored; img.style.display = ''; }
-        if (caption && capEl) { capEl.textContent = caption; capEl.style.display = ''; }
+        if (caption && capEl) { capEl.textContent = caption; capEl.style.display = 'block'; }
         if (btn) btn.textContent = (stored || caption) ? '✏️ Изменить фото' : '📷 Добавить фото';
       });
     }
@@ -6146,7 +6146,7 @@ ${sessionsSummary}
       }
       if (caption) {
         localStorage.setItem('story_caption_' + id, caption);
-        if (capEl) { capEl.textContent = caption; capEl.style.display = ''; }
+        if (capEl) { capEl.textContent = caption; capEl.style.display = 'block'; }
       } else {
         localStorage.removeItem('story_caption_' + id);
         if (capEl) { capEl.textContent = ''; capEl.style.display = 'none'; }
