@@ -787,8 +787,19 @@
     .s-list{margin:0;padding:0 0 0 16px}
     .s-list li{margin-bottom:6px;line-height:1.65}
     .s-question{background:#f0f7ff;border-left:3px solid var(--accent);padding:9px 13px;border-radius:0 6px 6px 0;margin-top:10px;font-style:italic;font-size:14px}
-    .s-photo{margin-bottom:16px}
+    .s-photo{margin-bottom:0}
     .s-photo img{width:100%;max-width:480px;border-radius:8px;display:block}
+    .s-photo-wrap{margin-bottom:16px}
+    .s-photo-caption{font-size:13px;color:var(--text-muted);padding:5px 4px 0;line-height:1.5;font-style:italic;display:none}
+    .s-photo-btn{display:inline-flex;align-items:center;gap:5px;margin-top:7px;padding:5px 10px;font-size:12px;background:var(--sidebar-bg);border:1px solid var(--border);border-radius:6px;cursor:pointer;font-family:inherit;color:var(--text-muted);transition:border-color .15s,color .15s}
+    .s-photo-btn:hover{border-color:var(--accent);color:var(--accent)}
+    .s-photo-panel{background:var(--sidebar-bg);border:1px solid var(--border);border-radius:8px;padding:12px;margin-top:8px;display:flex;flex-direction:column;gap:8px}
+    .s-photo-label{font-size:13px;display:flex;align-items:center;gap:8px;color:var(--text-muted)}
+    .s-photo-capin{padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-family:inherit;font-size:13px;background:var(--card-bg);color:var(--text);width:100%;box-sizing:border-box}
+    .s-photo-capin:focus{outline:none;border-color:var(--accent)}
+    .s-photo-panel-row{display:flex;gap:8px}
+    .s-photo-save{padding:5px 14px;background:var(--accent);color:#fff;border:none;border-radius:6px;font-family:inherit;font-size:13px;cursor:pointer}
+    .s-photo-cancel{padding:5px 14px;background:transparent;color:var(--text-muted);border:1px solid var(--border);border-radius:6px;font-family:inherit;font-size:13px;cursor:pointer}
   </style>
 
   <h2 style='margin-top:0'>Истории сыну</h2>
@@ -799,7 +810,16 @@
     <div class='s-body'>
       <div class='s-section s-text'>
         <h3>📖 История</h3>
-        <div class='s-photo' id='photo-gnomik'><img src='./assets/stories/gnomik.jpg' alt='Гномик Гоша' onerror="document.getElementById('photo-gnomik').style.display='none'"></div>
+        <div class='s-photo-wrap' id='pwrap-gnomik'>
+          <div class='s-photo' id='photo-gnomik'><img class='s-photo-img' src='./assets/stories/gnomik.jpg' alt='Гномик Гоша' onerror="this.style.display='none'"></div>
+          <div class='s-photo-caption' id='pcap-gnomik'></div>
+          <button class='s-photo-btn' id='pbtn-gnomik' onclick="sPhotoToggle('gnomik')">📷 Добавить фото</button>
+          <div class='s-photo-panel' id='ppanel-gnomik' style='display:none'>
+            <label class='s-photo-label'>Фото <input type='file' accept='image/*' onchange="sPhotoFile('gnomik',this)"></label>
+            <input class='s-photo-capin' type='text' id='pcapinput-gnomik' placeholder='Подпись к фото...'>
+            <div class='s-photo-panel-row'><button class='s-photo-save' onclick="sPhotoSave('gnomik')">Сохранить</button><button class='s-photo-cancel' onclick="sPhotoClose('gnomik')">Отмена</button></div>
+          </div>
+        </div>
         <p>Мне было лет двенадцать. Сестре Даше — три или четыре.</p>
         <div class='s-dialog'>
           <p>— А сестре сколько было?</p><p>— Четыре. Примерно.</p><p>— Допустим.</p>
@@ -840,7 +860,16 @@
     <div class='s-body'>
       <div class='s-section s-text'>
         <h3>📖 История</h3>
-        <div class='s-photo' id='photo-krutobol'><img src='./assets/stories/krutobol.jpg' alt='Крутобол' onerror="document.getElementById('photo-krutobol').style.display='none'"></div>
+        <div class='s-photo-wrap' id='pwrap-krutobol'>
+          <div class='s-photo' id='photo-krutobol'><img class='s-photo-img' src='./assets/stories/krutobol.jpg' alt='Крутобол' onerror="this.style.display='none'"></div>
+          <div class='s-photo-caption' id='pcap-krutobol'></div>
+          <button class='s-photo-btn' id='pbtn-krutobol' onclick="sPhotoToggle('krutobol')">📷 Добавить фото</button>
+          <div class='s-photo-panel' id='ppanel-krutobol' style='display:none'>
+            <label class='s-photo-label'>Фото <input type='file' accept='image/*' onchange="sPhotoFile('krutobol',this)"></label>
+            <input class='s-photo-capin' type='text' id='pcapinput-krutobol' placeholder='Подпись к фото...'>
+            <div class='s-photo-panel-row'><button class='s-photo-save' onclick="sPhotoSave('krutobol')">Сохранить</button><button class='s-photo-cancel' onclick="sPhotoClose('krutobol')">Отмена</button></div>
+          </div>
+        </div>
         <p>Мы изобрели игру. Нам было лет десять, и нам было скучно. Назвали её крутобол.</p>
         <p>Сначала нашли шест. Длинный, железный — такой, на которых вешают флаги. Метров пять, наверное, или шесть. Притащили на нашу детскую площадку, выкопали яму, залили цементом. Цемент взяли на соседней стройке — там он просто лежал, никем не охранялся. Вкопали шест. Он держался.</p>
         <p>На верхушку привязали верёвку, на конце — авоська с мячом. На слове «авоська» мы с Мирончи немного зависли.</p>
@@ -884,7 +913,16 @@
     <div class='s-body'>
       <div class='s-section s-text'>
         <h3>📖 История</h3>
-        <div class='s-photo' id='photo-ozhog'><img src='./assets/stories/ozhog.jpg' alt='Ожог' onerror="document.getElementById('photo-ozhog').style.display='none'"></div>
+        <div class='s-photo-wrap' id='pwrap-ozhog'>
+          <div class='s-photo' id='photo-ozhog'><img class='s-photo-img' src='./assets/stories/ozhog.jpg' alt='Ожог' onerror="this.style.display='none'"></div>
+          <div class='s-photo-caption' id='pcap-ozhog'></div>
+          <button class='s-photo-btn' id='pbtn-ozhog' onclick="sPhotoToggle('ozhog')">📷 Добавить фото</button>
+          <div class='s-photo-panel' id='ppanel-ozhog' style='display:none'>
+            <label class='s-photo-label'>Фото <input type='file' accept='image/*' onchange="sPhotoFile('ozhog',this)"></label>
+            <input class='s-photo-capin' type='text' id='pcapinput-ozhog' placeholder='Подпись к фото...'>
+            <div class='s-photo-panel-row'><button class='s-photo-save' onclick="sPhotoSave('ozhog')">Сохранить</button><button class='s-photo-cancel' onclick="sPhotoClose('ozhog')">Отмена</button></div>
+          </div>
+        </div>
         <p>Мирончи угадал эту историю раньше, чем я начал рассказывать.</p>
         <div class='s-dialog'>
           <p>— Второе слово — «гудрон». А как именно?</p><p>— На тебя попал кусок горячего гудрона.</p><p>— Правильно.</p>
@@ -927,7 +965,16 @@
     <div class='s-body'>
       <div class='s-section s-text'>
         <h3>📖 История</h3>
-        <div class='s-photo' id='photo-pudra'><img src='./assets/stories/pudra.jpg' alt='Пудра' onerror="document.getElementById('photo-pudra').style.display='none'"></div>
+        <div class='s-photo-wrap' id='pwrap-pudra'>
+          <div class='s-photo' id='photo-pudra'><img class='s-photo-img' src='./assets/stories/pudra.jpg' alt='Пудра' onerror="this.style.display='none'"></div>
+          <div class='s-photo-caption' id='pcap-pudra'></div>
+          <button class='s-photo-btn' id='pbtn-pudra' onclick="sPhotoToggle('pudra')">📷 Добавить фото</button>
+          <div class='s-photo-panel' id='ppanel-pudra' style='display:none'>
+            <label class='s-photo-label'>Фото <input type='file' accept='image/*' onchange="sPhotoFile('pudra',this)"></label>
+            <input class='s-photo-capin' type='text' id='pcapinput-pudra' placeholder='Подпись к фото...'>
+            <div class='s-photo-panel-row'><button class='s-photo-save' onclick="sPhotoSave('pudra')">Сохранить</button><button class='s-photo-cancel' onclick="sPhotoClose('pudra')">Отмена</button></div>
+          </div>
+        </div>
         <p>Это была последняя история на ту ночь. Мирончи уже засыпал, рядом лежала мама. Я рассказывал.</p>
         <p>Однажды мы с сестрой Дашей нашли у мамы косметичку. В ней — пудреница. Круглая белая коробочка. Внутри пудра и большая плоская помпушка.</p>
         <div class='s-dialog'>
@@ -966,7 +1013,16 @@
     <div class='s-body'>
       <div class='s-section s-text'>
         <h3>📖 История</h3>
-        <div class='s-photo' id='photo-transformator'><img src='./assets/stories/transformator.jpg' alt='Трансформатор' onerror="document.getElementById('photo-transformator').style.display='none'"></div>
+        <div class='s-photo-wrap' id='pwrap-transformator'>
+          <div class='s-photo' id='photo-transformator'><img class='s-photo-img' src='./assets/stories/transformator.jpg' alt='Трансформатор' onerror="this.style.display='none'"></div>
+          <div class='s-photo-caption' id='pcap-transformator'></div>
+          <button class='s-photo-btn' id='pbtn-transformator' onclick="sPhotoToggle('transformator')">📷 Добавить фото</button>
+          <div class='s-photo-panel' id='ppanel-transformator' style='display:none'>
+            <label class='s-photo-label'>Фото <input type='file' accept='image/*' onchange="sPhotoFile('transformator',this)"></label>
+            <input class='s-photo-capin' type='text' id='pcapinput-transformator' placeholder='Подпись к фото...'>
+            <div class='s-photo-panel-row'><button class='s-photo-save' onclick="sPhotoSave('transformator')">Сохранить</button><button class='s-photo-cancel' onclick="sPhotoClose('transformator')">Отмена</button></div>
+          </div>
+        </div>
         <div class='s-dialog'>
           <p>— Слово — «трансформатор».</p><p>— Мне кажется, дебильный трансформатор.</p>
         </div>
@@ -1003,16 +1059,6 @@
     </div>
   </details>
 
-  <div style='margin-top:24px;border:1px solid var(--border);border-radius:8px;padding:14px 16px;font-size:13px'>
-    <p style='margin:0 0 8px;font-weight:600'>📎 Как прикрепить фото к истории</p>
-    <ol style='margin:0;padding:0 0 0 16px;line-height:1.8;color:var(--text-muted)'>
-      <li>Положить фото в <code>Avatar/Family/Истории-сыну/photos/</code></li>
-      <li>Назвать файл как историю: <code>gnomik.jpg</code>, <code>krutobol.jpg</code> и т.д.</li>
-      <li>Скопировать в <code>Avatar/assets/stories/</code></li>
-      <li>Запустить <code>git add assets/stories/ИМЯ.jpg &amp;&amp; git commit &amp;&amp; git push</code></li>
-    </ol>
-    <p style='margin:8px 0 0;color:var(--text-muted)'>Фото появится над текстом истории автоматически.</p>
-  </div>
   <p style='margin-top:12px;color:var(--text-muted);font-size:13px'>Файлы: <code>Avatar/Family/Истории-сыну/</code></p>
 ` },
       {
@@ -1394,6 +1440,7 @@
             </div>
             <div class="block">${section.content || '<p>Раздел в разработке.</p>'}</div>
           `;
+          sPhotoInit();
         }
         return;
       }
@@ -6051,6 +6098,66 @@ ${sessionsSummary}
         sendBtn.disabled = false;
         sendBtn.textContent = 'Отправить';
       }
+    }
+
+    const S_PHOTO_IDS = ['gnomik','krutobol','ozhog','pudra','transformator'];
+    const sPhotoTemp = {};
+
+    function sPhotoInit() {
+      S_PHOTO_IDS.forEach(id => {
+        const stored = localStorage.getItem('story_photo_' + id);
+        const caption = localStorage.getItem('story_caption_' + id);
+        const img = document.querySelector('#photo-' + id + ' .s-photo-img');
+        const capEl = document.getElementById('pcap-' + id);
+        const btn = document.getElementById('pbtn-' + id);
+        if (stored && img) { img.src = stored; img.style.display = ''; }
+        if (caption && capEl) { capEl.textContent = caption; capEl.style.display = ''; }
+        if (btn) btn.textContent = (stored || caption) ? '✏️ Изменить фото' : '📷 Добавить фото';
+      });
+    }
+
+    function sPhotoToggle(id) {
+      const panel = document.getElementById('ppanel-' + id);
+      if (!panel) return;
+      if (panel.style.display !== 'none') { panel.style.display = 'none'; return; }
+      const capInput = document.getElementById('pcapinput-' + id);
+      if (capInput) capInput.value = localStorage.getItem('story_caption_' + id) || '';
+      sPhotoTemp[id] = null;
+      panel.style.display = 'block';
+    }
+
+    function sPhotoFile(id, input) {
+      const file = input.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = e => { sPhotoTemp[id] = e.target.result; };
+      reader.readAsDataURL(file);
+    }
+
+    function sPhotoSave(id) {
+      const capInput = document.getElementById('pcapinput-' + id);
+      const caption = capInput ? capInput.value.trim() : '';
+      const capEl = document.getElementById('pcap-' + id);
+      const img = document.querySelector('#photo-' + id + ' .s-photo-img');
+      const btn = document.getElementById('pbtn-' + id);
+      if (sPhotoTemp[id]) {
+        localStorage.setItem('story_photo_' + id, sPhotoTemp[id]);
+        if (img) { img.src = sPhotoTemp[id]; img.style.display = ''; }
+      }
+      if (caption) {
+        localStorage.setItem('story_caption_' + id, caption);
+        if (capEl) { capEl.textContent = caption; capEl.style.display = ''; }
+      } else {
+        localStorage.removeItem('story_caption_' + id);
+        if (capEl) { capEl.textContent = ''; capEl.style.display = 'none'; }
+      }
+      if (btn) btn.textContent = (sPhotoTemp[id] || localStorage.getItem('story_photo_' + id) || caption) ? '✏️ Изменить фото' : '📷 Добавить фото';
+      sPhotoClose(id);
+    }
+
+    function sPhotoClose(id) {
+      const panel = document.getElementById('ppanel-' + id);
+      if (panel) panel.style.display = 'none';
     }
 
     renderSidebar();
