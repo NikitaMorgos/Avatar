@@ -132,6 +132,41 @@ Avatar/
    - Поддержка нескольких программ (Run, Swim, GPP — из goals_2026.json)
    - Telegram-бот: команды `/s run 45min 8km`, `/d 73.5 7h good` для ввода без браузера
 
+### ✅ Семья / Истории сыну (Avatar → раздел «Семья»)
+
+- Аккордеон из 5 историй про детство Никиты, рассказанных сыну Мирончи
+- Раздел за паролем (`FAMILY_CREDENTIALS` в `index.html`)
+- **Файл:** `index.html` — HTML истории в `section.content` (блок `id === 'family'`), JS-функции ниже
+
+#### Фото + подпись к каждой истории:
+
+| JS-функция | Что делает |
+|---|---|
+| `sPhotoInit()` | Вызывается при рендере раздела, восстанавливает фото и подписи из localStorage |
+| `sPhotoToggle(id)` | Открывает/закрывает панель редактирования для истории с данным id |
+| `sPhotoFile(id, input)` | Читает загруженный файл через FileReader → кладёт base64 в `sPhotoTemp[id]` |
+| `sPhotoSave(id)` | Сохраняет фото и подпись в localStorage, обновляет DOM |
+| `sPhotoClose(id)` | Скрывает панель редактирования |
+
+**localStorage ключи:** `story_photo_<id>` (base64 фото), `story_caption_<id>` (строка подписи)  
+**ID историй:** `gnomik`, `krutobol`, `ozhog`, `pudra`, `transformator`
+
+#### CSS-классы фото-блока:
+| Класс | Назначение |
+|---|---|
+| `.s-photo-wrap` | Обёртка: фото + подпись + кнопка + панель |
+| `.s-photo-caption` | Подпись под фото (курсив, muted; `display:none` по умолчанию) |
+| `.s-photo-btn` | Кнопка «📷 Добавить фото» / «✏️ Изменить фото» |
+| `.s-photo-panel` | Скрытая панель с `<input file>`, полем подписи, кнопками Сохранить/Отмена |
+
+#### Как добавить новую историю:
+1. Создать `<details class='s-item'>` по образцу существующих 5 историй в `section.content`
+2. Внутри блока «📖 История» добавить фото-обёртку с новым `id` (например `id='photo-novaya'`)
+3. Добавить новый id в массив `S_PHOTO_IDS` в JS
+4. Добавить `.md` файл в `Family/Истории-сыну/processed/`
+
+**Подробнее:** `Family/Истории-сыну/AGENTS.md`
+
 ### 📋 Planned
 - Voice inbox (Plaud integration) — `docs/plaud-integration.md`
 - Google Docs/Sheets integration
