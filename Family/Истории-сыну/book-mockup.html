@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <title>Stories for Mironchi — макет 148×240</title>
+  <title>Stories for Mironchi — макет А4</title>
   <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -25,16 +25,16 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 52px;
+      gap: 56px;
     }
 
-    /* ── Формат 148 × 240 мм (А5 по ширине, длиннее) ── */
+    /* ── А4: 210 × 297 мм ── */
     .page {
-      width: 148mm;
-      height: 240mm;
+      width: 210mm;
+      height: 297mm;
       background: #fff;
-      padding: 20mm 18mm 18mm 22mm;
-      box-shadow: 0 8px 36px rgba(0,0,0,0.45);
+      padding: 25mm 22mm 22mm 28mm;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.45);
       display: flex;
       flex-direction: column;
       overflow: hidden;
@@ -43,18 +43,18 @@
     /* ── Шапка ── */
     .story-meta {
       font-family: -apple-system, 'Helvetica Neue', sans-serif;
-      font-size: 7.5pt;
+      font-size: 8.5pt;
       color: #b8b8b8;
       letter-spacing: 0.07em;
-      margin-bottom: 3pt;
+      margin-bottom: 4pt;
     }
 
     .story-title {
-      font-size: 13pt;
+      font-size: 18pt;
       font-weight: 600;
       line-height: 1.2;
       color: #111;
-      margin-bottom: 13pt;
+      margin-bottom: 16pt;
     }
 
     /* ── Фото ── */
@@ -62,42 +62,29 @@
       width: 100%;
       display: block;
       border-radius: 2pt;
-      margin-bottom: 5pt;
+      margin-bottom: 6pt;
       object-fit: cover;
-    }
-
-    .story-photo-placeholder {
-      width: 100%;
-      height: 50mm;
-      background: #e8e8e8;
-      border-radius: 2pt;
-      margin-bottom: 5pt;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-family: -apple-system, sans-serif;
-      font-size: 8.5pt;
-      color: #bbb;
+      height: 80mm;
     }
 
     .story-caption {
-      font-size: 8pt;
+      font-size: 9pt;
       color: #999;
       font-style: italic;
       line-height: 1.4;
-      margin-bottom: 10pt;
+      margin-bottom: 14pt;
     }
 
     /* ── Текст ── */
     .story-text {
-      font-size: 9pt;
-      line-height: 1.68;
+      font-size: 11pt;
+      line-height: 1.7;
       color: #1c1c1c;
       flex: 1;
     }
 
     .story-text p {
-      margin-bottom: 4.5pt;
+      margin-bottom: 6pt;
     }
 
     .story-text p:last-child { margin-bottom: 0; }
@@ -108,10 +95,10 @@
     /* ── Номер страницы ── */
     .page-num {
       text-align: center;
-      font-size: 8pt;
+      font-size: 9pt;
       color: #ccc;
       font-style: italic;
-      margin-top: 8pt;
+      margin-top: 10pt;
     }
 
     @media print {
@@ -128,19 +115,16 @@
 
   <!-- ══════════════════════════════════════
        Стр. 1 — длинная история + фото
-       Ожог — с реальной фоткой для примера
        ══════════════════════════════════════ -->
-  <div class="screen-note">Страница 1 — длинная история + фото</div>
+  <div class="screen-note">Страница 1 — длинная история + фото (Ожог)</div>
   <div class="page">
     <div class="story-meta">3 · 1986</div>
     <div class="story-title">Ожог</div>
 
-    <!-- Реальное фото: путь к файлу если есть, иначе сеть для демо -->
     <img class="story-photo"
          src="../../assets/stories/ozhog.jpg"
-         onerror="this.onerror=null;this.src='https://picsum.photos/seed/childhood-burns/520/360?grayscale'"
-         alt="Ожог"
-         style="height:52mm; object-fit:cover;">
+         onerror="this.onerror=null;this.src='https://picsum.photos/seed/childhood-yard/800/560?grayscale'"
+         alt="Ожог">
     <div class="story-caption">Детский двор в Химках. Гудрон варили вот в таком ведре.</div>
 
     <div class="story-text">
@@ -179,29 +163,6 @@
     </div>
 
     <div class="page-num">19</div>
-  </div>
-
-
-  <!-- ══════════════════════════════════════
-       Стр. 3 — средняя история без фото
-       ══════════════════════════════════════ -->
-  <div class="screen-note">Страница 3 — средняя история без фото (Гномик Гоша)</div>
-  <div class="page">
-    <div class="story-meta">1 · 1991</div>
-    <div class="story-title">Гномик Гоша</div>
-
-    <div class="story-text">
-      <p>Мне было лет двенадцать. Сестре Даше – три или четыре.</p>
-      <p class="dl">– А сестре сколько было?<br>– Четыре. Примерно.<br>– Допустим.</p>
-      <p>Я ей сказал, что под кроватью живёт гномик Гоша. Маленький, невидимый. Очень любит сладкое. Даша восприняла серьёзно: однажды тихонько положила под кровать шоколадку – покормить.</p>
-      <p>Ночью я достал шоколадку и съел. Но просто исчезнувшая шоколадка – это неинтересно. Я насыпал в тёмном углу зубного порошка и оставил в нём маленькие-маленькие следы. Как будто гномик пришёл, забрал и ушёл.</p>
-      <p>Даша верила долго. Очень долго.</p>
-      <p class="dl">– А потом она это поняла?<br>– Самый прикол – когда поняла. Ей было уже за тридцать. Мне – около сорока.<br>– То есть она поняла, что это ты всё сделал, только тогда?<br>– Только тогда.</p>
-      <p>Имя у гномика, кстати, было – Гоша. Но Мирончи начал его переделывать.</p>
-      <p class="dl">– Гного. Гого. Гого?<br>– Откуда Гога? У него не было имени, мне кажется.<br>– Я думаю, ты придумал имя.<br>– Я самый лучший придумывающий имя.<br>– А что делать.</p>
-    </div>
-
-    <div class="page-num">3</div>
   </div>
 
 </div>
