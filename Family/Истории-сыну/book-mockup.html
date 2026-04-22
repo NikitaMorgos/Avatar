@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <title>Stories for Mironchi — макет А5</title>
+  <title>Stories for Mironchi — макет 148×240</title>
   <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -19,7 +19,6 @@
       color: rgba(255,255,255,0.5);
       text-align: center;
       margin-bottom: 10px;
-      letter-spacing: 0.02em;
     }
 
     .pages {
@@ -29,25 +28,24 @@
       gap: 52px;
     }
 
-    /* ── А5: 148 × 210 мм ── */
+    /* ── Формат 148 × 240 мм (А5 по ширине, длиннее) ── */
     .page {
       width: 148mm;
-      height: 210mm;
+      height: 240mm;
       background: #fff;
       padding: 20mm 18mm 18mm 22mm;
       box-shadow: 0 8px 36px rgba(0,0,0,0.45);
-      position: relative;
       display: flex;
       flex-direction: column;
       overflow: hidden;
     }
 
-    /* ── Шапка истории ── */
+    /* ── Шапка ── */
     .story-meta {
       font-family: -apple-system, 'Helvetica Neue', sans-serif;
       font-size: 7.5pt;
-      color: #b0b0b0;
-      letter-spacing: 0.06em;
+      color: #b8b8b8;
+      letter-spacing: 0.07em;
       margin-bottom: 3pt;
     }
 
@@ -56,14 +54,22 @@
       font-weight: 600;
       line-height: 1.2;
       color: #111;
-      margin-bottom: 12pt;
+      margin-bottom: 13pt;
     }
 
     /* ── Фото ── */
     .story-photo {
       width: 100%;
-      height: 35mm;
-      background: #ebebeb;
+      display: block;
+      border-radius: 2pt;
+      margin-bottom: 5pt;
+      object-fit: cover;
+    }
+
+    .story-photo-placeholder {
+      width: 100%;
+      height: 50mm;
+      background: #e8e8e8;
       border-radius: 2pt;
       margin-bottom: 5pt;
       display: flex;
@@ -82,7 +88,7 @@
       margin-bottom: 10pt;
     }
 
-    /* ── Текст истории ── */
+    /* ── Текст ── */
     .story-text {
       font-size: 9pt;
       line-height: 1.68;
@@ -94,14 +100,10 @@
       margin-bottom: 4.5pt;
     }
 
-    .story-text p:last-child {
-      margin-bottom: 0;
-    }
+    .story-text p:last-child { margin-bottom: 0; }
 
     /* Диалог — курсив */
-    .story-text p.dl {
-      font-style: italic;
-    }
+    .story-text p.dl { font-style: italic; }
 
     /* ── Номер страницы ── */
     .page-num {
@@ -112,16 +114,11 @@
       margin-top: 8pt;
     }
 
-    /* ── Печать ── */
     @media print {
       body { background: white; padding: 0; }
       .screen-note { display: none; }
       .pages { gap: 0; }
-      .page {
-        box-shadow: none;
-        page-break-after: always;
-        margin: 0;
-      }
+      .page { box-shadow: none; page-break-after: always; margin: 0; }
     }
   </style>
 </head>
@@ -130,37 +127,40 @@
 <div class="pages">
 
   <!-- ══════════════════════════════════════
-       Страница 1 — самая длинная история + фото
-       Крутобол (~270 слов) — проверяем что влезает
+       Стр. 1 — длинная история + фото
+       Ожог — с реальной фоткой для примера
        ══════════════════════════════════════ -->
-  <div class="screen-note">Страница 1 — самая длинная история + фото (Крутобол)</div>
+  <div class="screen-note">Страница 1 — длинная история + фото</div>
   <div class="page">
-    <div class="story-meta">2 · 1988</div>
-    <div class="story-title">Крутобол</div>
+    <div class="story-meta">3 · 1986</div>
+    <div class="story-title">Ожог</div>
 
-    <div class="story-photo">[ фото ]</div>
-    <div class="story-caption">Детская площадка в Химках. Обрубок шеста стоит до сих пор.</div>
+    <!-- Реальное фото: путь к файлу если есть, иначе сеть для демо -->
+    <img class="story-photo"
+         src="../../assets/stories/ozhog.jpg"
+         onerror="this.onerror=null;this.src='https://picsum.photos/seed/childhood-burns/520/360?grayscale'"
+         alt="Ожог"
+         style="height:52mm; object-fit:cover;">
+    <div class="story-caption">Детский двор в Химках. Гудрон варили вот в таком ведре.</div>
 
     <div class="story-text">
-      <p>Мы изобрели игру. Нам было лет десять, и нам было скучно. Назвали её крутобол.</p>
-      <p>Сначала нашли шест. Длинный, железный – такой, на которых вешают флаги. Метров пять, наверное, или шесть. Притащили на нашу детскую площадку, выкопали яму, залили цементом. Цемент взяли на соседней стройке – там он просто лежал, никем не охранялся. Вкопали шест. Он держался.</p>
-      <p>На верхушку привязали верёвку, на конце – авоська с мячом. На слове «авоська» мы с Мирончи немного зависли.</p>
-      <p class="dl">– Авоська? Объясни, что это такое.<br>– Ну это такой... она вешается на два дерева...<br>– И вот так на ней лежать можно? Это авоська?<br>– Нет, то гамак. Авоська – это сетка такая.<br>– Авоська – это из одного мультика!</p>
-      <p>В общем, мяч в сетке на верёвке. Дальше игра: поле пополам, шест посередине, две команды. Одна бьёт по мячу – закрутить по часовой стрелке. Другая отбивает – закрутить против. Победил тот, кто намотал верёвку до упора.</p>
-      <p>Мы проигрывали. Почти всегда. Высокие ребята закручивали высоко, и до мяча нельзя было допрыгнуть. Мы были мелкими.</p>
-      <p class="dl">– Прикольно.<br>– Да. Так мы проиграли один или два сезона.<br>– Сколько сезонов?<br>– Ну, лето.</p>
-      <p>Прошло лет тридцать пять. Шест давно обломался. Но обрубок – высотой где-то в метр, в том же цементе – стоит на той площадке до сих пор.</p>
-      <p class="dl">– А мы же ездили туда год назад.<br>– Ну вот, тогда мы его и видели.<br>– Точно видели. В прошлом году, значит.</p>
-      <p>Ладно, конец этой истории.</p>
+      <p>Мирончи угадал эту историю раньше, чем я начал рассказывать.</p>
+      <p class="dl">– Второе слово – «гудрон». А как именно?<br>– На тебя попал кусок горячего гудрона.<br>– Правильно.</p>
+      <p>Гудрон – это чёрный строительный материал, которым покрывают крыши. У нас во дворе он лежал всегда – большими чёрными глыбами, просто на земле.</p>
+      <p class="dl">– Пап, я не глупый, я историю помню.<br>– Ты помнишь. Но запись для тех, кто не знает.</p>
+      <p>Так вот. Гудрон можно было жевать – как жвачку. Невкусно, но жевалось. А ещё варить на костре в ведре: он плавился, становился жидким и блестящим. В жидкий гудрон можно было залить формочку – получался брелок.</p>
+      <p>В тот день мы варили ведро, как обычно. Я сидел рядом в шортах. Подошёл один мальчик – не очень хороший. Посмотрел на ведро и говорит: «О, а если вот так сделать?» – и кинул в него большой камень.</p>
+      <p>Горячий гудрон выплеснулся. Несколько капель попали мне на ноги.</p>
+      <p class="dl">– Покажи.<br>– Я не помню уже, где именно. Но два ожога есть до сих пор.</p>
+      <p>На этом мы заканчиваем сегодняшнюю запись.</p>
     </div>
 
-    <div class="page-num">5</div>
+    <div class="page-num">7</div>
   </div>
 
 
   <!-- ══════════════════════════════════════
-       Страница 2 — короткая история, без фото
-       Тот же кегль — смотрим сколько воздуха
+       Стр. 2 — короткая история, без фото
        ══════════════════════════════════════ -->
   <div class="screen-note">Страница 2 — короткая история без фото (Свантесон)</div>
   <div class="page">
@@ -178,17 +178,16 @@
       <p class="dl">– Но в ней что-то было?<br>– Нет. Просто пустая. Разукрашенная, на память.</p>
     </div>
 
-    <div class="page-num">17</div>
+    <div class="page-num">19</div>
   </div>
 
 
   <!-- ══════════════════════════════════════
-       Страница 3 — средняя история, без фото
-       Гномик Гоша — много диалога
+       Стр. 3 — средняя история без фото
        ══════════════════════════════════════ -->
   <div class="screen-note">Страница 3 — средняя история без фото (Гномик Гоша)</div>
   <div class="page">
-    <div class="story-meta">1 · 1990</div>
+    <div class="story-meta">1 · 1991</div>
     <div class="story-title">Гномик Гоша</div>
 
     <div class="story-text">
