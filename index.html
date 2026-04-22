@@ -806,6 +806,10 @@
     .s-edit-btn:hover{border-color:var(--accent);color:var(--accent)}
     .s-edit-btn.active{border-color:var(--accent);background:rgba(35,131,226,.07)}
     .s-story-body[contenteditable=true]{outline:2px solid var(--accent);border-radius:6px;padding:4px 8px;margin-top:2px}
+    .s-year-row{display:flex;align-items:center;gap:7px;margin-bottom:12px}
+    .s-year-label{font-size:12px;color:var(--text-muted)}
+    .s-year-input{width:62px;padding:3px 7px;border:1px solid var(--border);border-radius:5px;font-family:inherit;font-size:13px;color:var(--text);background:var(--card-bg);text-align:center}
+    .s-year-input:focus{outline:none;border-color:var(--accent)}
   </style>
 
   <h2 style='margin-top:0'>Истории сыну</h2>
@@ -1650,6 +1654,7 @@
           `;
           sPhotoInit();
           sTextInit();
+          sYearInit();
         }
         return;
       }
@@ -5487,6 +5492,82 @@
             'Могу сделать pitch → side pass без рывков',
             'Фолловер: на 5&6 делаю два шага на месте — анкор под собой'
           ]
+        },
+        {
+          num: 3,
+          id: 'lesson_03_angled_pitch',
+          title: 'Body Positioning — Боковой Питч (Angled Pitch)',
+          duration: '6:45',
+          keyIdea: 'Боковой питч — латеральный наклон всего тела в сторону, как на качающейся лодке. Оба партнёра кренятся ВМЕСТЕ через фрейм. Плечи при этом уходят ВНИЗ, не поднимаются. Инициатива — от верхней части тела (weight transfer upper), нижнее тело остаётся заземлённым. Урок строится на паттерне из 12 счётов.',
+          concepts: [
+            { term: 'Angled pitch',       def: 'Боковой наклон тела — lateral tilt влево или вправо' },
+            { term: 'Shoulders down',     def: 'Плечи прижаты вниз при наклоне — не поднимаются к ушам' },
+            { term: '"On a boat"',        def: 'Образ лодки: оба тела кренятся вместе в одну сторону' },
+            { term: 'Weight transfer upper', def: 'Перенос веса через верхнее тело — инициирует боковой питч' },
+            { term: 'On top of the frame', def: 'Фолловер "ложится" своим весом на фрейм лидера — информация идёт через тело' },
+            { term: 'Inside turn',        def: 'Поворот фолловера внутрь (к лидеру) — происходит на фоне angled pitch' },
+            { term: 'Trick pull step',    def: 'Лидер: шаг назад с задержкой (pull + hold) — подготовка к боковому питчу' },
+            { term: '12-count pattern',   def: 'Два 6-счётных паттерна подряд — питч в конце второго цикла (счёт 7-12)' }
+          ],
+          solo: [
+            {
+              id: 'shoulder_down_isolation',
+              name: 'Изоляция рёбер: плечи ВНИЗ',
+              dose: '5–7 мин · ежедневно',
+              desc: 'Скрести руки на груди (как в видео). Медленно наклони корпус вправо — только рёбра и корпус, плечи при этом тянутся ВНИЗ и немного вперёд. Почувствуй разницу: (А) "плечевой" наклон — плечо поднимается — НЕПРАВИЛЬНО. (Б) рёберный наклон — плечо остаётся низким — ПРАВИЛЬНО. 10 наклонов влево, 10 вправо. Медленно, с паузой в крайней точке.',
+              focus: 'Плечо не должно приближаться к уху. Если приближается — наклон идёт от плеча, а не от центра тела.',
+              why: 'Тибо и Николь начинают урок именно с этого drilla ("feel like our shoulders are pushing down"). Это база — без неё angled pitch становится "плечевым дёрганием".'
+            },
+            {
+              id: 'boat_drill_solo',
+              name: 'Drill "Лодка" — solo качание',
+              dose: '5 мин · с музыкой 70–80 bpm',
+              desc: 'Встань прямо, ступни на ширине бёдер, колени чуть мягкие. Представь, что ты стоишь на палубе лодки. Позволь всему телу медленно накрениться влево (волна) — подожди счёт — накренись вправо. Нижняя часть тела — как якорь: стопы не двигаются. Верхнее тело "плывёт". После 2 мин без музыки — добавь WCS-трек, качайся в ритм.',
+              focus: 'Крен идёт от центра тела (рёбра/хип), не от плеч. Стопы — земля, корпус — волна.',
+              why: '"As if like we\'re on a boat" — это главная метафора урока. Соло-проработка строит телесную память до парной практики.'
+            },
+            {
+              id: 'trick_pull_step_drill',
+              name: 'Лидер: Trick Pull Step + Hold',
+              dose: '5 мин · с метрономом',
+              desc: 'Из стартовой позиции WCS: счёт 1-2 — шаг вперёд, счёт 3&4 — тройной шаг, счёт 5 — ШАГ НАЗАД (pull), счёт 6 — HOLD (задержка, вес остаётся). На этом hold — инициируй angled pitch корпусом. Повтори 10 раз сначала без музыки, потом под WCS-трек. Фиксируй: hold должен быть активным, не пассивным.',
+              focus: 'Pull step — не просто шаг назад. Это "забрать" себя назад с намерением. Hold — намеренное удержание для создания питча.',
+              why: 'Тибо называет это "trick pull step" — лидерский ключ к запуску angled pitch в паре.'
+            }
+          ],
+          partner: [
+            {
+              id: 'blind_feel_test',
+              name: 'Blind Test — почувствуй наклон вслепую',
+              dose: '5 мин',
+              desc: 'Встаньте лицом друг к другу, лёгкое касание руками (или ладонь лидера на плече/лопатке фолловера). Фолловер закрывает глаза. Лидер медленно инициирует angled pitch — наклон влево или вправо — только через тело. Фолловер называет: "влево" или "вправо". Повторите 10 раз, меняйте сторону без паттерна. Потом поменяйтесь ролями.',
+              focus: 'Фолловер: не угадываешь, а ЧУВСТВУЕШЬ через фрейм. Лидер: минимум усилий руками, максимум — телом.',
+              why: '"Even without looking, I\'ll be able to feel" — это тест из видео. Если фолловер угадывает >7/10 — angled pitch работает правильно.'
+            },
+            {
+              id: 'boat_together',
+              name: '"Лодка" вдвоём — синхронный крен',
+              dose: '5–7 мин',
+              desc: 'Встаньте в закрытую позицию. Без музыки, без счёта — медленно качайтесь как лодка влево-вправо. Лидер инициирует, фолловер следует через фрейм. Задача: найти момент, когда оба кренятся ВМЕСТЕ, как одно тело. Если фолловер запаздывает — лидер замедляет волну. Когда синхрон найден — добавьте счёт, потом музыку.',
+              focus: 'Цель — не синхрон по глазам, а синхрон по ощущению. Если смотрите друг на друга — попробуйте с закрытыми глазами.',
+              why: 'Синхронный крен — это angled pitch в чистом виде. Сначала медленно без паттерна, иначе фолловер будет "отставать" на счёт.'
+            },
+            {
+              id: 'angled_to_inside_turn',
+              name: 'Angled Pitch → Inside Turn (12-счётная связка)',
+              dose: '15 мин',
+              desc: 'Паттерн на 12 счётов: счёт 1–6 — базовый starter step; счёт 7 — лидер делает trick pull step (шаг назад с hold); счёт 8 — angled pitch (наклон вправо через фрейм); счёт 9&10 — фолловер inside turn, сохраняя "вес на фрейме" лидера; счёт 11&12 — оба выходят и якорятся. Начинайте очень медленно (~60 bpm), разбирайте каждый счёт. Когда паттерн стабилен — добавляйте скорость.',
+              focus: 'Фолловер на inside turn: не теряй контакт с фреймом. Лидер: наклон должен быть ДО поворота, не одновременно.',
+              why: 'Это основная связка всего урока. Именно её Тибо и Николь разбирают и демонстрируют в финальной части видео.'
+            }
+          ],
+          checkpoints: [
+            'Плечи при angled pitch остаются ВНИЗ — не поднимаются',
+            'Могу почувствовать направление наклона партнёра с закрытыми глазами',
+            'Ощущение "лодки" — оба тела кренятся вместе через фрейм',
+            'Лидер: trick pull step + hold без потери ритма и баланса',
+            'Связка starter step → pull step → angled pitch → inside turn исполняется на 12 счётов'
+          ]
         }
         // Следующие уроки добавятся по мере разбора видео серии
       ]
@@ -6441,6 +6522,24 @@ ${sessionsSummary}
         btn.classList.add('active');
       }
     }
+    function sYearInit() {
+      S_STORY_IDS.forEach(id => {
+        if (document.getElementById('syear-' + id)) return;
+        const photoBlock = document.getElementById('pwrap-' + id) || document.getElementById('photo-' + id);
+        if (!photoBlock) return;
+        const section = photoBlock.closest('.s-section.s-text');
+        if (!section) return;
+        const year = localStorage.getItem('story_year_' + id) || '';
+        const row = document.createElement('div');
+        row.className = 's-year-row';
+        row.innerHTML = `<span class='s-year-label'>📅 Год:</span><input class='s-year-input' id='syear-${id}' type='text' placeholder='—' maxlength='9' value='${year}'>`;
+        section.insertBefore(row, photoBlock);
+        document.getElementById('syear-' + id).addEventListener('change', e => {
+          localStorage.setItem('story_year_' + id, e.target.value.trim());
+        });
+      });
+    }
+
     const sPhotoTemp = {};
 
     function sPhotoInit() {
