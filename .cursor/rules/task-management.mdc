@@ -1,0 +1,45 @@
+---
+description: Task management protocol for Avatar project
+alwaysApply: true
+---
+
+# Task Management — Avatar
+
+## Структура задачи
+
+Каждая новая задача создаётся в `tasks/task-NNN-short-name/` со следующей структурой:
+
+```
+tasks/task-NNN-name/
+  tasks/        # подзадачи, чек-листы (checklist.md)
+  jobs/         # скрипты, команды, автоматизация
+  breadcrumbs/  # хронологические заметки (YYYY-MM-DD.md)
+  docs/         # ссылки, документы, спеки
+  plan.md       # план работ, шаги, фазы
+  status.md     # статус, прогресс, блокеры
+```
+
+Все папки создаются **сразу** при создании задачи.
+
+## Статусы
+
+`🟡 planning` → `🔵 in-progress` → `🟣 review` → `✅ done` | `❌ cancelled`
+
+## Правила
+
+- Перед началом работы — прочитать `status.md` активной задачи
+- Каждое значимое действие → запись в `breadcrumbs/YYYY-MM-DD.md`
+- Блокеры и вопросы → в `status.md` раздел «Блокеры»
+- Скрипты и команды → в `jobs/`, а не в корень проекта
+- При переключении задач — обновить `status.md` текущей задачи
+
+## Именование
+
+- Номер трёхзначный: `task-001`, `task-002`, …
+- Имя — kebab-case, кратко: `vpn-proxy`, `bot-cleanup`, `web-ui`
+
+## Активные задачи
+
+| # | Задача | Статус |
+|---|--------|--------|
+| 001 | vpn-proxy | 🔵 in-progress |

@@ -7,3 +7,6 @@ __pycache__/
 db/*.db
 health_analyses_extracted.json
 health_pdf_debug.txt
+
+# Claude Code worktrees & agent state
+.claude/
