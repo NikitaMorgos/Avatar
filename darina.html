@@ -237,6 +237,7 @@
     <div class="sidebar">
       <button class="sb-add" id="add-btn">+ Добавить запись</button>
       <button class="sb-export" id="exp-btn">⬇ Экспорт JSON</button>
+      <button class="sb-export" id="word-btn" style="background:var(--accent);color:#fff;border-color:var(--accent)">📄 Скачать Word</button>
       <div id="year-nav"></div>
     </div>
     <div class="main" id="main"></div>
@@ -610,6 +611,149 @@ document.getElementById('exp-btn').onclick = () => {
   const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
   a.download = 'darina-book.json'; a.click();
 };
+
+document.getElementById('word-btn').onclick = exportToWord;
+
+function exportToWord() {
+  const ans = loadAnswers();
+  const sorted = [...entries].sort((a,b) => {
+    const order = ['cover','endpaper','year-opener','note','note-photo','quote','drawing','location','map','vocabulary','music','characters','letter','interview-transcript'];
+    if (a.year !== b.year) return a.year - b.year;
+    if (a.type === 'year-opener') return -1;
+    if (b.type === 'year-opener') return 1;
+    return MONTHS.indexOf(a.month) - MONTHS.indexOf(b.month);
+  });
+
+  const esc = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const nl  = s => esc(s).replace(/\n/g,'<br>');
+
+  let html = '';
+
+  // Cover
+  const cover = entries.find(e => e.type==='cover' && e.year===0);
+  if (cover) {
+    const lines = (cover.text||'').split('\n').filter(Boolean);
+    html += `<h1 style="text-align:center;font-size:28pt;margin-top:80pt">${esc(lines[0]||'Дарина')}</h1>`;
+    if (lines[1]) html += `<h2 style="text-align:center;font-size:18pt;font-weight:normal;color:#7a6148">${esc(lines.slice(1).join(' '))}</h2>`;
+    if (cover.caption) html += `<p style="text-align:center;color:#aaa;font-size:11pt">${esc(cover.caption)}</p>`;
+    html += `<hr style="margin:40pt 0">`;
+  }
+
+  // Years 2011–2026
+  const contentYears = [2011,2012,2013,2014,2015,2016,2017,2018,2026];
+  contentYears.forEach(yr => {
+    const yearEntries = sorted.filter(e => e.year === yr && !['cover','endpaper'].includes(e.type));
+    if (!yearEntries.length) return;
+
+    const opener = yearEntries.find(e => e.type === 'year-opener');
+    const rest   = yearEntries.filter(e => e.type !== 'year-opener');
+
+    // Year heading
+    html += `<h2 style="font-size:22pt;color:#7a6148;border-bottom:2px solid #c8a87a;padding-bottom:6pt;margin-top:30pt">${yr}</h2>`;
+    if (opener) {
+      const fact = opener.historicFact || HIST[yr] || '';
+      if (opener.text) html += `<p style="color:#666;font-style:italic">${esc(opener.text)}</p>`;
+      if (fact) html += `<blockquote style="border-left:3px solid #c8a87a;padding-left:12pt;color:#888;font-style:italic;margin:8pt 0 16pt"><em>Историк: </em>${esc(fact)}</blockquote>`;
+    }
+
+    rest.forEach(e => {
+      if (e.type === 'note' || e.type === 'note-photo') {
+        html += `<div style="margin-bottom:16pt">`;
+        if (e.month) html += `<p style="font-size:8pt;color:#c8a87a;text-transform:uppercase;letter-spacing:1pt;margin-bottom:2pt">${esc(e.month)} ${yr}</p>`;
+        html += `<p style="font-size:12pt;line-height:1.7">${nl(e.text)}</p>`;
+        if (e.photo) html += `<p style="font-size:8pt;color:#aaa">[фото]</p>`;
+        if (e.caption) html += `<p style="font-size:9pt;color:#888;font-style:italic">${esc(e.caption)}</p>`;
+        html += `</div>`;
+      } else if (e.type === 'quote') {
+        html += `<blockquote style="font-size:14pt;border-left:4px solid #c8a87a;padding-left:16pt;margin:20pt 0;font-style:italic;color:#333">${nl(e.text)}<br><span style="font-size:9pt;color:#aaa">${yr}</span></blockquote>`;
+      } else if (e.type === 'drawing') {
+        html += `<div style="margin:16pt 0;padding:12pt;border:1px solid #ddd;background:#fafaf6">`;
+        html += `<p style="font-size:8pt;color:#c8a87a;text-transform:uppercase">🎨 Рисунок · ${yr}</p>`;
+        if (e.photo) html += `<p style="font-size:8pt;color:#aaa">[изображение рисунка]</p>`;
+        if (e.caption||e.text) html += `<p style="font-style:italic;font-size:10pt;color:#666">${esc(e.caption||e.text)}</p>`;
+        html += `</div>`;
+      } else if (e.type === 'vocabulary') {
+        html += `<div style="margin:16pt 0;padding:12pt;background:#f9f5ef;border-left:3px solid #c8a87a">`;
+        html += `<p style="font-size:9pt;color:#c8a87a;text-transform:uppercase;font-weight:bold">📖 Словарик Дарины</p>`;
+        html += `<p style="font-size:11pt;line-height:1.8">${nl(e.text)}</p></div>`;
+      } else if (e.type === 'music') {
+        html += `<div style="margin:16pt 0;padding:12pt;background:#f5f0f9;border-left:3px solid #b8a0d8">`;
+        html += `<p style="font-size:9pt;color:#9070b8;text-transform:uppercase;font-weight:bold">🎵 Музыка · ${yr}</p>`;
+        html += `<p style="font-size:11pt;line-height:1.8">${nl(e.text)}</p></div>`;
+      } else if (e.type === 'map') {
+        html += `<div style="margin:16pt 0;padding:12pt;background:#f0f5f0;border-left:3px solid #88b888">`;
+        html += `<p style="font-size:9pt;color:#4a8a4a;text-transform:uppercase;font-weight:bold">🗺️ География</p>`;
+        html += `<p style="font-size:11pt;line-height:1.8">${nl(e.text)}</p></div>`;
+      } else if (e.type === 'characters') {
+        html += `<div style="margin:16pt 0;padding:12pt;background:#f5f0ec;border-left:3px solid #d8a888">`;
+        html += `<p style="font-size:9pt;color:#a87848;text-transform:uppercase;font-weight:bold">👥 Персонажи</p>`;
+        html += `<p style="font-size:11pt;line-height:1.8">${nl(e.text)}</p></div>`;
+      } else if (e.type === 'letter') {
+        html += `<div style="margin:16pt 0;padding:12pt;background:#faf5f0;border:1px solid #e8d8c8">`;
+        html += `<p style="font-size:9pt;color:#c8a87a;text-transform:uppercase;font-weight:bold">💌 Письмо</p>`;
+        html += `<p style="font-size:11pt;line-height:1.8;font-style:italic">${nl(e.text)}</p></div>`;
+      } else if (e.type === 'interview-transcript') {
+        html += `<h3 style="font-size:14pt;color:#7a6148;margin-top:24pt">🎙️ Интервью с Дариной · апрель 2026</h3>`;
+        // Q&A structured output
+        const cats = [...new Set(QUESTIONS.map(q => q.cat))];
+        cats.forEach(cat => {
+          html += `<p style="font-size:9pt;color:#c8a87a;text-transform:uppercase;font-weight:bold;margin-top:14pt">${esc(cat)}</p>`;
+          QUESTIONS.filter(q => q.cat === cat).forEach(q => {
+            const a = ans[q.id] || '';
+            html += `<p style="font-size:10pt;font-weight:bold;margin:8pt 0 2pt">${q.id}. ${esc(q.q)}</p>`;
+            html += `<p style="font-size:11pt;color:#333;margin:0 0 6pt;padding-left:14pt;line-height:1.6">${a ? nl(a) : '<span style="color:#bbb">— нет ответа —</span>'}</p>`;
+          });
+        });
+      }
+    });
+  });
+
+  // Locations section
+  const locs = entries.filter(e => e.type === 'location').sort((a,b) => a.year-b.year);
+  if (locs.length) {
+    html += `<h2 style="font-size:22pt;color:#7a6148;border-bottom:2px solid #c8a87a;padding-bottom:6pt;margin-top:30pt">📍 Локации</h2>`;
+    locs.forEach(e => {
+      html += `<div style="margin:16pt 0;padding:14pt;border:1px solid #e0d0c0;border-left:4px solid #c8a87a">`;
+      html += `<p style="font-size:14pt;font-weight:bold;margin:0 0 4pt">${esc(e.caption||'Локация')}</p>`;
+      if (e.subtitle) html += `<p style="font-size:9pt;color:#c8a87a;text-transform:uppercase;letter-spacing:1pt;margin:0 0 8pt">${esc(e.subtitle)}</p>`;
+      if (e.photo) html += `<p style="font-size:8pt;color:#aaa">[фото места]</p>`;
+      if (e.text) html += `<p style="font-size:11pt;line-height:1.7;color:#333">${nl(e.text)}</p>`;
+      html += `<p style="font-size:8pt;color:#bbb;margin-top:6pt">${e.year}${e.month?' · '+e.month:''}</p>`;
+      html += `</div>`;
+    });
+  }
+
+  // Back endpaper inscription
+  const backEp = entries.find(e => e.type==='endpaper' && e.month==='back');
+  if (backEp && backEp.text) {
+    html += `<hr style="margin:40pt 0"><p style="text-align:center;font-size:14pt;font-style:italic;color:#7a6148;line-height:2">${nl(backEp.text)}</p>`;
+  }
+
+  const doc = `
+<html xmlns:o="urn:schemas-microsoft-com:office:office"
+      xmlns:w="urn:schemas-microsoft-com:office:word"
+      xmlns="http://www.w3.org/TR/REC-html40">
+<head>
+<meta charset="utf-8">
+<meta name="ProgId" content="Word.Document">
+<meta name="Generator" content="Microsoft Word 15">
+<style>
+  @page { size: A5; margin: 20mm 18mm 22mm 18mm; }
+  body { font-family: 'Garamond', Georgia, serif; font-size: 11pt; line-height: 1.6; color: #1a1a1a; }
+  h1, h2, h3 { font-family: 'Garamond', Georgia, serif; font-weight: normal; }
+  blockquote { margin: 16pt 20pt; }
+  p { margin: 0 0 8pt; }
+</style>
+</head>
+<body>${html}</body>
+</html>`;
+
+  const blob = new Blob(['\ufeff' + doc], { type: 'application/msword' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'Дарина — Книга детства.doc';
+  a.click();
+}
 
 // ── EDITOR ────────────────────────────────────────────────────────────────────
 function renderEmpty() {
