@@ -800,6 +800,12 @@
     .s-photo-panel-row{display:flex;gap:8px}
     .s-photo-save{padding:5px 14px;background:var(--accent);color:#fff;border:none;border-radius:6px;font-family:inherit;font-size:13px;cursor:pointer}
     .s-photo-cancel{padding:5px 14px;background:transparent;color:var(--text-muted);border:1px solid var(--border);border-radius:6px;font-family:inherit;font-size:13px;cursor:pointer}
+    .s-h3-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+    .s-h3-row h3{margin:0}
+    .s-edit-btn{display:inline-flex;align-items:center;padding:2px 8px;font-size:12px;background:transparent;border:1px solid var(--border);border-radius:5px;cursor:pointer;font-family:inherit;color:var(--text-muted);transition:border-color .15s,color .15s;line-height:1.5}
+    .s-edit-btn:hover{border-color:var(--accent);color:var(--accent)}
+    .s-edit-btn.active{border-color:var(--accent);background:rgba(35,131,226,.07)}
+    .s-story-body[contenteditable=true]{outline:2px solid var(--accent);border-radius:6px;padding:4px 8px;margin-top:2px}
   </style>
 
   <h2 style='margin-top:0'>Истории сыну</h2>
@@ -1183,6 +1189,11 @@
       <div class='s-section s-text'>
         <h3>📖 История</h3>
         <div class='s-photo' id='photo-svantenson'><img src='./assets/stories/svantenson.jpg' alt='Свантесон' onerror="document.getElementById('photo-svantenson').style.display='none'"></div>
+        <p>В этот раз начал Мирончи — коротко, как диктор.</p>
+        <div class='s-dialog'>
+          <p>— Итак, слово двойное. Сванта Свантесон. Ты ответил на правильный вопрос — когда на улице спрашивали разные вопросы. И ты ответил имя малыша из мультика «Карлсон и малыш». Его зовут Сванта Свантесон.</p>
+          <p>— Абсолютно верно.</p>
+        </div>
         <p>Мы с мамой шли по улице в Калинине — это сейчас Тверь. Была какая-то викторина на улице. Мы остановились.</p>
         <p>Вопросы были разные. Дети отвечали. А когда ведущий спросил, как зовут малыша из мультика «Карлсон, который живёт на крыше» — никто не знал.</p>
         <p>Только я поднял руку.</p>
@@ -1633,6 +1644,7 @@
             <div class="block">${section.content || '<p>Раздел в разработке.</p>'}</div>
           `;
           sPhotoInit();
+          sTextInit();
         }
         return;
       }
@@ -6367,6 +6379,63 @@ ${sessionsSummary}
     }
 
     const S_PHOTO_IDS = ['gnomik','krutobol','ozhog','pudra','transformator'];
+    const S_STORY_IDS = ['gnomik','krutobol','ozhog','pudra','transformator','alebastr','pugovica','robin_hood','svantenson','vkladishi'];
+
+    function sTextInit() {
+      S_STORY_IDS.forEach(id => {
+        if (document.getElementById('stext-' + id)) return;
+        const photoBlock = document.getElementById('pwrap-' + id) || document.getElementById('photo-' + id);
+        if (!photoBlock) return;
+        const section = photoBlock.closest('.s-section.s-text');
+        if (!section) return;
+        // Wrap h3 in a flex row with edit button
+        const h3 = section.querySelector('h3');
+        if (h3) {
+          const row = document.createElement('div');
+          row.className = 's-h3-row';
+          section.insertBefore(row, h3);
+          row.appendChild(h3);
+          const btn = document.createElement('button');
+          btn.className = 's-edit-btn';
+          btn.id = 'sedit-' + id;
+          btn.title = 'Редактировать текст';
+          btn.textContent = '✏️';
+          btn.onclick = () => sTextEdit(id);
+          row.appendChild(btn);
+        }
+        // Wrap all text nodes after photo block in a div
+        const wrapper = document.createElement('div');
+        wrapper.id = 'stext-' + id;
+        wrapper.className = 's-story-body';
+        let next = photoBlock.nextSibling;
+        while (next) {
+          const tmp = next.nextSibling;
+          wrapper.appendChild(next);
+          next = tmp;
+        }
+        section.appendChild(wrapper);
+        // Restore stored text from localStorage
+        const stored = localStorage.getItem('story_text_' + id);
+        if (stored) wrapper.innerHTML = stored;
+      });
+    }
+
+    function sTextEdit(id) {
+      const el = document.getElementById('stext-' + id);
+      const btn = document.getElementById('sedit-' + id);
+      if (!el || !btn) return;
+      if (el.contentEditable === 'true') {
+        localStorage.setItem('story_text_' + id, el.innerHTML);
+        el.contentEditable = 'false';
+        btn.textContent = '✏️';
+        btn.classList.remove('active');
+      } else {
+        el.contentEditable = 'true';
+        el.focus();
+        btn.textContent = '✅ Сохранить';
+        btn.classList.add('active');
+      }
+    }
     const sPhotoTemp = {};
 
     function sPhotoInit() {
