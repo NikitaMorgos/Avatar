@@ -4100,6 +4100,104 @@
       }
     }
 
+    // ===== BTBN Skill File Auto-Sync (File System Access API) =====
+    const BTBN_IDB = 'avatar_btbn_v1';
+    function _btbnIDB() {
+      return new Promise((res, rej) => {
+        const r = indexedDB.open(BTBN_IDB, 1);
+        r.onupgradeneeded = e => e.target.result.createObjectStore('handles');
+        r.onsuccess = e => res(e.target.result);
+        r.onerror = () => rej(r.error);
+      });
+    }
+    async function btbnSaveHandle(h) {
+      const db = await _btbnIDB();
+      await new Promise((res,rej) => { const tx=db.transaction('handles','readwrite'); tx.objectStore('handles').put(h,'skill'); tx.oncomplete=res; tx.onerror=()=>rej(tx.error); });
+      db.close();
+    }
+    async function btbnGetHandle() {
+      const db = await _btbnIDB();
+      const h = await new Promise((res,rej) => { const tx=db.transaction('handles','readonly'); const r=tx.objectStore('handles').get('skill'); r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error); });
+      db.close(); return h||null;
+    }
+    async function btbnClearHandle() {
+      const db = await _btbnIDB();
+      await new Promise((res,rej) => { const tx=db.transaction('handles','readwrite'); tx.objectStore('handles').delete('skill'); tx.oncomplete=res; tx.onerror=()=>rej(tx.error); });
+      db.close();
+    }
+    async function btbnCheckPerm(h, ask=false) {
+      try {
+        const o={mode:'readwrite'};
+        if (await h.queryPermission(o)==='granted') return 'granted';
+        if (ask && await h.requestPermission(o)==='granted') return 'granted';
+        return 'prompt';
+      } catch { return 'error'; }
+    }
+    async function btbnFileRead(h) { const f=await h.getFile(); return f.text(); }
+    async function btbnFileWrite(h, content) {
+      const w=await h.createWritable(); await w.write(content); await w.close();
+    }
+    let _btbnSyncTimer=null;
+    function btbnScheduleWrite(content) {
+      clearTimeout(_btbnSyncTimer);
+      _btbnSyncTimer = setTimeout(async () => {
+        try {
+          const h = await btbnGetHandle(); if (!h) return;
+          const perm = await btbnCheckPerm(h);
+          if (perm!=='granted') { btbnSkillUI('need-perm', h.name); return; }
+          await btbnFileWrite(h, content);
+          btbnSkillUI('synced', h.name);
+        } catch(e) { btbnSkillUI('error','',e.message); }
+      }, 800);
+    }
+    function btbnSkillUI(state, name='', msg='') {
+      const st  = document.getElementById('btbn-skill-status');
+      const btn = document.getElementById('btbn-skill-bind');
+      const permBtn = document.getElementById('btbn-skill-perm');
+      const unbBtn  = document.getElementById('btbn-skill-unbind');
+      const fsaBar  = document.getElementById('btbn-fsa-bar');
+      if (!st) return;
+      st.style.color = state==='synced'?'#22c55e':state==='error'?'#dc2626':'var(--text-muted)';
+      if (state==='none')       { st.textContent='Автосинхронизация отключена'; if(btn) btn.style.display=''; if(permBtn) permBtn.style.display='none'; if(unbBtn) unbBtn.style.display='none'; }
+      else if (state==='synced'){ st.textContent='✓ '+name; if(btn) btn.style.display='none'; if(permBtn) permBtn.style.display='none'; if(unbBtn) unbBtn.style.display=''; }
+      else if (state==='need-perm'){ st.textContent=name+' — нужно разрешение'; if(btn) btn.style.display='none'; if(permBtn) permBtn.style.display=''; if(unbBtn) unbBtn.style.display=''; }
+      else if (state==='error') { st.textContent='Ошибка: '+msg; }
+    }
+    async function btbnInitSync() {
+      if (!('showOpenFilePicker' in window)) return; // not supported
+      const bar = document.getElementById('btbn-fsa-bar');
+      if (bar) bar.style.display='flex';
+      const h = await btbnGetHandle().catch(()=>null);
+      if (!h) { btbnSkillUI('none'); return; }
+      const perm = await btbnCheckPerm(h);
+      if (perm==='granted') {
+        try {
+          const content = await btbnFileRead(h);
+          const ta = document.getElementById('btbn-guidelines-textarea');
+          if (ta && ta.value !== content) {
+            ta.value = content;
+            const d=loadBtbnData(); d.guidelines=content; saveBtbnData(d);
+          }
+          btbnSkillUI('synced', h.name);
+        } catch(e) { btbnSkillUI('error','',e.message); }
+      } else {
+        btbnSkillUI('need-perm', h.name);
+      }
+    }
+    async function btbnBindSkillFile() {
+      try {
+        const [h] = await window.showOpenFilePicker({ types:[{description:'Markdown',accept:{'text/markdown':['.md'],'text/plain':['.md','.txt']}}], multiple:false });
+        await btbnSaveHandle(h);
+        const content = await btbnFileRead(h);
+        const ta = document.getElementById('btbn-guidelines-textarea');
+        if (ta) ta.value = content;
+        const d=loadBtbnData(); d.guidelines=content; saveBtbnData(d);
+        btbnSkillUI('synced', h.name);
+        const st2=document.getElementById('btbn-guidelines-status');
+        if(st2){st2.textContent='Загружено из файла ✓';setTimeout(()=>{st2.textContent='';},2500);}
+      } catch(e) { if (e.name!=='AbortError') alert('Ошибка: '+e.message); }
+    }
+
     const DIARY_EVERNOTE_KEY = 'avatar_diary_evernote';
     function loadDiaryEvernoteNotes() {
       try { const s = localStorage.getItem(DIARY_EVERNOTE_KEY); if (s) return JSON.parse(s); } catch (e) {}
@@ -4179,16 +4277,22 @@
           </div>
           <div id="btbn-panel-guidelines" class="btbn-subpanel">
             <div class="btbn-guidelines-wrap">
-              <p class="gtd-overview">Гайдлайн канала: концепция, ToneOfVoice, форматы постов. Используется как контекст AI-соавтора на этапе Копирайт. Синхронизируется с файлом <code>SKILL.md</code> — скиллом Клода.</p>
-              <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;padding:10px 14px;background:var(--locked-bg);border:1px solid var(--border);border-radius:8px;flex-wrap:wrap">
-                <span style="font-size:0.8rem;font-weight:600;color:var(--text-muted)">SKILL.md</span>
+              <p class="gtd-overview">Гайдлайн канала: концепция, ToneOfVoice, форматы постов. Используется как контекст AI-соавтора. Синхронизируется с файлом <code>SKILL.md</code>.</p>
+              <div id="btbn-fsa-bar" style="display:none;align-items:center;gap:10px;margin-bottom:10px;padding:10px 14px;background:var(--locked-bg);border:1px solid var(--border);border-radius:8px;flex-wrap:wrap">
+                <span style="font-size:0.75rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em">Авто-синхронизация</span>
+                <span id="btbn-skill-status" style="font-size:0.8rem;color:var(--text-muted)">Проверка…</span>
                 <div style="flex:1"></div>
-                <label style="display:flex;align-items:center;gap:6px;padding:6px 14px;border:1px solid var(--border);border-radius:6px;background:var(--bg);cursor:pointer;font-size:0.8rem;color:var(--text-muted)">
-                  📥 Импортировать
+                <button id="btbn-skill-bind" type="button" style="padding:5px 12px;border:1px solid var(--accent);border-radius:6px;background:none;cursor:pointer;font-size:0.8rem;color:var(--accent)">🔗 Привязать SKILL.md</button>
+                <button id="btbn-skill-perm" type="button" style="display:none;padding:5px 12px;border:1px solid #f59e0b;border-radius:6px;background:none;cursor:pointer;font-size:0.8rem;color:#d97706">🔓 Разрешить доступ</button>
+                <button id="btbn-skill-unbind" type="button" style="display:none;padding:5px 12px;border:1px solid var(--border);border-radius:6px;background:none;cursor:pointer;font-size:0.8rem;color:var(--text-muted)">Отвязать</button>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap">
+                <span style="font-size:0.72rem;color:var(--text-muted)">Ручная синхронизация:</span>
+                <label style="padding:4px 10px;border:1px solid var(--border);border-radius:6px;background:var(--locked-bg);cursor:pointer;font-size:0.78rem;color:var(--text-muted)">📥 Импорт
                   <input type="file" accept=".md,text/markdown,text/plain" id="btbn-skill-import" style="display:none">
                 </label>
-                <button type="button" id="btbn-skill-export" style="padding:6px 14px;border:1px solid var(--border);border-radius:6px;background:var(--bg);cursor:pointer;font-size:0.8rem;color:var(--text-muted)">📤 Экспортировать</button>
-                <span id="btbn-skill-sync-status" style="font-size:0.8rem;color:var(--text-muted)"></span>
+                <button type="button" id="btbn-skill-export" style="padding:4px 10px;border:1px solid var(--border);border-radius:6px;background:var(--locked-bg);cursor:pointer;font-size:0.78rem;color:var(--text-muted)">📤 Экспорт</button>
+                <span id="btbn-manual-status" style="font-size:0.78rem;color:var(--text-muted)"></span>
               </div>
               <textarea id="btbn-guidelines-textarea" class="btbn-guidelines-textarea" placeholder="---&#10;name: skill-name&#10;description: Описание скилла&#10;---&#10;&#10;Концепция канала, ToneOfVoice, форматы постов…"></textarea>
               <div style="margin-top:10px;display:flex;align-items:center;gap:12px">
@@ -4221,48 +4325,72 @@
           document.querySelectorAll('.btbn-subpanel').forEach(p => p.classList.toggle('active', p.id === 'btbn-panel-' + id));
           if (id === 'pipeline') renderBtbnBoard();
           if (id === 'timeline') renderBtbnTimeline();
+          if (id === 'guidelines') btbnInitSync();
         };
       });
-      // BTBN guidelines — save
+      // BTBN guidelines — load + auto-sync init
+      const guidelinesTA = document.getElementById('btbn-guidelines-textarea');
+      if (guidelinesTA) {
+        guidelinesTA.value = loadBtbnData().guidelines || '';
+        // Debounced auto-save to localStorage + file
+        guidelinesTA.oninput = () => {
+          const val = guidelinesTA.value;
+          const d = loadBtbnData(); d.guidelines = val; saveBtbnData(d);
+          btbnScheduleWrite(val);
+        };
+      }
+      // Save button
       const guidelinesSave = document.getElementById('btbn-guidelines-save');
       if (guidelinesSave) guidelinesSave.onclick = () => {
-        const val = document.getElementById('btbn-guidelines-textarea')?.value || '';
+        const val = guidelinesTA?.value || '';
         const d = loadBtbnData(); d.guidelines = val; saveBtbnData(d);
+        btbnScheduleWrite(val);
         const status = document.getElementById('btbn-guidelines-status');
-        if (status) { status.textContent = 'Сохранено ✓'; setTimeout(() => { status.textContent = ''; }, 2000); }
+        if (status) { status.textContent = 'Сохранено ✓'; setTimeout(()=>{ status.textContent=''; }, 2000); }
       };
-      const guidelinesTA = document.getElementById('btbn-guidelines-textarea');
-      if (guidelinesTA) guidelinesTA.value = loadBtbnData().guidelines || '';
-      // BTBN guidelines — export to SKILL.md
+      // FSA: bind button
+      const bindBtn = document.getElementById('btbn-skill-bind');
+      if (bindBtn) bindBtn.onclick = () => btbnBindSkillFile();
+      // FSA: request permission button
+      const permBtn = document.getElementById('btbn-skill-perm');
+      if (permBtn) permBtn.onclick = async () => {
+        const h = await btbnGetHandle().catch(()=>null); if (!h) return;
+        const perm = await btbnCheckPerm(h, true);
+        if (perm==='granted') await btbnInitSync(); else btbnSkillUI('need-perm', h.name);
+      };
+      // FSA: unbind button
+      const unbBtn = document.getElementById('btbn-skill-unbind');
+      if (unbBtn) unbBtn.onclick = async () => {
+        await btbnClearHandle(); btbnSkillUI('none');
+        const bar=document.getElementById('btbn-fsa-bar'); if(bar) bar.style.display='flex';
+      };
+      // Manual export
       const skillExport = document.getElementById('btbn-skill-export');
       if (skillExport) skillExport.onclick = () => {
-        const content = document.getElementById('btbn-guidelines-textarea')?.value || '';
+        const content = guidelinesTA?.value || '';
         if (!content.trim()) { alert('Гайдлайн пуст — нечего экспортировать.'); return; }
         const blob = new Blob([content], { type: 'text/markdown;charset=utf-8' });
         const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url; a.download = 'SKILL.md'; a.click();
+        const a = document.createElement('a'); a.href=url; a.download='SKILL.md'; a.click();
         URL.revokeObjectURL(url);
-        const st = document.getElementById('btbn-skill-sync-status');
-        if (st) { st.textContent = 'Скачан SKILL.md'; setTimeout(()=>{ st.textContent=''; }, 3000); }
+        const st=document.getElementById('btbn-manual-status');
+        if(st){st.textContent='Скачан SKILL.md';setTimeout(()=>{st.textContent='';},3000);}
       };
-      // BTBN guidelines — import from SKILL.md
+      // Manual import
       const skillImport = document.getElementById('btbn-skill-import');
       if (skillImport) skillImport.onchange = async function() {
-        const file = this.files?.[0];
-        if (!file) return;
+        const file = this.files?.[0]; if (!file) return;
         try {
           const text = await file.text();
-          const ta = document.getElementById('btbn-guidelines-textarea');
-          if (ta) ta.value = text;
-          const d = loadBtbnData(); d.guidelines = text; saveBtbnData(d);
-          const st = document.getElementById('btbn-skill-sync-status');
-          if (st) { st.textContent = 'Импортировано ✓'; setTimeout(()=>{ st.textContent=''; }, 3000); }
-          const status = document.getElementById('btbn-guidelines-status');
-          if (status) { status.textContent = 'Сохранено ✓'; setTimeout(()=>{ status.textContent=''; }, 2000); }
-        } catch(e) { alert('Ошибка чтения файла: ' + (e.message||e)); }
-        this.value = '';
+          if (guidelinesTA) guidelinesTA.value = text;
+          const d=loadBtbnData(); d.guidelines=text; saveBtbnData(d);
+          const st=document.getElementById('btbn-manual-status');
+          if(st){st.textContent='Импортировано ✓';setTimeout(()=>{st.textContent='';},3000);}
+        } catch(e) { alert('Ошибка: '+(e.message||e)); }
+        this.value='';
       };
+      // Init FSA sync
+      btbnInitSync();
       const apiUrl = getCollectApiUrl();
       const apiBlock = document.getElementById('diary-evernote-api-block');
       const statusText = document.getElementById('diary-evernote-status-text');
