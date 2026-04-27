@@ -622,34 +622,48 @@
     .btbn-card-btn { padding:2px 6px; font-size:0.72rem; border:1px solid var(--border); border-radius:4px; background:var(--locked-bg); cursor:pointer; color:var(--text-muted); }
     .btbn-card-btn:hover { background:var(--accent); color:#fff; border-color:var(--accent); }
     .btbn-card-btn:disabled { opacity:0.25; cursor:default; pointer-events:none; }
-    /* BTBN Modal */
-    .btbn-modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:1000; align-items:center; justify-content:center; }
+    /* BTBN Modal — fullscreen */
+    .btbn-modal-overlay { display:none; position:fixed; inset:0; background:var(--bg); z-index:2000; flex-direction:column; }
     .btbn-modal-overlay.open { display:flex; }
-    .btbn-modal { background:var(--bg); border-radius:12px; padding:28px; width:min(740px,96vw); max-height:90vh; overflow-y:auto; position:relative; }
-    .btbn-modal-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; }
-    .btbn-modal-title { font-size:1.05rem; font-weight:600; }
-    .btbn-modal-close { background:none; border:none; font-size:1.4rem; cursor:pointer; color:var(--text-muted); padding:0; line-height:1; }
+    .btbn-modal { width:100%; height:100%; border-radius:0; padding:0; max-height:100%; display:flex; flex-direction:column; overflow:hidden; }
+    .btbn-modal-bar { display:flex; align-items:center; gap:10px; padding:10px 20px; border-bottom:1px solid var(--border); background:var(--locked-bg); flex-shrink:0; }
+    .btbn-modal-bar-title { font-size:0.875rem; font-weight:600; color:var(--text-muted); flex-shrink:0; }
+    .btbn-modal-close { background:none; border:1px solid var(--border); border-radius:6px; font-size:0.875rem; cursor:pointer; color:var(--text-muted); padding:5px 12px; }
+    .btbn-modal-close:hover { background:var(--border); }
+    .btbn-modal-body { flex:1; overflow-y:auto; padding:20px 28px 36px; }
+    /* Fields */
     .btbn-field { margin-bottom:16px; }
-    .btbn-label { display:block; font-size:0.78rem; font-weight:600; color:var(--text-muted); margin-bottom:6px; text-transform:uppercase; letter-spacing:0.05em; }
+    .btbn-label { display:block; font-size:0.72rem; font-weight:700; color:var(--text-muted); margin-bottom:6px; text-transform:uppercase; letter-spacing:0.06em; }
     .btbn-input { width:100%; padding:8px 12px; border:1px solid var(--border); border-radius:6px; font-size:0.9375rem; background:var(--bg); color:var(--text); box-sizing:border-box; }
-    .btbn-textarea { width:100%; padding:10px 12px; border:1px solid var(--border); border-radius:6px; font-size:0.9375rem; background:var(--bg); color:var(--text); box-sizing:border-box; min-height:180px; resize:vertical; font-family:inherit; line-height:1.6; }
-    .btbn-media-row { display:flex; gap:8px; margin-bottom:8px; align-items:center; }
-    .btbn-media-row input { flex:1; padding:6px 10px; border:1px solid var(--border); border-radius:6px; font-size:0.875rem; background:var(--bg); color:var(--text); }
-    .btbn-media-del { padding:3px 8px; border:1px solid var(--border); border-radius:5px; background:none; cursor:pointer; color:var(--text-muted); font-size:0.8rem; }
-    .btbn-media-del:hover { color:#dc2626; border-color:#dc2626; }
-    .btbn-media-add { font-size:0.8rem; padding:4px 10px; border:1px dashed var(--border); border-radius:6px; background:none; cursor:pointer; color:var(--text-muted); }
+    /* Rich-text toolbar + editor */
+    .btbn-toolbar { display:flex; gap:4px; margin-bottom:6px; align-items:center; }
+    .btbn-toolbar-btn { min-width:28px; height:28px; padding:0 7px; display:flex; align-items:center; justify-content:center; border:1px solid var(--border); border-radius:4px; background:var(--locked-bg); cursor:pointer; font-size:0.875rem; color:var(--text); }
+    .btbn-toolbar-btn:hover { background:var(--accent); color:#fff; border-color:var(--accent); }
+    .btbn-toolbar-sep { width:1px; background:var(--border); height:20px; margin:0 3px; }
+    .btbn-editor { min-height:300px; outline:none; font-size:0.9375rem; line-height:1.75; padding:12px; border:1px solid var(--border); border-radius:6px; background:var(--bg); cursor:text; overflow-y:auto; }
+    .btbn-editor:focus { border-color:var(--accent); box-shadow:0 0 0 2px rgba(35,131,226,0.1); }
+    .btbn-editor ul, .btbn-editor ol { padding-left:20px; }
+    /* Media attachments */
+    .btbn-media-list { display:flex; flex-wrap:wrap; gap:10px; margin-bottom:8px; }
+    .btbn-media-item { position:relative; display:flex; flex-direction:column; gap:4px; }
+    .btbn-media-item img { width:110px; height:82px; object-fit:cover; border-radius:6px; border:1px solid var(--border); }
+    .btbn-media-item video { width:140px; height:90px; border-radius:6px; border:1px solid var(--border); }
+    .btbn-media-del { position:absolute; top:-6px; right:-6px; width:18px; height:18px; border-radius:50%; background:#dc2626; color:#fff; border:none; cursor:pointer; font-size:0.6rem; display:flex; align-items:center; justify-content:center; line-height:1; padding:0; }
+    .btbn-media-caption { width:110px; padding:4px 6px; border:1px solid var(--border); border-radius:4px; font-size:0.72rem; background:var(--bg); color:var(--text); }
+    .btbn-media-add { font-size:0.8rem; padding:5px 12px; border:1px dashed var(--border); border-radius:6px; background:none; cursor:pointer; color:var(--text-muted); display:inline-block; }
     .btbn-media-add:hover { border-color:var(--accent); color:var(--accent); }
+    /* Stage */
     .btbn-stage-select { display:flex; gap:8px; flex-wrap:wrap; }
     .btbn-stage-btn { padding:5px 14px; border-radius:20px; border:1px solid var(--border); background:var(--locked-bg); color:var(--text-muted); cursor:pointer; font-size:0.8rem; }
     .btbn-stage-btn.active { background:var(--accent); color:#fff; border-color:var(--accent); }
-    .btbn-modal-footer { display:flex; gap:8px; margin-top:20px; border-top:1px solid var(--border); padding-top:16px; align-items:center; }
-    .btbn-save-btn { padding:8px 20px; background:var(--accent); color:#fff; border:none; border-radius:6px; cursor:pointer; font-weight:500; font-size:0.9rem; }
+    /* Buttons */
+    .btbn-save-btn { padding:7px 18px; background:var(--accent); color:#fff; border:none; border-radius:6px; cursor:pointer; font-weight:500; font-size:0.875rem; }
     .btbn-save-btn:hover { opacity:0.88; }
-    .btbn-delete-btn { padding:7px 16px; background:none; border:1px solid #dc2626; color:#dc2626; border-radius:6px; cursor:pointer; font-size:0.875rem; margin-left:auto; }
+    .btbn-delete-btn { padding:6px 14px; background:none; border:1px solid #dc2626; color:#dc2626; border-radius:6px; cursor:pointer; font-size:0.8rem; }
     /* BTBN AI Chat */
-    .btbn-ai-section { margin-top:20px; border-top:2px solid var(--border); padding-top:16px; }
+    .btbn-ai-section { margin-top:24px; border-top:2px solid var(--border); padding-top:16px; }
     .btbn-ai-title { font-weight:600; margin-bottom:12px; font-size:0.95rem; }
-    .btbn-ai-history { height:220px; overflow-y:auto; border:1px solid var(--border); border-radius:8px; padding:12px; background:var(--locked-bg); display:flex; flex-direction:column; gap:10px; margin-bottom:10px; }
+    .btbn-ai-history { height:240px; overflow-y:auto; border:1px solid var(--border); border-radius:8px; padding:12px; background:var(--locked-bg); display:flex; flex-direction:column; gap:10px; margin-bottom:10px; }
     .btbn-ai-msg { padding:8px 12px; border-radius:8px; max-width:88%; font-size:0.875rem; line-height:1.5; white-space:pre-wrap; }
     .btbn-ai-user { background:var(--accent); color:#fff; align-self:flex-end; }
     .btbn-ai-assistant { background:var(--bg); border:1px solid var(--border); align-self:flex-start; }
@@ -664,6 +678,26 @@
     .btbn-subpanel { display:none; }
     .btbn-subpanel.active { display:block; }
     .btbn-guidelines-textarea { width:100%; min-height:480px; padding:16px; border:1px solid var(--border); border-radius:8px; font-size:0.9375rem; background:var(--bg); color:var(--text); font-family:inherit; resize:vertical; box-sizing:border-box; line-height:1.6; }
+    /* BTBN Timeline */
+    .btbn-timeline { max-width:660px; }
+    .btbn-tl-year-group { margin-bottom:20px; }
+    .btbn-tl-year-label { font-size:1rem; font-weight:700; padding:0 0 8px; border-bottom:2px solid var(--border); margin-bottom:6px; letter-spacing:0.02em; }
+    .btbn-tl-item { display:flex; align-items:flex-start; gap:12px; padding:8px; border-radius:6px; cursor:pointer; }
+    .btbn-tl-item:hover { background:var(--locked-bg); }
+    .btbn-tl-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; margin-top:4px; }
+    .btbn-tl-dot.stage-topic   { background:#94a3b8; }
+    .btbn-tl-dot.stage-draft   { background:#3b82f6; }
+    .btbn-tl-dot.stage-copy    { background:#f59e0b; }
+    .btbn-tl-dot.stage-publish { background:#22c55e; }
+    .btbn-tl-date { font-size:0.75rem; color:var(--text-muted); width:96px; flex-shrink:0; padding-top:2px; }
+    .btbn-tl-topic { flex:1; font-size:0.875rem; }
+    .btbn-tl-badge { font-size:0.65rem; padding:2px 8px; border-radius:10px; font-weight:500; flex-shrink:0; }
+    .btbn-tl-badge.stage-topic   { background:#f1f5f9; color:#64748b; }
+    .btbn-tl-badge.stage-draft   { background:#dbeafe; color:#1d4ed8; }
+    .btbn-tl-badge.stage-copy    { background:#fef3c7; color:#d97706; }
+    .btbn-tl-badge.stage-publish { background:#dcfce7; color:#15803d; }
+    .btbn-tl-num { font-size:0.68rem; color:var(--text-muted); width:28px; text-align:right; flex-shrink:0; padding-top:2px; }
+    .btbn-tl-empty { padding:20px 0; color:var(--text-muted); }
 
     /* Locked section overlay */
     .locked-content {
@@ -3670,38 +3704,54 @@
     function saveBtbnData(d) {
       try { localStorage.setItem(BTBN_KEY, JSON.stringify(d)); } catch(e) {}
     }
-    function btbnGenId() {
-      return 'btbn_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7);
+    function btbnGenId() { return 'btbn_' + Date.now() + '_' + Math.random().toString(36).slice(2,7); }
+    function btbnFmtMonth(ym) {
+      if (!ym) return '';
+      const [y,m] = ym.split('-');
+      return (['','Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'][parseInt(m,10)]||m)+' '+y;
+    }
+    function btbnFmtMonthFull(ym) {
+      if (!ym) return '';
+      const [y,m] = ym.split('-');
+      return (['','Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'][parseInt(m,10)]||m)+' '+y;
+    }
+    function btbnReadFile(file) {
+      return new Promise((resolve, reject) => {
+        if (file.size > 8*1024*1024 && !confirm('"'+file.name+'" — '+(file.size/1024/1024).toFixed(1)+' МБ. Большие файлы замедляют работу. Продолжить?')) { reject(new Error('cancelled')); return; }
+        const reader = new FileReader();
+        reader.onload = e => resolve({ data: e.target.result, name: file.name, caption: '' });
+        reader.onerror = () => reject(new Error('ошибка чтения'));
+        reader.readAsDataURL(file);
+      });
     }
     function renderBtbnBoard() {
       const data = loadBtbnData();
       const posts = data.posts || [];
+      const stageLabel = { topic:'Тема', draft:'Черновик', copy:'Копирайт', publish:'К публикации' };
       const html = BTBN_STAGES.map((stage, si) => {
-        const stagePosts = posts.filter(p => p.stage === stage.id).sort((a,b) => (a.order||0) - (b.order||0));
+        const stagePosts = posts.filter(p => p.stage === stage.id).sort((a,b) => (a.order||0)-(b.order||0));
         const cards = stagePosts.map((post, pi) => {
+          const display = escapeHtml(post.topic || post.title || 'Без темы');
           const numStr = post.num ? `<div class="btbn-card-num">#${post.num}</div>` : '';
-          const title = escapeHtml(post.title || 'Без названия');
-          const date = post.eventDate ? `<div class="btbn-card-date">${post.eventDate}</div>` : '';
-          const tagsArr = (post.tags || []).slice(0, 3);
-          const tags = tagsArr.length ? `<div class="btbn-card-tags">${tagsArr.map(t => `<span class="btbn-tag">${escapeHtml(t)}</span>`).join('')}</div>` : '';
-          const canLeft = si > 0, canRight = si < BTBN_STAGES.length - 1;
-          const canUp = pi > 0, canDown = pi < stagePosts.length - 1;
+          const date = post.eventDate ? `<div class="btbn-card-date">${btbnFmtMonth(post.eventDate)}</div>` : '';
+          const tagsArr = (post.tags||[]).slice(0,3);
+          const tags = tagsArr.length ? `<div class="btbn-card-tags">${tagsArr.map(t=>`<span class="btbn-tag">${escapeHtml(t)}</span>`).join('')}</div>` : '';
+          const mc = (post.images||[]).length + (post.videos||[]).length;
+          const media = mc ? `<div style="font-size:0.68rem;color:var(--text-muted);margin-top:2px">📎 ${mc}</div>` : '';
+          const canLeft=si>0, canRight=si<BTBN_STAGES.length-1, canUp=pi>0, canDown=pi<stagePosts.length-1;
           return `<div class="btbn-card" data-id="${post.id}">
-            ${numStr}<div class="btbn-card-title">${title}</div>${date}${tags}
+            ${numStr}<div class="btbn-card-title">${display}</div>${date}${tags}${media}
             <div class="btbn-card-actions">
-              <button class="btbn-card-btn" data-action="up"   data-id="${post.id}" ${canUp    ?'':'disabled'} title="Выше">↑</button>
-              <button class="btbn-card-btn" data-action="down" data-id="${post.id}" ${canDown  ?'':'disabled'} title="Ниже">↓</button>
-              <button class="btbn-card-btn" data-action="left" data-id="${post.id}" ${canLeft  ?'':'disabled'} title="Назад">←</button>
-              <button class="btbn-card-btn" data-action="right"data-id="${post.id}" ${canRight ?'':'disabled'} title="Вперёд">→</button>
-              <button class="btbn-card-btn" data-action="edit" data-id="${post.id}" title="Редактировать">✎</button>
+              <button class="btbn-card-btn" data-action="up"    data-id="${post.id}" ${canUp?'':'disabled'}>↑</button>
+              <button class="btbn-card-btn" data-action="down"  data-id="${post.id}" ${canDown?'':'disabled'}>↓</button>
+              <button class="btbn-card-btn" data-action="left"  data-id="${post.id}" ${canLeft?'':'disabled'}>←</button>
+              <button class="btbn-card-btn" data-action="right" data-id="${post.id}" ${canRight?'':'disabled'}>→</button>
+              <button class="btbn-card-btn" data-action="edit"  data-id="${post.id}">✎</button>
             </div>
           </div>`;
         }).join('');
         return `<div class="btbn-col" data-stage="${stage.id}">
-          <div class="btbn-col-header">
-            <span>${stage.label}</span>
-            <span class="btbn-col-count">${stagePosts.length}</span>
-          </div>
+          <div class="btbn-col-header"><span>${stage.label}</span><span class="btbn-col-count">${stagePosts.length}</span></div>
           ${cards}
           <button class="btbn-add-btn" data-add-stage="${stage.id}">+ Добавить пост</button>
         </div>`;
@@ -3715,68 +3765,87 @@
       board.querySelectorAll('.btbn-card-btn[data-action]').forEach(btn => {
         btn.onclick = e => {
           e.stopPropagation();
-          const action = btn.dataset.action;
-          const id = btn.dataset.id;
-          if (action === 'edit') { openBtbnModal(id); return; }
+          const {action, id} = btn.dataset;
+          if (action==='edit') { openBtbnModal(id); return; }
           const data = loadBtbnData();
-          const posts = data.posts || [];
-          const idx = posts.findIndex(p => p.id === id);
-          if (idx === -1) return;
+          const posts = data.posts||[];
+          const idx = posts.findIndex(p=>p.id===id);
+          if (idx===-1) return;
           const post = posts[idx];
-          const stageIdx = BTBN_STAGES.findIndex(s => s.id === post.stage);
-          const stagePosts = posts.filter(p => p.stage === post.stage).sort((a,b) => (a.order||0)-(b.order||0));
-          const posInStage = stagePosts.findIndex(p => p.id === id);
-          if (action === 'left' && stageIdx > 0) {
-            post.stage = BTBN_STAGES[stageIdx-1].id;
-            post.order = posts.filter(p => p.stage === post.stage).length;
-          } else if (action === 'right' && stageIdx < BTBN_STAGES.length-1) {
-            post.stage = BTBN_STAGES[stageIdx+1].id;
-            post.order = posts.filter(p => p.stage === post.stage).length;
-          } else if (action === 'up' && posInStage > 0) {
-            const prev = stagePosts[posInStage-1];
-            const tmp = prev.order; prev.order = post.order; post.order = tmp;
-            const pi2 = posts.findIndex(p => p.id === prev.id); if (pi2 !== -1) posts[pi2] = prev;
-          } else if (action === 'down' && posInStage < stagePosts.length-1) {
-            const next = stagePosts[posInStage+1];
-            const tmp = next.order; next.order = post.order; post.order = tmp;
-            const ni = posts.findIndex(p => p.id === next.id); if (ni !== -1) posts[ni] = next;
-          }
-          posts[idx] = post;
-          data.posts = posts;
-          saveBtbnData(data);
-          renderBtbnBoard();
+          const si = BTBN_STAGES.findIndex(s=>s.id===post.stage);
+          const sp = posts.filter(p=>p.stage===post.stage).sort((a,b)=>(a.order||0)-(b.order||0));
+          const pi = sp.findIndex(p=>p.id===id);
+          if (action==='left' && si>0) { post.stage=BTBN_STAGES[si-1].id; post.order=posts.filter(p=>p.stage===post.stage).length; }
+          else if (action==='right' && si<BTBN_STAGES.length-1) { post.stage=BTBN_STAGES[si+1].id; post.order=posts.filter(p=>p.stage===post.stage).length; }
+          else if (action==='up' && pi>0) { const prev=sp[pi-1]; [prev.order,post.order]=[post.order,prev.order]; const pi2=posts.findIndex(p=>p.id===prev.id); if(pi2!==-1) posts[pi2]=prev; }
+          else if (action==='down' && pi<sp.length-1) { const next=sp[pi+1]; [next.order,post.order]=[post.order,next.order]; const ni=posts.findIndex(p=>p.id===next.id); if(ni!==-1) posts[ni]=next; }
+          posts[idx]=post; data.posts=posts; saveBtbnData(data); renderBtbnBoard();
         };
       });
-      board.querySelectorAll('.btbn-card').forEach(card => {
-        card.onclick = () => openBtbnModal(card.dataset.id);
-      });
+      board.querySelectorAll('.btbn-card').forEach(c => { c.onclick=()=>openBtbnModal(c.dataset.id); });
       board.querySelectorAll('.btbn-add-btn[data-add-stage]').forEach(btn => {
         btn.onclick = e => { e.stopPropagation(); openBtbnModal(null, btn.dataset.addStage); };
       });
     }
+    function renderBtbnTimeline() {
+      const container = document.getElementById('btbn-timeline');
+      if (!container) return;
+      const data = loadBtbnData();
+      const posts = (data.posts||[]).slice();
+      if (!posts.length) { container.innerHTML='<div class="btbn-tl-empty">Нет постов. Создай первый пост в Пайплайне.</div>'; return; }
+      const stageLabel = { topic:'Тема', draft:'Черновик', copy:'Копирайт', publish:'К публикации' };
+      const dated   = posts.filter(p=>p.eventDate).sort((a,b)=>a.eventDate.localeCompare(b.eventDate));
+      const undated = posts.filter(p=>!p.eventDate);
+      const byYear = {};
+      dated.forEach(p => { const y=p.eventDate.split('-')[0]; (byYear[y]=byYear[y]||[]).push(p); });
+      const makeItem = p => `<div class="btbn-tl-item" data-id="${p.id}">
+        <div class="btbn-tl-dot stage-${p.stage}"></div>
+        <div class="btbn-tl-date">${p.eventDate?btbnFmtMonthFull(p.eventDate):'—'}</div>
+        <div class="btbn-tl-topic">${escapeHtml(p.topic||p.title||'Без темы')}</div>
+        <div class="btbn-tl-badge stage-${p.stage}">${stageLabel[p.stage]||p.stage}</div>
+        <div class="btbn-tl-num">${p.num?'#'+p.num:''}</div>
+      </div>`;
+      let html = Object.keys(byYear).sort().map(y =>
+        `<div class="btbn-tl-year-group"><div class="btbn-tl-year-label">${y}</div>${byYear[y].map(makeItem).join('')}</div>`
+      ).join('');
+      if (undated.length) html += `<div class="btbn-tl-year-group"><div class="btbn-tl-year-label" style="color:var(--text-muted)">Без даты</div>${undated.map(makeItem).join('')}</div>`;
+      container.innerHTML = html;
+      container.querySelectorAll('.btbn-tl-item[data-id]').forEach(item => { item.onclick=()=>openBtbnModal(item.dataset.id); });
+    }
     function openBtbnModal(postId, defaultStage) {
       const data = loadBtbnData();
-      let post = postId ? (data.posts||[]).find(p => p.id === postId) : null;
+      let post = postId ? (data.posts||[]).find(p => p.id===postId) : null;
       const isNew = !post;
       if (isNew) {
-        const stage = defaultStage || 'topic';
-        const num = (data.posts||[]).length + 1;
-        post = { id: btbnGenId(), num, title: '', text: '', eventDate: '', stage, order: (data.posts||[]).filter(p => p.stage === stage).length, videos: [], images: [], tags: [], aiMessages: [], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
+        const stage = defaultStage||'topic';
+        post = { id:btbnGenId(), num:(data.posts||[]).length+1, topic:'', title:'', text:'', eventDate:'', stage, order:(data.posts||[]).filter(p=>p.stage===stage).length, videos:[], images:[], tags:[], aiMessages:[], createdAt:new Date().toISOString(), updatedAt:new Date().toISOString() };
       }
       const existing = document.getElementById('btbn-modal-overlay');
       if (existing) existing.remove();
-      const stageButtons = BTBN_STAGES.map(s => `<button type="button" class="btbn-stage-btn${post.stage===s.id?' active':''}" data-stage="${s.id}">${s.label}</button>`).join('');
-      const mediaRowHtml = (item, type, i) => `<div class="btbn-media-row" data-media-type="${type}" data-media-idx="${i}">
-        <input type="text" placeholder="URL ${type==='image'?'изображения':'видео'}" value="${escapeHtml(item.url||'')}" data-field="url">
-        <input type="text" placeholder="Подпись" value="${escapeHtml(item.caption||'')}" data-field="caption" style="max-width:180px">
-        <button type="button" class="btbn-media-del" data-remove-media>✕</button>
-      </div>`;
-      const imagesHtml = (post.images||[]).map((img,i) => mediaRowHtml(img,'image',i)).join('');
-      const videosHtml  = (post.videos||[]).map((vid,i) => mediaRowHtml(vid,'video',i)).join('');
-      const isInCopy = post.stage === 'copy';
-      const aiMsgsHtml = (post.aiMessages||[]).map(m =>
+      const stageBtns = BTBN_STAGES.map(s=>`<button type="button" class="btbn-stage-btn${post.stage===s.id?' active':''}" data-stage="${s.id}">${s.label}</button>`).join('');
+      const imgItemHtml = (img,i) => {
+        const src = img.data||img.url||'';
+        return `<div class="btbn-media-item" data-media-type="image">
+          <button type="button" class="btbn-media-del" data-remove-media>✕</button>
+          <img src="${escapeHtml(src)}" data-name="${escapeHtml(img.name||'')}">
+          <input type="text" class="btbn-media-caption" placeholder="Подпись" value="${escapeHtml(img.caption||'')}">
+        </div>`;
+      };
+      const vidItemHtml = (vid,i) => {
+        const src = vid.data||vid.url||'';
+        return `<div class="btbn-media-item" data-media-type="video">
+          <button type="button" class="btbn-media-del" data-remove-media>✕</button>
+          <video src="${escapeHtml(src)}" controls data-name="${escapeHtml(vid.name||'')}"></video>
+          <div style="font-size:0.7rem;color:var(--text-muted);max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escapeHtml(vid.name||'')}</div>
+          <input type="text" class="btbn-media-caption" placeholder="Подпись" value="${escapeHtml(vid.caption||'')}">
+        </div>`;
+      };
+      const imgsHtml = (post.images||[]).map(imgItemHtml).join('');
+      const vidsHtml = (post.videos||[]).map(vidItemHtml).join('');
+      const isInCopy = post.stage==='copy';
+      const aiMsgsHtml = (post.aiMessages||[]).map(m=>
         `<div class="btbn-ai-msg btbn-ai-${m.role}"><div class="btbn-ai-role">${m.role==='user'?'Ты':'Клод'}</div><div>${escapeHtml(m.content)}</div></div>`
-      ).join('') || '<div style="color:var(--text-muted);font-size:0.875rem;padding:4px">Попроси улучшить текст, проверить тон, предложить заголовок…</div>';
+      ).join('') || '<div style="color:var(--text-muted);font-size:0.875rem;padding:4px">Попроси улучшить текст, проверить тон голоса, предложить заголовок…</div>';
       const keyNeeded = !data.aiKey && !BTBN_CLAUDE_KEY;
       const aiSection = isInCopy ? `<div class="btbn-ai-section">
         <div class="btbn-ai-title">✨ AI-соавтор (Claude)</div>
@@ -3785,147 +3854,189 @@
           <input id="btbn-ai-input" class="btbn-ai-input" type="text" placeholder="Сообщение для Клода…">
           <button id="btbn-ai-send" class="btbn-ai-send">Отправить</button>
         </div>
-        ${keyNeeded ? `<div style="margin-top:10px;display:flex;gap:8px;align-items:center">
+        ${keyNeeded?`<div style="margin-top:10px;display:flex;gap:8px;align-items:center">
           <input id="btbn-ai-key-input" type="password" class="btbn-input" placeholder="Claude API Key (sk-ant-...)" style="flex:1">
           <button id="btbn-ai-key-save" type="button" class="btbn-save-btn" style="padding:6px 14px;font-size:0.8rem">Сохранить ключ</button>
-        </div>` : ''}
+        </div>`:''}
       </div>` : '';
       const overlay = document.createElement('div');
       overlay.id = 'btbn-modal-overlay';
       overlay.className = 'btbn-modal-overlay open';
       overlay.innerHTML = `<div class="btbn-modal" id="btbn-modal">
-        <div class="btbn-modal-header">
-          <div class="btbn-modal-title">${isNew ? 'Новый пост' : `Пост ${post.num ? '#'+post.num : ''}`}</div>
-          <button type="button" class="btbn-modal-close" id="btbn-modal-close">✕</button>
-        </div>
-        <div class="btbn-field">
-          <label class="btbn-label">Заголовок</label>
-          <input id="btbn-field-title" class="btbn-input" type="text" placeholder="Заголовок поста" value="${escapeHtml(post.title||'')}">
-        </div>
-        <div style="display:flex;gap:12px">
-          <div class="btbn-field" style="flex:1">
-            <label class="btbn-label">Дата события</label>
-            <input id="btbn-field-date" class="btbn-input" type="date" value="${post.eventDate||''}">
-          </div>
-          <div class="btbn-field" style="flex:2">
-            <label class="btbn-label">Теги (через запятую)</label>
-            <input id="btbn-field-tags" class="btbn-input" type="text" placeholder="тег1, тег2" value="${escapeHtml((post.tags||[]).join(', '))}">
-          </div>
-        </div>
-        <div class="btbn-field">
-          <label class="btbn-label">Текст поста</label>
-          <textarea id="btbn-field-text" class="btbn-textarea">${escapeHtml(post.text||'')}</textarea>
-        </div>
-        <div class="btbn-field">
-          <label class="btbn-label">Изображения</label>
-          <div id="btbn-images-list">${imagesHtml}</div>
-          <button type="button" class="btbn-media-add" id="btbn-add-image">+ Добавить изображение</button>
-        </div>
-        <div class="btbn-field">
-          <label class="btbn-label">Видео</label>
-          <div id="btbn-videos-list">${videosHtml}</div>
-          <button type="button" class="btbn-media-add" id="btbn-add-video">+ Добавить видео</button>
-        </div>
-        <div class="btbn-field">
-          <label class="btbn-label">Стадия пайплайна</label>
-          <div class="btbn-stage-select" id="btbn-stage-select">${stageButtons}</div>
-        </div>
-        ${aiSection}
-        <div class="btbn-modal-footer">
+        <div class="btbn-modal-bar">
+          <button type="button" class="btbn-modal-close" id="btbn-modal-close">← Закрыть</button>
+          <div class="btbn-modal-bar-title">Пост ${post.num?'#'+post.num:(isNew?'новый':'')}</div>
+          <div style="flex:1"></div>
           <button type="button" class="btbn-save-btn" id="btbn-save-btn">Сохранить</button>
-          ${!isNew ? '<button type="button" class="btbn-delete-btn" id="btbn-delete-btn">Удалить пост</button>' : ''}
+          ${!isNew?'<button type="button" class="btbn-delete-btn" id="btbn-delete-btn">Удалить</button>':''}
+        </div>
+        <div class="btbn-modal-body">
+          <div style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:4px">
+            <div class="btbn-field" style="flex:2;min-width:180px">
+              <label class="btbn-label">Тема <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:0.72rem">(видна в пайплайне)</span></label>
+              <input id="btbn-field-topic" class="btbn-input" type="text" placeholder="Краткая суть поста" value="${escapeHtml(post.topic||post.title||'')}">
+            </div>
+            <div class="btbn-field" style="flex:0 0 160px">
+              <label class="btbn-label">Месяц события</label>
+              <input id="btbn-field-date" class="btbn-input" type="month" value="${post.eventDate||''}">
+            </div>
+            <div class="btbn-field" style="flex:2;min-width:180px">
+              <label class="btbn-label">Теги (через запятую)</label>
+              <input id="btbn-field-tags" class="btbn-input" type="text" placeholder="тег1, тег2" value="${escapeHtml((post.tags||[]).join(', '))}">
+            </div>
+          </div>
+          <div class="btbn-field">
+            <label class="btbn-label">Заголовок <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:0.72rem">(литературный, только внутри поста)</span></label>
+            <input id="btbn-field-title" class="btbn-input" type="text" placeholder="Красивый заголовок для публикации" value="${escapeHtml(post.title||'')}">
+          </div>
+          <div class="btbn-field">
+            <label class="btbn-label">Текст поста</label>
+            <div class="btbn-toolbar">
+              <button type="button" class="btbn-toolbar-btn" data-cmd="bold" title="Жирный (Ctrl+B)"><b>Б</b></button>
+              <button type="button" class="btbn-toolbar-btn" data-cmd="italic" title="Курсив (Ctrl+I)"><i>К</i></button>
+              <div class="btbn-toolbar-sep"></div>
+              <button type="button" class="btbn-toolbar-btn" data-cmd="insertUnorderedList" title="Маркированный список">• ≡</button>
+              <button type="button" class="btbn-toolbar-btn" data-cmd="insertOrderedList" title="Нумерованный список">1.</button>
+              <div class="btbn-toolbar-sep"></div>
+              <button type="button" class="btbn-toolbar-btn" data-cmd="removeFormat" title="Убрать форматирование">✕</button>
+            </div>
+            <div id="btbn-editor" class="btbn-editor" contenteditable="true"></div>
+          </div>
+          <div style="display:flex;gap:24px;flex-wrap:wrap">
+            <div class="btbn-field" style="flex:1;min-width:200px">
+              <label class="btbn-label">Изображения</label>
+              <div id="btbn-images-list" class="btbn-media-list">${imgsHtml}</div>
+              <label class="btbn-media-add">+ Добавить изображение
+                <input type="file" accept="image/*" multiple id="btbn-add-image" style="display:none">
+              </label>
+            </div>
+            <div class="btbn-field" style="flex:1;min-width:200px">
+              <label class="btbn-label">Видео</label>
+              <div id="btbn-videos-list" class="btbn-media-list">${vidsHtml}</div>
+              <label class="btbn-media-add">+ Добавить видео
+                <input type="file" accept="video/*" multiple id="btbn-add-video" style="display:none">
+              </label>
+            </div>
+          </div>
+          <div class="btbn-field">
+            <label class="btbn-label">Стадия пайплайна</label>
+            <div class="btbn-stage-select" id="btbn-stage-select">${stageBtns}</div>
+          </div>
+          ${aiSection}
         </div>
       </div>`;
       document.body.appendChild(overlay);
+      // Set rich-text content after DOM insertion
+      const editor = document.getElementById('btbn-editor');
+      if (editor) editor.innerHTML = post.text||'';
+      // Close
       document.getElementById('btbn-modal-close').onclick = () => overlay.remove();
-      overlay.onclick = e => { if (e.target === overlay) overlay.remove(); };
-      // Stage select: re-open if switched to copy (to show AI section)
+      // Toolbar execCommand
+      overlay.querySelectorAll('.btbn-toolbar-btn[data-cmd]').forEach(btn => {
+        btn.onmousedown = e => { e.preventDefault(); document.execCommand(btn.dataset.cmd, false, null); editor && editor.focus(); };
+      });
+      // Stage switch: re-open when switching to copy so AI panel renders
       overlay.querySelectorAll('.btbn-stage-btn').forEach(btn => {
         btn.onclick = () => {
           overlay.querySelectorAll('.btbn-stage-btn').forEach(b => b.classList.remove('active'));
           btn.classList.add('active');
-          if (btn.dataset.stage === 'copy' && !document.querySelector('.btbn-ai-section')) {
-            const updated = collectBtbnModalData(post);
-            const d2 = loadBtbnData();
-            const pi = (d2.posts||[]).findIndex(p => p.id === updated.id);
-            if (pi !== -1) d2.posts[pi] = updated; else { d2.posts = d2.posts||[]; d2.posts.push(updated); }
-            saveBtbnData(d2);
-            overlay.remove();
-            openBtbnModal(updated.id);
+          if (btn.dataset.stage==='copy' && !overlay.querySelector('.btbn-ai-section')) {
+            const upd = collectBtbnModalData(post);
+            const d2 = loadBtbnData(); d2.posts=d2.posts||[];
+            const pi = d2.posts.findIndex(p=>p.id===upd.id);
+            if (pi!==-1) d2.posts[pi]=upd; else d2.posts.push(upd);
+            saveBtbnData(d2); overlay.remove(); openBtbnModal(upd.id);
           }
         };
       });
-      document.getElementById('btbn-add-image').onclick = () => {
+      // Image file upload
+      const imgInput = document.getElementById('btbn-add-image');
+      if (imgInput) imgInput.onchange = async function() {
         const list = document.getElementById('btbn-images-list');
-        const row = document.createElement('div');
-        row.className = 'btbn-media-row'; row.dataset.mediaType = 'image';
-        row.innerHTML = `<input type="text" placeholder="URL изображения" data-field="url"><input type="text" placeholder="Подпись" data-field="caption" style="max-width:180px"><button type="button" class="btbn-media-del" data-remove-media>✕</button>`;
-        list.appendChild(row);
+        for (const file of Array.from(this.files||[])) {
+          try {
+            const r = await btbnReadFile(file);
+            const item = document.createElement('div');
+            item.className = 'btbn-media-item'; item.dataset.mediaType = 'image';
+            item.innerHTML = `<button type="button" class="btbn-media-del" data-remove-media>✕</button><img src="${r.data}" data-name="${escapeHtml(r.name)}"><input type="text" class="btbn-media-caption" placeholder="Подпись">`;
+            list.appendChild(item);
+          } catch(e) { if (e.message!=='cancelled') alert('Ошибка: '+e.message); }
+        }
+        this.value = '';
       };
-      document.getElementById('btbn-add-video').onclick = () => {
+      // Video file upload
+      const vidInput = document.getElementById('btbn-add-video');
+      if (vidInput) vidInput.onchange = async function() {
         const list = document.getElementById('btbn-videos-list');
-        const row = document.createElement('div');
-        row.className = 'btbn-media-row'; row.dataset.mediaType = 'video';
-        row.innerHTML = `<input type="text" placeholder="URL видео" data-field="url"><input type="text" placeholder="Подпись" data-field="caption" style="max-width:180px"><button type="button" class="btbn-media-del" data-remove-media>✕</button>`;
-        list.appendChild(row);
+        for (const file of Array.from(this.files||[])) {
+          try {
+            const r = await btbnReadFile(file);
+            const item = document.createElement('div');
+            item.className = 'btbn-media-item'; item.dataset.mediaType = 'video';
+            item.innerHTML = `<button type="button" class="btbn-media-del" data-remove-media>✕</button><video src="${r.data}" controls data-name="${escapeHtml(r.name)}"></video><div style="font-size:0.7rem;color:var(--text-muted);max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escapeHtml(r.name)}</div><input type="text" class="btbn-media-caption" placeholder="Подпись">`;
+            list.appendChild(item);
+          } catch(e) { if (e.message!=='cancelled') alert('Ошибка: '+e.message); }
+        }
+        this.value = '';
       };
-      overlay.addEventListener('click', e => { if (e.target.closest('[data-remove-media]')) e.target.closest('.btbn-media-row').remove(); });
+      // Remove media item
+      overlay.addEventListener('click', e => { if (e.target.closest('[data-remove-media]')) e.target.closest('.btbn-media-item').remove(); });
+      // Save
       document.getElementById('btbn-save-btn').onclick = () => {
-        const updated = collectBtbnModalData(post);
-        const d = loadBtbnData();
-        d.posts = d.posts||[];
-        const pi = d.posts.findIndex(p => p.id === updated.id);
-        if (pi !== -1) d.posts[pi] = updated; else d.posts.push(updated);
-        saveBtbnData(d);
-        overlay.remove();
-        renderBtbnBoard();
+        const upd = collectBtbnModalData(post);
+        const d = loadBtbnData(); d.posts=d.posts||[];
+        const pi = d.posts.findIndex(p=>p.id===upd.id);
+        if (pi!==-1) d.posts[pi]=upd; else d.posts.push(upd);
+        saveBtbnData(d); overlay.remove(); renderBtbnBoard();
       };
+      // Delete
       const delBtn = document.getElementById('btbn-delete-btn');
       if (delBtn) delBtn.onclick = () => {
         if (!confirm('Удалить пост?')) return;
         const d = loadBtbnData();
-        d.posts = (d.posts||[]).filter(p => p.id !== post.id);
-        saveBtbnData(d);
-        overlay.remove();
-        renderBtbnBoard();
+        d.posts=(d.posts||[]).filter(p=>p.id!==post.id);
+        saveBtbnData(d); overlay.remove(); renderBtbnBoard();
       };
+      // API key save
       const keySave = document.getElementById('btbn-ai-key-save');
       if (keySave) keySave.onclick = () => {
-        const key = (document.getElementById('btbn-ai-key-input')?.value||'').trim();
+        const key=(document.getElementById('btbn-ai-key-input')?.value||'').trim();
         if (!key) return;
-        const d = loadBtbnData(); d.aiKey = key; saveBtbnData(d);
-        keySave.textContent = 'Сохранено ✓';
-        setTimeout(() => { keySave.textContent = 'Сохранить ключ'; }, 1500);
+        const d=loadBtbnData(); d.aiKey=key; saveBtbnData(d);
+        keySave.textContent='Сохранено ✓'; setTimeout(()=>{keySave.textContent='Сохранить ключ';},1500);
       };
+      // AI send
       const aiSend = document.getElementById('btbn-ai-send');
       if (aiSend) {
         aiSend.onclick = () => sendBtbnAI(post.id);
         const aiInput = document.getElementById('btbn-ai-input');
-        if (aiInput) aiInput.onkeydown = e => { if (e.key==='Enter' && !e.shiftKey) { e.preventDefault(); sendBtbnAI(post.id); } };
+        if (aiInput) aiInput.onkeydown = e => { if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendBtbnAI(post.id);} };
         const hist = document.getElementById('btbn-ai-history');
         if (hist) hist.scrollTop = hist.scrollHeight;
       }
     }
     function collectBtbnModalData(post) {
+      const topic     = document.getElementById('btbn-field-topic')?.value || '';
       const title     = document.getElementById('btbn-field-title')?.value || '';
-      const text      = document.getElementById('btbn-field-text')?.value || '';
+      const text      = document.getElementById('btbn-editor')?.innerHTML || '';
       const eventDate = document.getElementById('btbn-field-date')?.value || '';
       const tagsRaw   = document.getElementById('btbn-field-tags')?.value || '';
-      const tags = tagsRaw.split(',').map(t => t.trim()).filter(Boolean);
-      const activeStageBtn = document.querySelector('#btbn-stage-select .btbn-stage-btn.active');
-      const stage = activeStageBtn?.dataset.stage || post.stage;
+      const tags = tagsRaw.split(',').map(t=>t.trim()).filter(Boolean);
+      const stage = document.querySelector('#btbn-stage-select .btbn-stage-btn.active')?.dataset.stage || post.stage;
       const images = [], videos = [];
-      document.querySelectorAll('#btbn-images-list .btbn-media-row').forEach(row => {
-        const url = row.querySelector('[data-field="url"]')?.value?.trim()||'';
-        const caption = row.querySelector('[data-field="caption"]')?.value?.trim()||'';
-        if (url) images.push({ url, caption });
+      document.querySelectorAll('#btbn-images-list .btbn-media-item').forEach(item => {
+        const imgEl = item.querySelector('img');
+        const src = imgEl?.src || '';
+        if (!src || src===window.location.href) return;
+        images.push({ data:src, name:imgEl?.dataset.name||'', caption:item.querySelector('.btbn-media-caption')?.value?.trim()||'' });
       });
-      document.querySelectorAll('#btbn-videos-list .btbn-media-row').forEach(row => {
-        const url = row.querySelector('[data-field="url"]')?.value?.trim()||'';
-        const caption = row.querySelector('[data-field="caption"]')?.value?.trim()||'';
-        if (url) videos.push({ url, caption });
+      document.querySelectorAll('#btbn-videos-list .btbn-media-item').forEach(item => {
+        const vidEl = item.querySelector('video');
+        const src = vidEl?.src || '';
+        if (!src || src===window.location.href) return;
+        videos.push({ data:src, name:vidEl?.dataset.name||'', caption:item.querySelector('.btbn-media-caption')?.value?.trim()||'' });
       });
-      return { ...post, title, text, eventDate, tags, stage, images, videos, updatedAt: new Date().toISOString() };
+      return { ...post, topic, title, text, eventDate, tags, stage, images, videos, updatedAt:new Date().toISOString() };
     }
     async function sendBtbnAI(postId) {
       const data = loadBtbnData();
@@ -3939,14 +4050,15 @@
       const userText = (input?.value||'').trim();
       if (!userText) return;
       const guidelines = data.guidelines || '';
-      const systemPrompt = `Ты соавтор Telegram-канала BornToBeNovice (BTBN). Помогаешь автору дорабатывать посты для публикации.${guidelines ? '\n\nГАЙДЛАЙН КАНАЛА:\n' + guidelines : ''}
+      const textPlain = (currentPost.text||'').replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim();
+      const systemPrompt = `Ты соавтор Telegram-канала BornToBeNovice (BTBN). Помогаешь автору дорабатывать посты для публикации.${guidelines?'\n\nГАЙДЛАЙН КАНАЛА:\n'+guidelines:''}
 
 ТЕКУЩИЙ ПОСТ:
+Тема: ${currentPost.topic||'—'}
 Заголовок: ${currentPost.title||'—'}
-Дата события: ${currentPost.eventDate||'—'}
+Дата: ${btbnFmtMonthFull(currentPost.eventDate)||'—'}
 Теги: ${(currentPost.tags||[]).join(', ')||'—'}
-Текст:
-${currentPost.text||'—'}
+Текст: ${textPlain||'—'}
 
 Помогай улучшать текст, сохраняя голос автора. Предлагай конкретные правки. Отвечай по-русски.`;
       if (!currentPost.aiMessages) currentPost.aiMessages = [];
@@ -4056,10 +4168,14 @@ ${currentPost.text||'—'}
         <div id="diary-panel-btbn" class="gtd-panel">
           <div class="btbn-subtabs">
             <button type="button" class="btbn-subtab active" data-subtab="pipeline">Пайплайн</button>
+            <button type="button" class="btbn-subtab" data-subtab="timeline">Лента</button>
             <button type="button" class="btbn-subtab" data-subtab="guidelines">Гайдлайн</button>
           </div>
           <div id="btbn-panel-pipeline" class="btbn-subpanel active">
             <div id="btbn-board" class="btbn-board"></div>
+          </div>
+          <div id="btbn-panel-timeline" class="btbn-subpanel">
+            <div id="btbn-timeline" class="btbn-timeline"></div>
           </div>
           <div id="btbn-panel-guidelines" class="btbn-subpanel">
             <div class="btbn-guidelines-wrap">
@@ -4094,6 +4210,7 @@ ${currentPost.text||'—'}
           document.querySelectorAll('.btbn-subtab').forEach(t => t.classList.toggle('active', t.dataset.subtab === id));
           document.querySelectorAll('.btbn-subpanel').forEach(p => p.classList.toggle('active', p.id === 'btbn-panel-' + id));
           if (id === 'pipeline') renderBtbnBoard();
+          if (id === 'timeline') renderBtbnTimeline();
         };
       });
       // BTBN guidelines
