@@ -4179,8 +4179,18 @@
           </div>
           <div id="btbn-panel-guidelines" class="btbn-subpanel">
             <div class="btbn-guidelines-wrap">
-              <p class="gtd-overview">Концепция канала, Tone of Voice, правила для постов. Используется как контекст для AI-соавтора на этапе Копирайт.</p>
-              <textarea id="btbn-guidelines-textarea" class="btbn-guidelines-textarea" placeholder="Опиши концепцию канала, целевую аудиторию, Tone of Voice, что публикуем/не публикуем, примеры хороших постов…"></textarea>
+              <p class="gtd-overview">Гайдлайн канала: концепция, ToneOfVoice, форматы постов. Используется как контекст AI-соавтора на этапе Копирайт. Синхронизируется с файлом <code>SKILL.md</code> — скиллом Клода.</p>
+              <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;padding:10px 14px;background:var(--locked-bg);border:1px solid var(--border);border-radius:8px;flex-wrap:wrap">
+                <span style="font-size:0.8rem;font-weight:600;color:var(--text-muted)">SKILL.md</span>
+                <div style="flex:1"></div>
+                <label style="display:flex;align-items:center;gap:6px;padding:6px 14px;border:1px solid var(--border);border-radius:6px;background:var(--bg);cursor:pointer;font-size:0.8rem;color:var(--text-muted)">
+                  📥 Импортировать
+                  <input type="file" accept=".md,text/markdown,text/plain" id="btbn-skill-import" style="display:none">
+                </label>
+                <button type="button" id="btbn-skill-export" style="padding:6px 14px;border:1px solid var(--border);border-radius:6px;background:var(--bg);cursor:pointer;font-size:0.8rem;color:var(--text-muted)">📤 Экспортировать</button>
+                <span id="btbn-skill-sync-status" style="font-size:0.8rem;color:var(--text-muted)"></span>
+              </div>
+              <textarea id="btbn-guidelines-textarea" class="btbn-guidelines-textarea" placeholder="---&#10;name: skill-name&#10;description: Описание скилла&#10;---&#10;&#10;Концепция канала, ToneOfVoice, форматы постов…"></textarea>
               <div style="margin-top:10px;display:flex;align-items:center;gap:12px">
                 <button type="button" id="btbn-guidelines-save" class="btbn-save-btn">Сохранить</button>
                 <span id="btbn-guidelines-status" style="font-size:0.875rem;color:var(--text-muted)"></span>
@@ -4213,7 +4223,7 @@
           if (id === 'timeline') renderBtbnTimeline();
         };
       });
-      // BTBN guidelines
+      // BTBN guidelines — save
       const guidelinesSave = document.getElementById('btbn-guidelines-save');
       if (guidelinesSave) guidelinesSave.onclick = () => {
         const val = document.getElementById('btbn-guidelines-textarea')?.value || '';
@@ -4223,6 +4233,36 @@
       };
       const guidelinesTA = document.getElementById('btbn-guidelines-textarea');
       if (guidelinesTA) guidelinesTA.value = loadBtbnData().guidelines || '';
+      // BTBN guidelines — export to SKILL.md
+      const skillExport = document.getElementById('btbn-skill-export');
+      if (skillExport) skillExport.onclick = () => {
+        const content = document.getElementById('btbn-guidelines-textarea')?.value || '';
+        if (!content.trim()) { alert('Гайдлайн пуст — нечего экспортировать.'); return; }
+        const blob = new Blob([content], { type: 'text/markdown;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = 'SKILL.md'; a.click();
+        URL.revokeObjectURL(url);
+        const st = document.getElementById('btbn-skill-sync-status');
+        if (st) { st.textContent = 'Скачан SKILL.md'; setTimeout(()=>{ st.textContent=''; }, 3000); }
+      };
+      // BTBN guidelines — import from SKILL.md
+      const skillImport = document.getElementById('btbn-skill-import');
+      if (skillImport) skillImport.onchange = async function() {
+        const file = this.files?.[0];
+        if (!file) return;
+        try {
+          const text = await file.text();
+          const ta = document.getElementById('btbn-guidelines-textarea');
+          if (ta) ta.value = text;
+          const d = loadBtbnData(); d.guidelines = text; saveBtbnData(d);
+          const st = document.getElementById('btbn-skill-sync-status');
+          if (st) { st.textContent = 'Импортировано ✓'; setTimeout(()=>{ st.textContent=''; }, 3000); }
+          const status = document.getElementById('btbn-guidelines-status');
+          if (status) { status.textContent = 'Сохранено ✓'; setTimeout(()=>{ status.textContent=''; }, 2000); }
+        } catch(e) { alert('Ошибка чтения файла: ' + (e.message||e)); }
+        this.value = '';
+      };
       const apiUrl = getCollectApiUrl();
       const apiBlock = document.getElementById('diary-evernote-api-block');
       const statusText = document.getElementById('diary-evernote-status-text');
