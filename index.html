@@ -1207,7 +1207,16 @@
     <div class='s-body'>
       <div class='s-section s-text'>
         <h3>📖 История</h3>
-        <div class='s-photo' id='photo-pugovica'><img src='./assets/stories/pugovica.jpg' alt='Пуговица' onerror="document.getElementById('photo-pugovica').style.display='none'"></div>
+        <div class='s-photo-wrap' id='pwrap-pugovica'>
+          <div class='s-photo' id='photo-pugovica'><img class='s-photo-img' src='./assets/stories/pugovica.jpg' alt='Пуговица' onerror="this.style.display='none'"></div>
+          <div class='s-photo-caption' id='pcap-pugovica'></div>
+          <button class='s-photo-btn' id='pbtn-pugovica' onclick="sPhotoToggle('pugovica')">📷 Добавить фото</button>
+          <div class='s-photo-panel' id='ppanel-pugovica' style='display:none'>
+            <label class='s-photo-label'>Фото <input type='file' accept='image/*' onchange="sPhotoFile('pugovica',this)"></label>
+            <input class='s-photo-capin' type='text' id='pcapinput-pugovica' placeholder='Подпись к фото...'>
+            <div class='s-photo-panel-row'><button class='s-photo-save' onclick="sPhotoSave('pugovica')">Сохранить</button><button class='s-photo-cancel' onclick="sPhotoClose('pugovica')">Отмена</button></div>
+          </div>
+        </div>
         <p>В этот раз Мирончи рассказывал сам. Я попросил – и он начал.</p>
         <div class='s-dialog'>
           <p>– Мой папа Никита Моргоський, когда он собрался... у него от пиджака оторвалась пуговица. И у многих чуваков был такой прикол. Они пуговицу намазывали фиолетовой краской, и эту пуговицу, стороной на которой краска, прилепляли под щеку и отлепляли. Типа у тебя фингал. Лучше было под глаз – и под глазом синяк. Но можно было взять фломастер и просто начертить фиолетовым. И вот они пришли, некоторые чуваки, их было четыре штуки, в школу. И учитель сказал: а откуда у вас синяки? И они всему классу рассказали такой прикол.</p>
@@ -1242,7 +1251,16 @@
     <div class='s-body'>
       <div class='s-section s-text'>
         <h3>📖 История</h3>
-        <div class='s-photo' id='photo-robin_hood'><img src='./assets/stories/robin_hood.jpg' alt='Робин Гуд' onerror="document.getElementById('photo-robin_hood').style.display='none'"></div>
+        <div class='s-photo-wrap' id='pwrap-robin_hood'>
+          <div class='s-photo' id='photo-robin_hood'><img class='s-photo-img' src='./assets/stories/robin_hood.jpg' alt='Робин Гуд' onerror="this.style.display='none'"></div>
+          <div class='s-photo-caption' id='pcap-robin_hood'></div>
+          <button class='s-photo-btn' id='pbtn-robin_hood' onclick="sPhotoToggle('robin_hood')">📷 Добавить фото</button>
+          <div class='s-photo-panel' id='ppanel-robin_hood' style='display:none'>
+            <label class='s-photo-label'>Фото <input type='file' accept='image/*' onchange="sPhotoFile('robin_hood',this)"></label>
+            <input class='s-photo-capin' type='text' id='pcapinput-robin_hood' placeholder='Подпись к фото...'>
+            <div class='s-photo-panel-row'><button class='s-photo-save' onclick="sPhotoSave('robin_hood')">Сохранить</button><button class='s-photo-cancel' onclick="sPhotoClose('robin_hood')">Отмена</button></div>
+          </div>
+        </div>
         <p>Сначала факт. Робин Гуд – это не от слова «good», хороший. А от «hood» – капюшон. И «худи» и «Робин Гуд» – слова из одного корня. Робингудовцы были в капюшонах.</p>
         <p>А ещё у меня была пластинка. Моя любимая. Не книжка – пластинка. Дома стоял проигрыватель, я слушал. И эту – про Робин Гуда – знал наизусть. Даже куски между песнями, там такие рассказы в рифму. Начинался так:</p>
         <p><em>«Это было давным-давно, может быть, девятьсот, а возможно, и тысячу лет назад...»</em></p>
@@ -1293,7 +1311,16 @@
     <div class='s-body'>
       <div class='s-section s-text'>
         <h3>📖 История</h3>
-        <div class='s-photo' id='photo-svantenson'><img src='./assets/stories/svantenson.jpg' alt='Свантесон' onerror="document.getElementById('photo-svantenson').style.display='none'"></div>
+        <div class='s-photo-wrap' id='pwrap-svantenson'>
+          <div class='s-photo' id='photo-svantenson'><img class='s-photo-img' src='./assets/stories/svantenson.jpg' alt='Свантесон' onerror="this.style.display='none'"></div>
+          <div class='s-photo-caption' id='pcap-svantenson'></div>
+          <button class='s-photo-btn' id='pbtn-svantenson' onclick="sPhotoToggle('svantenson')">📷 Добавить фото</button>
+          <div class='s-photo-panel' id='ppanel-svantenson' style='display:none'>
+            <label class='s-photo-label'>Фото <input type='file' accept='image/*' onchange="sPhotoFile('svantenson',this)"></label>
+            <input class='s-photo-capin' type='text' id='pcapinput-svantenson' placeholder='Подпись к фото...'>
+            <div class='s-photo-panel-row'><button class='s-photo-save' onclick="sPhotoSave('svantenson')">Сохранить</button><button class='s-photo-cancel' onclick="sPhotoClose('svantenson')">Отмена</button></div>
+          </div>
+        </div>
         <p>В этот раз начал Мирончи – коротко, как диктор.</p>
         <div class='s-dialog'>
           <p>– Итак, слово двойное. Сванта Свантесон. Ты ответил на правильный вопрос – когда на улице спрашивали разные вопросы. И ты ответил имя малыша из мультика «Карлсон и малыш». Его зовут Сванта Свантесон.</p>
@@ -1334,7 +1361,16 @@
     <div class='s-body'>
       <div class='s-section s-text'>
         <h3>📖 История</h3>
-        <div class='s-photo' id='photo-vkladishi'><img src='./assets/stories/vkladishi.jpg' alt='Вкладыши' onerror="document.getElementById('photo-vkladishi').style.display='none'"></div>
+        <div class='s-photo-wrap' id='pwrap-vkladishi'>
+          <div class='s-photo' id='photo-vkladishi'><img class='s-photo-img' src='./assets/stories/vkladishi.jpg' alt='Вкладыши' onerror="this.style.display='none'"></div>
+          <div class='s-photo-caption' id='pcap-vkladishi'></div>
+          <button class='s-photo-btn' id='pbtn-vkladishi' onclick="sPhotoToggle('vkladishi')">📷 Добавить фото</button>
+          <div class='s-photo-panel' id='ppanel-vkladishi' style='display:none'>
+            <label class='s-photo-label'>Фото <input type='file' accept='image/*' onchange="sPhotoFile('vkladishi',this)"></label>
+            <input class='s-photo-capin' type='text' id='pcapinput-vkladishi' placeholder='Подпись к фото...'>
+            <div class='s-photo-panel-row'><button class='s-photo-save' onclick="sPhotoSave('vkladishi')">Сохранить</button><button class='s-photo-cancel' onclick="sPhotoClose('vkladishi')">Отмена</button></div>
+          </div>
+        </div>
         <p>В этот раз Мирончи рассказывал сам. Серьёзно, как диктор.</p>
         <div class='s-dialog'>
           <p>– Эти записи записывает Никита Маргося. И у Никиты Маргося была сестра Даша. И вот Даша, когда ходила в садик – ей было шесть лет, а папе четырнадцать – папа коллекционировал вкладыши. Которые раньше в жвачках были. И однажды Даша взяла все папины вкладыши и отдала своему дружку Лёше Мохову. Папа потом это заметил. На Дашу не рассердился, потому что за Дашу заступились папины родители.</p>
@@ -7184,7 +7220,7 @@ ${sessionsSummary}
       }
     }
 
-    const S_PHOTO_IDS = ['gnomik','krutobol','ozhog','pudra','transformator'];
+    const S_PHOTO_IDS = ['gnomik','krutobol','ozhog','pudra','transformator','alebastr','pugovica','robin_hood','svantenson','vkladishi'];
     const S_STORY_IDS = ['gnomik','krutobol','ozhog','pudra','transformator','alebastr','pugovica','robin_hood','svantenson','vkladishi'];
 
     function sTextInit() {
