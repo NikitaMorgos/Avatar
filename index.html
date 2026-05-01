@@ -774,6 +774,8 @@
     // Хранится здесь (не в .env — это frontend). Файл в .gitignore для безопасности.
     const SPORT_CLAUDE_KEY = '';
     const BTBN_CLAUDE_KEY = ''; // Claude API key для AI-соавтора BTBN (или введи в интерфейсе)
+    const BTBN_NOTION_TOKEN  = ''; // Notion integration token (secret_...) — или введи в интерфейсе
+    const BTBN_NOTION_DB_ID  = '63026d3c78e548c6b078507ffe5dbac5'; // BTBN Drafts DB
 
     // Доступ к MarComTeam и GTD (email + пароль):
     const AUTH_CREDENTIALS = { email: 'n.morgos@gmail.com', password: 'Nthvbyfk2020' };
@@ -4234,6 +4236,162 @@
       } catch(e) { if (e.name!=='AbortError') alert('Ошибка: '+e.message); }
     }
 
+    // ===== BTBN — Notion sync =====
+    const BTBN_NOTION_PROXY = 'https://corsproxy.io/?';
+
+    async function notionFetch(endpoint, method, body) {
+      method = method || 'GET';
+      const data = loadBtbnData();
+      const token = (BTBN_NOTION_TOKEN || data.notionToken || '').trim();
+      if (!token) throw new Error('Notion token не задан — введи в поле выше');
+      const target = 'https://api.notion.com/v1' + endpoint;
+      const opts = {
+        method,
+        headers: {
+          'Authorization': 'Bearer ' + token,
+          'Notion-Version': '2022-06-28',
+          'Content-Type': 'application/json'
+        }
+      };
+      if (body) opts.body = JSON.stringify(body);
+      const r = await fetch(BTBN_NOTION_PROXY + encodeURIComponent(target), opts);
+      if (!r.ok) {
+        const err = await r.text().catch(() => r.status);
+        throw new Error('Notion ' + r.status + ': ' + (typeof err === 'string' ? err.slice(0,120) : r.status));
+      }
+      return r.json();
+    }
+
+    function btbnRichTextToPlain(rt) {
+      return (rt || []).map(function(t){ return t.plain_text || ''; }).join('');
+    }
+
+    function btbnRichTextToHtml(rt) {
+      return (rt || []).map(function(t) {
+        var text = (t.plain_text || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+        if (!text) return '';
+        var a = t.annotations || {};
+        if (a.bold)          text = '<strong>' + text + '</strong>';
+        if (a.italic)        text = '<em>' + text + '</em>';
+        if (a.strikethrough) text = '<s>' + text + '</s>';
+        if (a.code)          text = '<code>' + text + '</code>';
+        if (t.href)          text = '<a href="' + t.href + '" target="_blank">' + text + '</a>';
+        return text;
+      }).join('');
+    }
+
+    function btbnBlocksToHtml(blocks) {
+      var html = '', inUl = false, inOl = false;
+      function closeList() {
+        if (inUl) { html += '</ul>'; inUl = false; }
+        if (inOl) { html += '</ol>'; inOl = false; }
+      }
+      (blocks || []).forEach(function(block) {
+        var type = block.type;
+        var rt = (block[type] && block[type].rich_text) ? block[type].rich_text : [];
+        var content = btbnRichTextToHtml(rt);
+        if (type !== 'bulleted_list_item' && inUl) closeList();
+        if (type !== 'numbered_list_item' && inOl) closeList();
+        switch (type) {
+          case 'paragraph':
+            html += '<p>' + (content || '&nbsp;') + '</p>'; break;
+          case 'heading_1':
+            html += '<h2>' + content + '</h2>'; break;
+          case 'heading_2':
+            html += '<h3>' + content + '</h3>'; break;
+          case 'heading_3':
+            html += '<h3>' + content + '</h3>'; break;
+          case 'bulleted_list_item':
+            if (!inUl) { html += '<ul>'; inUl = true; }
+            html += '<li>' + content + '</li>'; break;
+          case 'numbered_list_item':
+            if (!inOl) { html += '<ol>'; inOl = true; }
+            html += '<li>' + content + '</li>'; break;
+          case 'quote':
+            html += '<blockquote>' + content + '</blockquote>'; break;
+          case 'callout':
+            var icon = (block.callout && block.callout.icon && block.callout.icon.emoji) ? block.callout.icon.emoji + ' ' : '';
+            html += '<blockquote>' + icon + content + '</blockquote>'; break;
+          case 'code':
+            html += '<pre><code>' + content + '</code></pre>'; break;
+          case 'divider':
+            html += '<hr>'; break;
+          default:
+            if (content) html += '<p>' + content + '</p>';
+        }
+      });
+      closeList();
+      return html;
+    }
+
+    async function syncBtbnFromNotion() {
+      var statusEl = document.getElementById('btbn-notion-sync-status');
+      var btn = document.getElementById('btbn-notion-sync-btn');
+      if (statusEl) statusEl.textContent = '⏳ Загружаю из Notion…';
+      if (btn) btn.disabled = true;
+      try {
+        // save token if typed in input
+        var tokenInput = document.getElementById('btbn-notion-token-input');
+        if (tokenInput && tokenInput.value.trim()) {
+          var d0 = loadBtbnData();
+          d0.notionToken = tokenInput.value.trim();
+          saveBtbnData(d0);
+        }
+        // query non-imported pages
+        var qResp = await notionFetch('/databases/' + BTBN_NOTION_DB_ID + '/query', 'POST', {
+          filter: { property: 'imported', checkbox: { equals: false } },
+          page_size: 100
+        });
+        var pages = qResp.results || [];
+        if (!pages.length) {
+          if (statusEl) statusEl.textContent = '✓ Нет новых постов';
+          if (btn) btn.disabled = false;
+          return;
+        }
+        var data = loadBtbnData();
+        var added = 0;
+        for (var i = 0; i < pages.length; i++) {
+          var page = pages[i];
+          var props = page.properties || {};
+          // fetch blocks
+          var blocksResp = await notionFetch('/blocks/' + page.id + '/children?page_size=100');
+          var html = btbnBlocksToHtml(blocksResp.results || []);
+          // build post
+          var post = {
+            id: btbnGenId(),
+            notionId: page.id,
+            num: (props.version && props.version.number) || 0,
+            topic: btbnRichTextToPlain(props.topic ? props.topic.title : []),
+            title: btbnRichTextToPlain(props.title ? props.title.rich_text : []),
+            text: html,
+            eventDate: (props.eventDate && props.eventDate.date && props.eventDate.date.start) ? props.eventDate.date.start.slice(0,7) : '',
+            stage: (props.stage && props.stage.select && props.stage.select.name) ? props.stage.select.name : 'topic',
+            channel: (props.channel && props.channel.select && props.channel.select.name) ? props.channel.select.name : '',
+            tags: ((props.tags && props.tags.multi_select) ? props.tags.multi_select : []).map(function(t){return t.name;}).join(', '),
+            images: [],
+            videos: [],
+            aiMessages: [],
+            order: Date.now() + i,
+            createdAt: page.created_time,
+            updatedAt: page.last_edited_time
+          };
+          data.posts.push(post);
+          added++;
+          // mark as imported
+          try {
+            await notionFetch('/pages/' + page.id, 'PATCH', { properties: { imported: { checkbox: true } } });
+          } catch(e2) { console.warn('Could not mark imported:', e2); }
+        }
+        saveBtbnData(data);
+        renderBtbnBoard();
+        if (statusEl) statusEl.textContent = '✓ Импортировано: ' + added + ' ' + (added===1?'пост':'постов');
+      } catch(e) {
+        if (statusEl) statusEl.textContent = '❌ ' + e.message;
+        console.error(e);
+      }
+      if (btn) btn.disabled = false;
+    }
+
     const DIARY_EVERNOTE_KEY = 'avatar_diary_evernote';
     function loadDiaryEvernoteNotes() {
       try { const s = localStorage.getItem(DIARY_EVERNOTE_KEY); if (s) return JSON.parse(s); } catch (e) {}
@@ -4306,6 +4464,16 @@
             <button type="button" class="btbn-subtab" data-subtab="guidelines">Гайдлайн</button>
           </div>
           <div id="btbn-panel-pipeline" class="btbn-subpanel active">
+            <div id="btbn-notion-bar" style="display:flex;align-items:center;gap:10px;margin-bottom:14px;padding:10px 14px;background:var(--locked-bg);border:1px solid var(--border);border-radius:8px;flex-wrap:wrap">
+              <span style="font-size:0.72rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">Notion</span>
+              <input id="btbn-notion-token-input" type="password" placeholder="secret_... (Notion integration token)" autocomplete="off"
+                style="flex:1;min-width:200px;max-width:360px;padding:5px 10px;border:1px solid var(--border);border-radius:6px;background:var(--card-bg);color:var(--text);font-size:0.8rem">
+              <button id="btbn-notion-sync-btn" type="button"
+                style="padding:5px 14px;border:1px solid var(--accent);border-radius:6px;background:none;cursor:pointer;font-size:0.8rem;color:var(--accent);white-space:nowrap">
+                🔄 Sync from Notion
+              </button>
+              <span id="btbn-notion-sync-status" style="font-size:0.8rem;color:var(--text-muted)"></span>
+            </div>
             <div id="btbn-board" class="btbn-board"></div>
           </div>
           <div id="btbn-panel-timeline" class="btbn-subpanel">
@@ -4425,6 +4593,18 @@
         } catch(e) { alert('Ошибка: '+(e.message||e)); }
         this.value='';
       };
+      // Notion sync button
+      const notionSyncBtn = document.getElementById('btbn-notion-sync-btn');
+      if (notionSyncBtn) notionSyncBtn.onclick = syncBtbnFromNotion;
+      // Restore saved token into input (if any)
+      const notionInput = document.getElementById('btbn-notion-token-input');
+      if (notionInput) {
+        const savedToken = loadBtbnData().notionToken || '';
+        if (savedToken) notionInput.value = savedToken;
+        notionInput.onchange = function() {
+          const d = loadBtbnData(); d.notionToken = this.value.trim(); saveBtbnData(d);
+        };
+      }
       // Init FSA sync
       btbnInitSync();
       const apiUrl = getCollectApiUrl();
