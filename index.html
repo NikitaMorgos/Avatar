@@ -3736,7 +3736,7 @@
           const display = escapeHtml(post.topic || post.title || 'Без темы');
           const numStr = post.num ? `<div class="btbn-card-num">#${post.num}</div>` : '';
           const date = post.eventDate ? `<div class="btbn-card-date">${btbnFmtMonth(post.eventDate)}</div>` : '';
-          const tagsArr = (post.tags||[]).slice(0,3);
+          const tagsArr = (Array.isArray(post.tags) ? post.tags : (post.tags ? post.tags.split(',').map(t=>t.trim()).filter(Boolean) : [])).slice(0,3);
           const tags = tagsArr.length ? `<div class="btbn-card-tags">${tagsArr.map(t=>`<span class="btbn-tag">${escapeHtml(t)}</span>`).join('')}</div>` : '';
           const mc = (post.images||[]).length + (post.videos||[]).length;
           const media = mc ? `<div style="font-size:0.68rem;color:var(--text-muted);margin-top:2px">📎 ${mc}</div>` : '';
@@ -3884,7 +3884,7 @@
             </div>
             <div class="btbn-field" style="flex:2;min-width:180px">
               <label class="btbn-label">Теги (через запятую)</label>
-              <input id="btbn-field-tags" class="btbn-input" type="text" placeholder="тег1, тег2" value="${escapeHtml((post.tags||[]).join(', '))}">
+              <input id="btbn-field-tags" class="btbn-input" type="text" placeholder="тег1, тег2" value="${escapeHtml((Array.isArray(post.tags) ? post.tags : (post.tags ? post.tags.split(',').map(t=>t.trim()).filter(Boolean) : [])).join(', '))}">
             </div>
           </div>
           <div class="btbn-field">
