@@ -4331,7 +4331,7 @@
             eventDate: (props.eventDate && props.eventDate.date && props.eventDate.date.start) ? props.eventDate.date.start.slice(0,7) : '',
             stage: (props.stage && props.stage.select && props.stage.select.name) ? props.stage.select.name : 'topic',
             channel: (props.channel && props.channel.select && props.channel.select.name) ? props.channel.select.name : '',
-            tags: ((props.tags && props.tags.multi_select) ? props.tags.multi_select : []).map(function(t){return t.name;}).join(', '),
+            tags: ((props.tags && props.tags.multi_select) ? props.tags.multi_select : []).map(function(t){return t.name;}),
             images: [],
             videos: [],
             aiMessages: [],
