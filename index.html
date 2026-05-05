@@ -904,6 +904,7 @@
     .s-edit-btn:hover{border-color:var(--accent);color:var(--accent)}
     .s-edit-btn.active{border-color:var(--accent);background:rgba(35,131,226,.07)}
     .s-story-body[contenteditable=true]{outline:2px solid var(--accent);border-radius:6px;padding:4px 8px;margin-top:2px}
+    .s-char-count{font-size:11px;color:var(--text-muted);margin-right:6px;letter-spacing:.01em}
     .s-year-row{display:flex;align-items:center;gap:7px;margin-bottom:12px}
     .s-year-label{font-size:12px;color:var(--text-muted)}
     .s-year-input{width:62px;padding:3px 7px;border:1px solid var(--border);border-radius:5px;font-family:inherit;font-size:13px;color:var(--text);background:var(--card-bg);text-align:center}
@@ -7880,13 +7881,21 @@ ${sessionsSummary}
           row.className = 's-h3-row';
           section.insertBefore(row, h3);
           row.appendChild(h3);
+          const right = document.createElement('span');
+          right.style.display = 'flex';
+          right.style.alignItems = 'center';
+          const counter = document.createElement('span');
+          counter.className = 's-char-count';
+          counter.id = 'scount-' + id;
+          right.appendChild(counter);
           const btn = document.createElement('button');
           btn.className = 's-edit-btn';
           btn.id = 'sedit-' + id;
           btn.title = 'Редактировать текст';
           btn.textContent = '✏️';
           btn.onclick = () => sTextEdit(id);
-          row.appendChild(btn);
+          right.appendChild(btn);
+          row.appendChild(right);
         }
         // Wrap all text nodes after photo block in a div
         const wrapper = document.createElement('div');
@@ -7902,7 +7911,18 @@ ${sessionsSummary}
         // Restore stored text from localStorage
         const stored = localStorage.getItem('story_text_' + id);
         if (stored) wrapper.innerHTML = stored;
+        // Update counter on input
+        wrapper.addEventListener('input', () => sCountUpdate(id));
+        sCountUpdate(id);
       });
+    }
+
+    function sCountUpdate(id) {
+      const el = document.getElementById('stext-' + id);
+      const counter = document.getElementById('scount-' + id);
+      if (!el || !counter) return;
+      const len = (el.innerText || '').replace(/\s+/g, ' ').trim().length;
+      counter.textContent = len + ' симв.';
     }
 
     function sTextEdit(id) {
