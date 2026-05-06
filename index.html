@@ -4212,6 +4212,19 @@
       try { localStorage.setItem(BTBN_KEY, JSON.stringify(d)); } catch(e) {}
     }
     function btbnGenId() { return 'btbn_' + Date.now() + '_' + Math.random().toString(36).slice(2,7); }
+    function btbnCharCount(html) {
+      if (!html) return 0;
+      const tmp = document.createElement('div');
+      tmp.innerHTML = html;
+      return (tmp.textContent || tmp.innerText || '').replace(/\s+/g,' ').trim().length;
+    }
+    function btbnCharBadge(count) {
+      if (!count) return '';
+      const ok = count >= 1200 && count <= 1700;
+      const over = count > 1700;
+      const color = ok ? '#22c55e' : over ? '#f59e0b' : '#94a3b8';
+      return `<span style="font-size:0.7rem;padding:1px 6px;border-radius:10px;background:${color}22;color:${color};border:1px solid ${color}55;white-space:nowrap">${count.toLocaleString('ru')} зн.</span>`;
+    }
     function btbnFmtMonth(ym) {
       if (!ym) return '';
       const [y,m] = ym.split('-');
@@ -4245,9 +4258,11 @@
           const tags = tagsArr.length ? `<div class="btbn-card-tags">${tagsArr.map(t=>`<span class="btbn-tag">${escapeHtml(t)}</span>`).join('')}</div>` : '';
           const mc = (post.images||[]).length + (post.videos||[]).length;
           const media = mc ? `<div style="font-size:0.68rem;color:var(--text-muted);margin-top:2px">📎 ${mc}</div>` : '';
+          const cc = btbnCharCount(post.text);
+          const charBadge = cc ? `<div style="margin-top:4px">${btbnCharBadge(cc)}</div>` : '';
           const canLeft=si>0, canRight=si<BTBN_STAGES.length-1, canUp=pi>0, canDown=pi<stagePosts.length-1;
           return `<div class="btbn-card" data-id="${post.id}">
-            ${numStr}<div class="btbn-card-title">${display}</div>${date}${tags}${media}
+            ${numStr}<div class="btbn-card-title">${display}</div>${date}${tags}${media}${charBadge}
             <div class="btbn-card-actions">
               <button class="btbn-card-btn" data-action="up"    data-id="${post.id}" ${canUp?'':'disabled'}>↑</button>
               <button class="btbn-card-btn" data-action="down"  data-id="${post.id}" ${canDown?'':'disabled'}>↓</button>
@@ -4408,6 +4423,13 @@
               <button type="button" class="btbn-toolbar-btn" data-cmd="removeFormat" title="Убрать форматирование">✕</button>
             </div>
             <div id="btbn-editor" class="btbn-editor" contenteditable="true"></div>
+            <div style="display:flex;align-items:center;gap:10px;margin-top:6px">
+              <span id="btbn-char-counter" style="font-size:0.8rem;color:var(--text-muted)">0 зн.</span>
+              <span style="font-size:0.75rem;color:var(--text-muted)">цель: 1 200–1 700</span>
+              <div id="btbn-char-bar" style="flex:1;height:4px;background:var(--border);border-radius:2px;max-width:200px">
+                <div id="btbn-char-bar-fill" style="height:100%;border-radius:2px;transition:width 0.2s,background 0.2s;width:0%"></div>
+              </div>
+            </div>
           </div>
           <div style="display:flex;gap:24px;flex-wrap:wrap">
             <div class="btbn-field" style="flex:1;min-width:200px">
@@ -4436,6 +4458,28 @@
       // Set rich-text content after DOM insertion
       const editor = document.getElementById('btbn-editor');
       if (editor) editor.innerHTML = post.text||'';
+      // Char counter
+      function btbnUpdateCounter() {
+        const cnt = btbnCharCount(editor ? editor.innerHTML : '');
+        const counterEl = document.getElementById('btbn-char-counter');
+        const barFill = document.getElementById('btbn-char-bar-fill');
+        if (counterEl) {
+          const ok = cnt >= 1200 && cnt <= 1700;
+          const over = cnt > 1700;
+          const color = ok ? '#22c55e' : over ? '#f59e0b' : (cnt > 800 ? '#3b82f6' : 'var(--text-muted)');
+          counterEl.textContent = cnt.toLocaleString('ru') + ' зн.';
+          counterEl.style.color = color;
+          counterEl.style.fontWeight = ok ? '700' : '400';
+        }
+        if (barFill) {
+          const pct = Math.min(100, Math.round(cnt / 1700 * 100));
+          const ok = cnt >= 1200 && cnt <= 1700;
+          const over = cnt > 1700;
+          barFill.style.width = pct + '%';
+          barFill.style.background = ok ? '#22c55e' : over ? '#f59e0b' : '#3b82f6';
+        }
+      }
+      if (editor) { editor.oninput = btbnUpdateCounter; btbnUpdateCounter(); }
       // Close
       document.getElementById('btbn-modal-close').onclick = () => overlay.remove();
       // Toolbar execCommand
@@ -4844,11 +4888,13 @@
             createdAt: page.created_time,
             updatedAt: page.last_edited_time
           };
+          var cc = btbnCharCount(html);
+          post.charCount = cc;
           data.posts.push(post);
           added++;
-          // mark as imported
+          // mark as imported + write charCount back to Notion
           try {
-            await notionFetch('/pages/' + page.id, 'PATCH', { properties: { imported: { checkbox: true } } });
+            await notionFetch('/pages/' + page.id, 'PATCH', { properties: { imported: { checkbox: true }, charCount: { number: cc } } });
           } catch(e2) { console.warn('Could not mark imported:', e2); }
         }
         saveBtbnData(data);
