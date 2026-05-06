@@ -7911,9 +7911,13 @@ ${sessionsSummary}
         // Restore stored text from localStorage
         const stored = localStorage.getItem('story_text_' + id);
         if (stored) wrapper.innerHTML = stored;
-        // Update counter on input
+        // Update counter on input and when accordion opens
         wrapper.addEventListener('input', () => sCountUpdate(id));
-        sCountUpdate(id);
+        const details = section.closest('details');
+        if (details) {
+          details.addEventListener('toggle', () => { if (details.open) sCountUpdate(id); });
+        }
+        setTimeout(() => sCountUpdate(id), 0);
       });
     }
 
@@ -7921,7 +7925,7 @@ ${sessionsSummary}
       const el = document.getElementById('stext-' + id);
       const counter = document.getElementById('scount-' + id);
       if (!el || !counter) return;
-      const len = (el.innerText || '').replace(/\s+/g, ' ').trim().length;
+      const len = (el.textContent || '').replace(/\s+/g, ' ').trim().length;
       counter.textContent = len + ' симв.';
     }
 
