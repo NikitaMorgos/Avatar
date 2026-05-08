@@ -8,6 +8,7 @@ import requests
 import time
 import sys
 from pathlib import Path
+sys.stdout.reconfigure(encoding='utf-8', errors='replace')
 
 API_KEY = "3a111e5c070d48c8b0b9924a23fb17e6"
 HEADERS = {"authorization": API_KEY}
