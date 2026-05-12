@@ -901,6 +901,11 @@
     .s-edit-btn.active{border-color:var(--accent);background:rgba(35,131,226,.07)}
     .s-story-body[contenteditable=true]{outline:2px solid var(--accent);border-radius:6px;padding:4px 8px;margin-top:2px}
     .s-char-count{font-size:11px;color:var(--text-muted);margin-right:6px;letter-spacing:.01em}
+    .s-year-table{width:100%;border-collapse:collapse;font-size:13px;margin-top:4px}
+    .s-year-table th{text-align:left;padding:6px 12px;border-bottom:2px solid var(--border);color:var(--text-muted);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.04em}
+    .s-year-table td{padding:6px 12px;border-bottom:1px solid var(--border);vertical-align:top}
+    .s-year-table td:first-child{font-weight:600;color:var(--accent);white-space:nowrap;width:60px}
+    .s-year-table tr:last-child td{border-bottom:none}
     .s-year-row{display:flex;align-items:center;gap:7px;margin-bottom:12px}
     .s-year-label{font-size:12px;color:var(--text-muted)}
     .s-year-input{width:62px;padding:3px 7px;border:1px solid var(--border);border-radius:5px;font-family:inherit;font-size:13px;color:var(--text);background:var(--card-bg);text-align:center}
@@ -908,7 +913,14 @@
   </style>
 
   <h2 style='margin-top:0'>Истории сыну</h2>
-  <p style='color:var(--text-muted);margin-bottom:20px'>Истории про детство, рассказанные Мирончи перед сном. 25 историй.</p>
+  <p style='color:var(--text-muted);margin-bottom:20px'>Истории про детство, рассказанные Мирончи перед сном. 30 историй.</p>
+
+  <details class='s-item s-timeline-wrap'>
+    <summary><span class='s-num'>📅</span> Хронология <span class='s-theme'>по каким годам детства распределяются истории</span></summary>
+    <div class='s-body'>
+      <div id='s-timeline-body'></div>
+    </div>
+  </details>
 
   <details class='s-item'>
     <summary><span class='s-num'>1</span> Гномик Гоша <span class='s-theme'>Магия выдумки · забота о младших</span></summary>
@@ -2737,6 +2749,7 @@
           sTextInit();
           sYearInit();
           sTitleInit();
+          sTimelineInit();
         }
         return;
       }
@@ -8588,6 +8601,33 @@ ${sessionsSummary}
     function sTitleClose(id) {
       const p = document.getElementById('stitle-panel-' + id);
       if (p) p.style.display = 'none';
+    }
+
+    function sTimelineInit() {
+      const container = document.getElementById('s-timeline-body');
+      if (!container || container.innerHTML.trim()) return;
+      const byYear = {};
+      S_STORY_IDS.forEach(function(id) {
+        const year = S_YEAR_DEFAULTS[id];
+        if (!year) return;
+        const pw = document.getElementById('pwrap-' + id);
+        if (!pw) return;
+        const details = pw.closest('details');
+        if (!details) return;
+        const summary = details.querySelector('summary');
+        if (!summary) return;
+        const clone = summary.cloneNode(true);
+        clone.querySelector('.s-num') && clone.querySelector('.s-num').remove();
+        clone.querySelector('.s-theme') && clone.querySelector('.s-theme').remove();
+        const title = clone.textContent.trim();
+        if (!byYear[year]) byYear[year] = [];
+        byYear[year].push(title);
+      });
+      const years = Object.keys(byYear).sort();
+      let html = '<table class="s-year-table"><thead><tr><th>Год</th><th>Истории</th></tr></thead><tbody>';
+      years.forEach(function(y) { html += '<tr><td>' + y + '</td><td>' + byYear[y].join(', ') + '</td></tr>'; });
+      html += '</tbody></table>';
+      container.innerHTML = html;
     }
 
     const sPhotoTemp = {};
