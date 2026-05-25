@@ -9444,9 +9444,23 @@ ${sessionsSummary}
 
     const S_TRANSCRIPT_BASE = './Family/Истории-сыну/transcripts/';
     const S_TRANSCRIPT_FILES = {
-      pionerskiy_galstuk: 'pionerskiy galstuk_clean.txt',
-      schastliviy_biletik: 'schastliviy biletik_clean.txt',
-      krasnaya_armiya: 'krasnaya_armiya_clean.txt'
+      deda_grisha:          'deda grisha_raw.txt',
+      hershi_kola:          'hershi cola_raw.txt',
+      pionerskiy_galstuk:   'pionerskiy galstuk_raw.txt',
+      robin_hood:           'robin hood_raw.txt',
+      ushi:                 's ushey ne snimat_raw.txt',
+      schastliviy_biletik:  'schastliviy biletik_raw.txt',
+      krasnaya_armiya:      'krasnayaarmiya_cherniybaron_raw.txt',
+      chutchut_i:           'chutchutI_raw.txt',
+      zeleniye_banani:      'zeleniye banani_raw.txt',
+      diskoviy_telefon:     'diskoviy telefon_raw.txt',
+      stakani_s_mashinkami: 'stakani s mashinkami_raw.txt',
+      kovboi_i_indeyci:     'kovboi i indeyci_raw.txt',
+      zelenie_kresla:       'zelenie kresla_raw.txt',
+      cerkov_na_nerli:      'cerkov na nerli_raw.txt',
+      kafe_morozhenoe:      'kafe-morozhenoe_raw.txt',
+      krasniy_sviter:       'krasniy sviter_raw.txt',
+      probka:               'probka1_raw.txt'
     };
 
     function sRawInit() {
@@ -9467,7 +9481,7 @@ ${sessionsSummary}
           if (rawDiv.dataset.loaded) return;
           rawDiv.dataset.loaded = '1';
           rawDiv.textContent = 'Загрузка...';
-          const filename = S_TRANSCRIPT_FILES[id] || (id + '_clean.txt');
+          const filename = S_TRANSCRIPT_FILES[id] || (id + '_raw.txt');
           fetch(S_TRANSCRIPT_BASE + encodeURIComponent(filename))
             .then(function(r) { return r.ok ? r.text() : Promise.reject(r.status); })
             .then(function(t) { rawDiv.textContent = t.trim(); })
