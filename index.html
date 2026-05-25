@@ -907,6 +907,12 @@
     .s-year-table td:first-child{font-weight:600;color:var(--accent);white-space:nowrap;width:60px}
     .s-year-table tr:last-child td{border-bottom:none}
     .s-year-row{display:flex;align-items:center;gap:7px;margin-bottom:12px}
+    .s-raw-details{margin-top:2px}
+    .s-raw-details summary{font-size:12px;color:var(--text-muted);cursor:pointer;list-style:none;display:flex;align-items:center;gap:5px;padding:4px 0;user-select:none}
+    .s-raw-details summary::-webkit-details-marker{display:none}
+    .s-raw-details summary::before{content:'▶';font-size:9px;transition:transform .15s;opacity:.5}
+    .s-raw-details[open] summary::before{transform:rotate(90deg)}
+    .s-raw-body{font-size:12px;color:var(--text-muted);line-height:1.65;white-space:pre-wrap;margin-top:6px;padding:10px 12px;background:var(--bg);border:1px solid var(--border);border-radius:6px;max-height:280px;overflow-y:auto}
     .s-year-label{font-size:12px;color:var(--text-muted)}
     .s-year-input{width:62px;padding:3px 7px;border:1px solid var(--border);border-radius:5px;font-family:inherit;font-size:13px;color:var(--text);background:var(--card-bg);text-align:center}
     .s-year-input:focus{outline:none;border-color:var(--accent)}
@@ -3488,6 +3494,7 @@
           sYearInit();
           sTitleInit();
           sTimelineInit();
+          sRawInit();
         }
         return;
       }
@@ -9433,6 +9440,42 @@ ${sessionsSummary}
       years.forEach(function(y) { html += '<tr><td>' + y + '</td><td>' + byYear[y].join(', ') + '</td></tr>'; });
       html += '</tbody></table>';
       container.innerHTML = html;
+    }
+
+    const S_TRANSCRIPT_BASE = './Family/Истории-сыну/transcripts/';
+    const S_TRANSCRIPT_FILES = {
+      pionerskiy_galstuk: 'pionerskiy galstuk_clean.txt',
+      schastliviy_biletik: 'schastliviy biletik_clean.txt',
+      krasnaya_armiya: 'krasnaya_armiya_clean.txt'
+    };
+
+    function sRawInit() {
+      S_STORY_IDS.forEach(function(id) {
+        const pw = document.getElementById('pwrap-' + id);
+        if (!pw) return;
+        const body = pw.closest('.s-body');
+        if (!body) return;
+        if (body.querySelector('.s-raw-details')) return;
+        const sec = document.createElement('div');
+        sec.className = 's-section';
+        const det = document.createElement('details');
+        det.className = 's-raw-details';
+        det.innerHTML = "<summary>📝 Транскрипт</summary><div class='s-raw-body'></div>";
+        det.addEventListener('toggle', function() {
+          if (!det.open) return;
+          const rawDiv = det.querySelector('.s-raw-body');
+          if (rawDiv.dataset.loaded) return;
+          rawDiv.dataset.loaded = '1';
+          rawDiv.textContent = 'Загрузка...';
+          const filename = S_TRANSCRIPT_FILES[id] || (id + '_clean.txt');
+          fetch(S_TRANSCRIPT_BASE + encodeURIComponent(filename))
+            .then(function(r) { return r.ok ? r.text() : Promise.reject(r.status); })
+            .then(function(t) { rawDiv.textContent = t.trim(); })
+            .catch(function() { rawDiv.textContent = 'Транскрипт не найден.'; });
+        });
+        sec.appendChild(det);
+        body.appendChild(sec);
+      });
     }
 
     const sPhotoTemp = {};
